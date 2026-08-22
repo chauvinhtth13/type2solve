@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Đấu Trường Tư Duy</title>
+  <desc id="description">Một bộ não phát sáng trên chiếc khiên xanh tím</desc>
+  <defs>
+    <linearGradient id="background" x1="54" y1="38" x2="454" y2="474" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#243a78"/>
+      <stop offset="1" stop-color="#111a43"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="146" y1="130" x2="370" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9b5cff"/>
+      <stop offset=".55" stop-color="#4776e6"/>
+      <stop offset="1" stop-color="#18b9a8"/>
+    </linearGradient>
+    <linearGradient id="brain" x1="178" y1="168" x2="344" y2="330" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff5a8"/>
+      <stop offset="1" stop-color="#ffad42"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#background)"/>
+  <circle cx="256" cy="244" r="184" fill="none" stroke="#69e7ff" stroke-opacity=".14" stroke-width="18"/>
+  <path d="M256 79 404 135v111c0 101-59 166-148 205-89-39-148-104-148-205V135L256 79Z" fill="url(#shield)" stroke="#bfefff" stroke-width="13" stroke-linejoin="round"/>
+  <path d="M256 111 371 154v91c0 78-43 130-115 165-72-35-115-87-115-165v-91l115-43Z" fill="#101c4d" fill-opacity=".52"/>
+  <g fill="#ffe871" filter="url(#glow)">
+    <path d="m101 216 8 17 18 8-18 8-8 18-8-18-18-8 18-8 8-17Z"/>
+    <path d="m417 181 6 13 13 6-13 6-6 14-6-14-14-6 14-6 6-13Z"/>
+    <circle cx="404" cy="308" r="7"/>
+  </g>
+  <path d="M247 164c-26-18-62 0-59 32-28 6-35 43-12 60-15 27 9 58 38 52 5 25 35 36 55 19V183c-4-8-12-15-22-19Zm18 19v144c20 17 50 6 55-19 29 6 53-25 38-52 23-17 16-54-12-60 3-32-33-50-59-32-10 4-18 11-22 19Z" fill="url(#brain)" stroke="#fff7c8" stroke-width="9" stroke-linejoin="round"/>
+  <g fill="none" stroke="#9a5c24" stroke-linecap="round" stroke-width="8">
+    <path d="M226 193c-18 8-21 29-11 42m12 28c-18-4-31 8-31 24m30-44c18-4 27-17 26-34"/>
+    <path d="M286 193c18 8 21 29 11 42m-12 28c18-4 31 8 31 24m-30-44c-18-4-27-17-26-34"/>
+  </g>
+  <path d="M256 352 278 392h-44l22-40Z" fill="#fff3a6"/>
+</svg>

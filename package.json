@@ -1,0 +1,18 @@
+{
+  "name": "dau-truong-tu-duy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Game học tập tương tác: đấu toán, luyện gõ Anh–Việt và Sudoku 6 cấp độ.",
+  "scripts": {
+    "build:dictionary": "node tools/build-english-vocabulary.mjs",
+    "serve": "node tools/serve.mjs",
+    "test": "node tools/smoke-test.mjs",
+    "test:browser": "node tools/browser-smoke.mjs"
+  },
+  "keywords": [
+    "education",
+    "game",
+    "vietnamese",
+    "pwa"
+  ]
+}

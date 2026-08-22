@@ -1,0 +1,460 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1b2a52">
+  <meta name="description" content="Đấu Trường Tư Duy — đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku từ dễ đến tối thượng.">
+  <meta name="author" content="Châu Vinh">
+  <title>Đấu Trường Tư Duy</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/learning-games.css">
+</head>
+<body>
+<a class="skip-link" href="#homeTitle">Bỏ qua hiệu ứng, đến nội dung chính</a>
+<div class="stars" id="stars"></div>
+
+<main class="wrap">
+
+  <!-- TRANG CHỦ -->
+  <div class="screen active" id="home">
+    <div class="card">
+      <div class="big-emoji bounce">🧠</div>
+      <h1 id="homeTitle">ĐẤU TRƯỜNG <span class="hl">TƯ DUY</span></h1>
+      <p class="sub">Một học viện phiêu lưu: đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku! ✨</p>
+
+      <div class="profile-strip" id="profileSummary" aria-live="polite">
+        <span>⭐ <b id="profileStars">0</b> sao</span>
+        <span>⌨️ Kỷ lục <b id="profileTyping">0</b></span>
+        <span>🧩 Sudoku <b id="profileSudoku">0</b> ván thắng</span>
+      </div>
+
+      <div class="modes">
+        <button class="mode adv" onclick="SFX.click();startAdventure()">
+          <span class="mi">⚔️</span><b>PHIÊU LƯU</b>
+          <span>10 boss · mua vật phẩm · siêu chưởng</span>
+        </button>
+        <button class="mode blitz" onclick="SFX.click();startBlitz()">
+          <span class="mi">⚡</span><b>ĐẤU NHANH 60 GIÂY</b>
+          <span>Trả lời càng nhiều càng tốt · sai bị trừ giờ</span>
+        </button>
+        <button class="mode surv" onclick="SFX.click();startSurvival()">
+          <span class="mi">♾️</span><b>SINH TỒN</b>
+          <span>3 mạng · khó dần vô tận · phá kỷ lục</span>
+        </button>
+      </div>
+
+      <div class="world-title">🧭 KHU HỌC TẬP TƯƠNG TÁC</div>
+      <div class="learning-modes">
+        <button class="learning-mode typing-mode" onclick="SFX.click();openTypingGame()">
+          <span class="world-icon">⌨️</span>
+          <span><b>GÕ CHỮ DIỆT QUÁI</b><small>Luyện gõ tiếng Anh hoặc tiếng Việt · combo · boss từ vựng</small></span>
+          <span class="world-tag">Anh–Việt</span>
+        </button>
+        <button class="learning-mode sudoku-mode" onclick="SFX.click();openSudokuGame()">
+          <span class="world-icon">🧩</span>
+          <span><b>SUDOKU THỬ THÁCH</b><small>6 cấp độ · ghi chú · gợi ý · lưu kỷ lục theo từng level</small></span>
+          <span class="world-tag">Dễ → 17 ô</span>
+        </button>
+      </div>
+
+      <div style="margin-top:14px"><button class="btn" id="sndBtnHome" onclick="toggleSound()" title="Bật/tắt âm thanh">🔊</button></div>
+
+      <footer class="creator-support" aria-label="Tác giả và ủng hộ dự án">
+        <div class="creator-signature">
+          <span>✦ SÁNG TẠO &amp; PHÁT TRIỂN BỞI</span>
+          <strong>Châu Vinh</strong>
+          <small>Cảm ơn bạn đã cùng làm cho việc học vui hơn.</small>
+        </div>
+        <details class="coffee-support">
+          <summary>☕ Mời Châu Vinh một ly cà phê</summary>
+          <div class="coffee-content">
+            <div class="coffee-qr-placeholder" role="img" aria-label="Vị trí dành cho mã QR ủng hộ cà phê của Châu Vinh">
+              <span aria-hidden="true">▦</span>
+              <b>MÃ QR CÀ PHÊ</b>
+              <small>Đang chờ mã thanh toán</small>
+            </div>
+            <p>Một ly cà phê nhỏ sẽ tiếp sức để <b>Châu Vinh</b> phát triển thêm câu đố và trò chơi mới. 💛</p>
+          </div>
+        </details>
+      </footer>
+    </div>
+  </div>
+
+  <!-- GIỚI THIỆU BOSS -->
+  <div class="screen" id="intro">
+    <div class="card">
+      <div class="big-emoji bounce" id="introEmoji">👾</div>
+      <h1 id="introName">BOSS XUẤT HIỆN!</h1>
+      <div class="bossintro" id="introDesc"></div>
+      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();beginBattle()">⚔️ VÀO TRẬN!</button></div>
+      <div style="margin-top:12px"><button class="btn" onclick="SFX.open();openShop('intro')">🛒 CỬA HÀNG (<span id="introCoins">0</span> 💰)</button></div>
+    </div>
+  </div>
+
+  <!-- CHIẾN ĐẤU -->
+  <div class="screen" id="battle">
+    <div class="card" id="battleCard">
+      <div class="topbar">
+        <span class="badge" id="levelBadge">Boss 1/10</span>
+        <span class="badge coin" id="coinTxt">💰 0</span>
+        <button class="minibtn" id="sndBtn" onclick="toggleSound()" title="Bật/tắt âm thanh" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+        <button class="minibtn" onclick="askRestart()" title="Tạm dừng / Về trang chủ" aria-label="Tạm dừng trò chơi">⏸️</button>
+        <button class="minibtn" onclick="quickHome()" title="Về trang chủ" aria-label="Về trang chủ">🏠</button>
+        <span class="badge type" id="typeBadge">🧮</span>
+        <span class="streak" id="streakTxt"></span>
+        <span class="crit" id="critTxt"></span>
+      </div>
+
+      <div class="battlegrid">
+       <div class="colL">
+      <div class="arena" id="arena">
+        <div class="ground" id="ground"></div>
+        <div class="hprow">
+          <div class="hpwrap">
+            <div class="hpname">🦸 Em</div>
+            <div class="hpbar"><div class="hpfill" id="heroHp" style="width:100%"></div></div>
+            <div class="hptext" id="heroHpTxt"></div>
+          </div>
+          <div class="hpwrap">
+            <div class="hpname" id="bossName">👾 Boss</div>
+            <div class="hpbar"><div class="hpfill" id="bossHp" style="width:100%"></div></div>
+            <div class="hptext" id="bossHpTxt"></div>
+          </div>
+        </div>
+        <div class="fighter" id="heroBox">
+          <div style="position:relative;display:inline-block">
+            <div class="aura" id="heroAura"></div>
+            <div class="shadowPad"></div>
+            <span class="sprite" id="heroSprite">🦸</span>
+          </div>
+        </div>
+        <div class="fighter" id="bossBox">
+          <div style="position:relative;display:inline-block">
+            <div class="shadowPad"></div>
+            <span class="sprite" id="bossSprite">👾</span>
+          </div><br>
+          <span class="mech" id="bossMech"></span>
+        </div>
+      </div>
+
+      <div class="timerwrap">
+        <span style="font-size:18px">⏰</span>
+        <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+        <span class="timernum" id="timerNum">20s</span>
+      </div>
+
+      <div class="energywrap">
+        <span class="energylbl">⚡ Năng lượng</span>
+        <div class="energybar"><div class="energyfill" id="energyFill"></div></div>
+        <button class="ultbtn" id="ultBtn" onclick="useUltimate()">⚡ SIÊU CHƯỞNG!</button>
+      </div>
+      <div class="itembar" id="itemBar"></div>
+       </div>
+       <div class="colR">
+      <div class="qbox" id="qbox">
+        <div class="goldtag" id="goldTag" style="display:none">💛 CÂU HỎI VÀNG — SÁT THƯƠNG ×2! 💛</div>
+        <div class="qtext" id="questionTxt"></div>
+        <div class="qsvg" id="questionSvg"></div>
+      </div>
+      <div class="thinkbar" id="thinkBar"><i></i></div>
+      <div class="answer-toolbar">
+        <label for="answerModeSelect">Cách trả lời</label>
+        <select id="answerModeSelect" onchange="setAnswerMode(this.value)" title="Áp dụng từ câu tiếp theo">
+          <option value="mixed">🔀 Luân phiên</option>
+          <option value="choice">🔘 Trắc nghiệm</option>
+          <option value="input">⌨️ Tự nhập kết quả</option>
+        </select>
+        <span id="answerModeHint">Áp dụng từ câu tiếp theo</span>
+      </div>
+      <div class="answers" id="answers"></div>
+      <form class="answer-entry" id="answerForm" onsubmit="submitTypedAnswer(event)" hidden>
+        <label class="sr-only" for="answerInput">Nhập đáp án</label>
+        <input id="answerInput" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Nhập kết quả rồi nhấn Enter…">
+        <button class="answer-submit" id="answerSubmit" type="submit">TUNG CHƯỞNG</button>
+      </form>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="explain" id="explainBox"></div>
+      <button class="nextbtn" id="nextBtn" onclick="proceedNext()">▶ CÂU TIẾP THEO</button>
+       </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THẮNG BOSS + CHỌN BẢO VẬT -->
+  <div class="screen" id="bossWin">
+    <div class="card">
+      <div class="big-emoji bounce">🎁</div>
+      <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
+      <p class="sub" id="bossWinSub"></p>
+      <div style="margin-top:20px;max-width:520px;margin-left:auto;margin-right:auto">
+        <button class="btn big" onclick="SFX.open();openShop('next')">🛒 VÀO CỬA HÀNG MUA SẮM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CỬA HÀNG -->
+  <div class="screen" id="shop">
+    <div class="card">
+      <div class="big-emoji bounce">🛒</div>
+      <h1>CỬA HÀNG VẬT PHẨM</h1>
+      <p class="sub">Trả lời đúng để kiếm xu 💰 — mua vật phẩm để mạnh hơn!<br>
+      Xu của em: <b id="shopCoins" style="font-size:22px;color:#c98a00">0 💰</b></p>
+      <div class="shopgrid" id="shopGrid"></div>
+      <div style="margin-top:18px;max-width:520px;margin-left:auto;margin-right:auto">
+        <button class="btn big green" id="shopDoneBtn" onclick="SFX.click();closeShop()">⚔️ VÀO TRẬN!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KẾT QUẢ ĐẤU NHANH / SINH TỒN -->
+  <div class="screen" id="scoreEnd">
+    <div class="card">
+      <div class="big-emoji bounce" id="seEmoji">🏁</div>
+      <h1 id="seTitle">HẾT GIỜ!</h1>
+      <p class="sub" id="seRank"></p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="seScore">0</div><div class="lbl">ĐIỂM</div></div>
+        <div class="stat"><div class="num" id="seCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="seStreak">0</div><div class="lbl">COMBO MAX</div></div>
+        <div class="stat"><div class="num" id="seBest">0</div><div class="lbl">KỶ LỤC 🏅</div></div>
+      </div>
+      <div style="display:grid;gap:12px;max-width:520px;margin:0 auto">
+        <button class="btn big green" id="seAgain">🔁 CHƠI LẠI</button>
+        <button class="btn big" onclick="SFX.click();goHome()">🏠 VỀ TRANG CHỦ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VÔ ĐỊCH -->
+  <div class="screen" id="victory">
+    <div class="card">
+      <div class="big-emoji bounce">🏆</div>
+      <h1>NHÀ VÔ ĐỊCH TƯ DUY!</h1>
+      <p class="sub">Em đã chinh phục cả 10 boss của Đấu Trường Tư Duy! Quá đỉnh!</p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="stWrong">0</div><div class="lbl">CÂU SAI</div></div>
+        <div class="stat"><div class="num" id="stGold">0</div><div class="lbl">CÂU VÀNG</div></div>
+        <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">COMBO MAX</div></div>
+        <div class="stat"><div class="num" id="stCoins">0</div><div class="lbl">XU CÒN LẠI 💰</div></div>
+      </div>
+      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();goHome()">🏠 CHƠI LẠI</button></div>
+    </div>
+  </div>
+
+  <!-- THUA -->
+  <div class="screen" id="defeat">
+    <div class="card">
+      <div class="big-emoji">😵</div>
+      <h1>ÔI KHÔNG!</h1>
+      <p class="sub">Câu đố tư duy khó mà! Thử lại là quen tay ngay! 💪</p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stCorrect2">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="stWrong2">0</div><div class="lbl">CÂU SAI</div></div>
+        <div class="stat"><div class="num" id="stTimeout2">0</div><div class="lbl">HẾT GIỜ</div></div>
+      </div>
+      <div style="display:grid;gap:12px;max-width:520px;margin:0 auto">
+        <button class="btn big" onclick="SFX.open();openShop('defeat')">🛒 CỬA HÀNG (<span id="defeatCoins">0</span> 💰)</button>
+        <button class="btn big green" onclick="SFX.click();retryBoss()">🔁 ĐÁNH LẠI BOSS NÀY</button>
+        <button class="btn big" onclick="SFX.click();goHome()">🏠 VỀ TRANG CHỦ</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- GÕ CHỮ DIỆT QUÁI -->
+  <div class="screen learning-screen" id="typingGame">
+    <div class="card game-card typing-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveTypingGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN GÕ & TỪ VỰNG</span><h1>Gõ Chữ Diệt Quái</h1></div>
+        <button class="icon-btn" id="typingPauseBtn" onclick="toggleTypingPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="typing-setup" id="typingSetup">
+        <div class="typing-hero">🧙‍♀️<span>⚡</span></div>
+        <h2>Chọn chiến dịch</h2>
+        <div class="option-grid">
+          <label class="option-card"><input type="radio" name="typingLanguage" value="en" checked><span><b>Tiếng Anh</b><small>Hơn 82.000 từ kèm nghĩa tiếng Việt</small></span></label>
+          <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>Tiếng Việt</b><small>Luyện dấu, cụm từ và chính tả</small></span></label>
+        </div>
+        <p class="typing-dictionary-status" id="typingDictionaryStatus" aria-live="polite">📚 Kho từ mở sẽ tự nạp khi vào trò chơi.</p>
+        <p class="typing-source">Dữ liệu: <a href="https://vi.wiktionary.org/" target="_blank" rel="noopener">Wiktionary tiếng Việt</a> qua <a href="https://kaikki.org/viwiktionary/" target="_blank" rel="noopener">Kaikki</a> · CC BY-SA 4.0</p>
+        <label class="select-row">Độ khó
+          <select id="typingDifficulty"><option value="superslow">🐢 Siêu chậm — chỉ 1 quái, từ dễ nhất</option><option value="easy">Dễ — quái chậm</option><option value="normal" selected>Vừa — cân bằng</option><option value="hard">Khó — quái nhanh</option><option value="superfast">🚀 Siêu nhanh — quái dồn dập, điểm ×2</option></select>
+        </label>
+        <label class="check-row"><input type="checkbox" id="typingAccentAssist"> Hỗ trợ tiếng Việt không dấu <small>(tắt mặc định để luyện dấu tốt hơn)</small></label>
+
+        <div class="maplbl">🏰 CHIẾN DỊCH 10 CHẶNG — mỗi chặng thêm đợt quái, thêm từ và khó dần</div>
+        <div class="map typing-map" id="typingMap"></div>
+        <div class="typing-launch">
+          <button class="btn big green" id="typingCampaignBtn" onclick="startTypingCampaign()">⚔️ VÀO CHẶNG 1</button>
+          <button class="btn" onclick="startTypingRun()">🎯 LUYỆN TỰ DO — 3 đợt, không tính chặng</button>
+          <button class="btn typing-reset-btn" id="typingResetCampaignBtn" type="button" onclick="resetTypingCampaign()">↩️ RESET TIẾN ĐỘ 10 CHẶNG</button>
+        </div>
+        <p class="typing-campaign-status" id="typingCampaignStatus" aria-live="polite">Reset chỉ khóa lại các chặng; kỷ lục điểm, WPM, combo và tổng sao vẫn được giữ.</p>
+      </section>
+
+      <section class="typing-play" id="typingPlay" hidden>
+        <div class="typing-hud">
+          <span id="typingStagePill" hidden>🏰 Chặng <b id="typingStage">1/10</b></span><span>❤️ <b id="typingLives">3</b></span><span>🏆 <b id="typingScore">0</b></span><span>🔥 <b id="typingCombo">0</b></span><span>⌨️ <b id="typingWpm">0</b> WPM</span><span>🌊 Đợt <b id="typingWave">1</b>/<b id="typingWaveTotal">3</b></span>
+        </div>
+        <div class="typing-battlefield" id="typingField" aria-label="Quái vật mang từ đang tiến về cổng">
+          <div class="typing-gate"><span>🧙‍♀️</span><i></i></div>
+          <div class="lane-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="typing-monsters" id="typingMonsters"></div>
+          <div class="wave-banner" id="typingWaveBanner"></div>
+        </div>
+        <div class="learn-toast" id="typingLearnToast" aria-live="polite"></div>
+        <form class="typing-input-wrap" onsubmit="submitTypingBuffer(event)">
+          <label for="typingInput">Gõ đúng từ trên quái vật</label>
+          <input id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Bắt đầu gõ để khóa mục tiêu…">
+          <button type="submit">⚡ ĐÁNH</button>
+        </form>
+        <p class="typing-tip" id="typingTip">Gõ chữ đầu để khóa mục tiêu. Gõ đủ từ sẽ tự động tung phép.</p>
+      </section>
+
+      <section class="game-result" id="typingResult" hidden aria-live="polite">
+        <div class="result-icon" id="typingResultIcon">🏆</div><h2 id="typingResultTitle">Hoàn thành!</h2><p id="typingResultText"></p>
+        <div class="result-stats" id="typingResultStats"></div>
+        <div class="result-actions"><button class="btn big green" id="typingNextStageBtn" hidden onclick="startTypingCampaign()">⚔️ Chặng tiếp theo</button><button class="btn green" id="typingRetryBtn" onclick="startTypingRun()">🔁 Chơi lại</button><button class="btn" onclick="openTypingGame()">🗺️ Chọn chặng</button><button class="btn" onclick="leaveTypingGame()">🏠 Trang chủ</button></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- SUDOKU THỬ THÁCH -->
+  <div class="screen learning-screen" id="sudokuGame">
+    <div class="card game-card sudoku-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveSudokuGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN SUY LUẬN LOGIC</span><h1>Sudoku Thử Thách</h1></div>
+        <button class="icon-btn" id="sudokuPauseBtn" onclick="toggleSudokuPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="sudoku-setup" id="sudokuSetup">
+        <div class="sudoku-hero" aria-hidden="true">🧩</div>
+        <h2>Chọn cấp độ của bạn</h2>
+        <p>Tất cả bàn đều có đúng một nghiệm. Cấp càng cao thì càng ít ô mở sẵn và ít gợi ý hơn.</p>
+        <div class="sudoku-level-grid">
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="beginner">
+            <span><i>🌱</i><b>Làm quen</b><small>50 ô mở · 5 gợi ý</small><em id="sudokuBest-beginner">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="easy">
+            <span><i>🙂</i><b>Dễ</b><small>42 ô mở · 4 gợi ý</small><em id="sudokuBest-easy">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="medium" checked>
+            <span><i>🧠</i><b>Vừa</b><small>36 ô mở · 3 gợi ý</small><em id="sudokuBest-medium">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="hard">
+            <span><i>🔥</i><b>Khó</b><small>28 ô mở · 2 gợi ý</small><em id="sudokuBest-hard">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="expert">
+            <span><i>💎</i><b>Chuyên gia</b><small>23 ô mở · 1 gợi ý</small><em id="sudokuBest-expert">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card ultimate">
+            <input type="radio" name="sudokuDifficulty" value="ultimate">
+            <span><i>👑</i><b>Tối thượng</b><small>Chỉ 17 ô · không gợi ý</small><em id="sudokuBest-ultimate">Chưa có kỷ lục</em></span>
+          </label>
+        </div>
+        <div class="sudoku-setup-footer">
+          <span>🏆 Đã thắng <b id="sudokuTotalWins">0</b> ván</span>
+          <button class="btn big green" type="button" onclick="startSudoku()">🧩 BẮT ĐẦU SUDOKU</button>
+        </div>
+      </section>
+
+      <section class="sudoku-play" id="sudokuPlay" hidden>
+        <div class="sudoku-hud" aria-live="polite">
+          <span id="sudokuLevel">🧠 Vừa</span>
+          <span>⏱️ <b id="sudokuTime">00:00</b></span>
+          <span>🔢 <b id="sudokuClues">36</b> ô mở</span>
+          <span>💡 <b id="sudokuHints">3</b> gợi ý</span>
+          <span>🔎 <b id="sudokuChecks">0</b> lần kiểm tra</span>
+        </div>
+        <div class="sudoku-layout">
+          <div class="sudoku-board-column">
+            <div class="sudoku-board-wrap">
+              <div class="sudoku-board" id="sudokuBoard" role="grid" aria-label="Bàn Sudoku 9 hàng 9 cột"></div>
+              <div class="sudoku-pause-overlay" id="sudokuPauseOverlay" hidden>
+                <span>⏸️</span><b>ĐÃ TẠM DỪNG</b>
+                <button class="btn green" type="button" onclick="toggleSudokuPause()">▶️ Tiếp tục</button>
+              </div>
+            </div>
+            <div class="sudoku-feedback" id="sudokuFeedback" aria-live="polite">Chọn một ô rồi điền số.</div>
+          </div>
+
+          <aside class="sudoku-controls" aria-label="Bộ điều khiển Sudoku">
+            <div class="sudoku-number-pad" aria-label="Chọn số">
+              <button type="button" onclick="sudokuInput(1)" aria-label="Điền số 1">1</button>
+              <button type="button" onclick="sudokuInput(2)" aria-label="Điền số 2">2</button>
+              <button type="button" onclick="sudokuInput(3)" aria-label="Điền số 3">3</button>
+              <button type="button" onclick="sudokuInput(4)" aria-label="Điền số 4">4</button>
+              <button type="button" onclick="sudokuInput(5)" aria-label="Điền số 5">5</button>
+              <button type="button" onclick="sudokuInput(6)" aria-label="Điền số 6">6</button>
+              <button type="button" onclick="sudokuInput(7)" aria-label="Điền số 7">7</button>
+              <button type="button" onclick="sudokuInput(8)" aria-label="Điền số 8">8</button>
+              <button type="button" onclick="sudokuInput(9)" aria-label="Điền số 9">9</button>
+              <button class="erase" type="button" onclick="eraseSudokuCell()" aria-label="Xoá ô">⌫</button>
+            </div>
+            <div class="sudoku-tool-grid">
+              <button id="sudokuNoteBtn" type="button" onclick="toggleSudokuNotes()" aria-pressed="false">✏️ Ghi chú: TẮT</button>
+              <button id="sudokuHintBtn" type="button" onclick="useSudokuHint()">💡 Gợi ý (3)</button>
+              <button class="check" type="button" onclick="checkSudoku()">✅ Kiểm tra bàn</button>
+              <button type="button" onclick="restartSudoku()">↩️ Chơi lại bàn</button>
+              <button type="button" onclick="newSudoku()">🔀 Bàn mới</button>
+              <button type="button" onclick="chooseSudokuLevel()">🎚️ Đổi cấp độ</button>
+            </div>
+            <p class="sudoku-shortcuts"><b>Phím tắt:</b> 1–9 điền số · N ghi chú · H gợi ý · phím mũi tên di chuyển · Delete xoá · Esc tạm dừng.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="game-result sudoku-result" id="sudokuResult" hidden aria-live="polite">
+        <div class="result-icon" id="sudokuResultIcon">🏆</div>
+        <h2 id="sudokuResultTitle">Hoàn thành Sudoku!</h2>
+        <p id="sudokuResultText"></p>
+        <div class="result-stats" id="sudokuResultStats"></div>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="newSudoku()">🔀 Bàn mới cùng cấp</button>
+          <button class="btn" type="button" onclick="chooseSudokuLevel()">🎚️ Chọn cấp độ</button>
+          <button class="btn" type="button" onclick="leaveSudokuGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+</main>
+
+<div class="modal" id="restartModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" aria-hidden="true">
+  <div class="modalbox" tabindex="-1">
+    <div style="font-size:54px">⏸️</div>
+    <h1 id="pauseTitle" style="font-size:26px">TẠM DỪNG</h1>
+    <p class="sub" id="pauseInfo">Đồng hồ đã dừng — em cứ nghỉ thoải mái nhé!</p>
+    <div style="display:grid;gap:10px;margin-top:16px">
+      <button class="btn big green" onclick="closeRestart()">▶️ TIẾP TỤC CHƠI</button>
+      <button class="btn big" onclick="doRestart()">🔄 CHƠI LẠI TỪ ĐẦU</button>
+      <button class="btn big" onclick="goHomeFromPause()">🏠 VỀ TRANG CHỦ</button>
+    </div>
+  </div>
+</div>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/question-bank.js"></script>
+  <script src="assets/js/arena.js"></script>
+  <script src="assets/js/data/typing-content.js"></script>
+  <script src="assets/js/games/typing.js"></script>
+  <script src="assets/js/games/sudoku.js"></script>
+  <script src="assets/js/bootstrap.js"></script>
+</body>
+</html>

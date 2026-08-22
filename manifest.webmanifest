@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "Đấu Trường Tư Duy",
+  "short_name": "Tư Duy",
+  "description": "Đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku từ dễ đến tối thượng.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#08132f",
+  "theme_color": "#1b2a52",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "./assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
