@@ -188,16 +188,26 @@
      * engine tự đọc theo và không cần đổi dòng code nào.
      */
     campaign: [
-      { emoji: '🐛', name: 'Sâu Chữ Cái',      waves: 3,  perWave: CAMPAIGN_PER_WAVE, gap: 2600, speed: 2.6, level: 1, armor: 2 },
-      { emoji: '👻', name: 'Ma Gõ Nhầm',       waves: 5,  perWave: CAMPAIGN_PER_WAVE, gap: 2450, speed: 3.0, level: 1, armor: 2 },
-      { emoji: '🦇', name: 'Dơi Lạc Phím',     waves: 7,  perWave: CAMPAIGN_PER_WAVE, gap: 2300, speed: 3.4, level: 1, armor: 3 },
-      { emoji: '🐍', name: 'Rắn Chính Tả',     waves: 9,  perWave: CAMPAIGN_PER_WAVE, gap: 2150, speed: 3.8, level: 2, armor: 3 },
-      { emoji: '🦂', name: 'Bọ Cạp Dấu Thanh', waves: 11, perWave: CAMPAIGN_PER_WAVE, gap: 2000, speed: 4.2, level: 2, armor: 3 },
-      { emoji: '🦑', name: 'Mực Ngữ Pháp',     waves: 13, perWave: CAMPAIGN_PER_WAVE, gap: 1850, speed: 4.6, level: 2, armor: 4 },
-      { emoji: '🐲', name: 'Rồng Con Từ Vựng', waves: 15, perWave: CAMPAIGN_PER_WAVE, gap: 1700, speed: 5.0, level: 3, armor: 4 },
-      { emoji: '👹', name: 'Quỷ Tốc Độ',       waves: 17, perWave: CAMPAIGN_PER_WAVE, gap: 1550, speed: 5.4, level: 3, armor: 4 },
-      { emoji: '🐉', name: 'Rồng Ngôn Ngữ',    waves: 19, perWave: CAMPAIGN_PER_WAVE, gap: 1400, speed: 5.8, level: 3, armor: 5 },
-      { emoji: '🌌', name: 'Chúa Tể Bàn Phím', waves: 21, perWave: CAMPAIGN_PER_WAVE, gap: 1300, speed: 6.3, level: 3, armor: 5 }
+      { emoji: '🐛', name: 'Sâu Chữ Cái',      desc: 'Con sâu non bò trên khúc thân cuộn, hai cái râu ngoe nguẩy dò từng chữ cái. Chậm rì — chặng để em làm quen bàn phím.',
+        waves: 3,  perWave: CAMPAIGN_PER_WAVE, gap: 2600, speed: 2.6, level: 1, armor: 2 },
+      { emoji: '👻', name: 'Ma Gõ Nhầm',       desc: 'Không chân, tà áo bay lửng lơ, chuyên rình lúc em gõ vội mà bấm nhầm phím bên cạnh.',
+        waves: 5,  perWave: CAMPAIGN_PER_WAVE, gap: 2450, speed: 3.0, level: 1, armor: 2 },
+      { emoji: '🦇', name: 'Dơi Lạc Phím',     desc: 'Đôi tai dỏng lên nghe tiếng gõ, cánh đập loạn xạ làm em lạc mất hàng phím giữa.',
+        waves: 7,  perWave: CAMPAIGN_PER_WAVE, gap: 2300, speed: 3.4, level: 1, armor: 3 },
+      { emoji: '🐍', name: 'Rắn Chính Tả',     desc: 'Trườn trên khúc thân cuộn tròn, nanh nhọn chờ đúng một chữ viết sai là đớp.',
+        waves: 9,  perWave: CAMPAIGN_PER_WAVE, gap: 2150, speed: 3.8, level: 2, armor: 3 },
+      { emoji: '🦂', name: 'Bọ Cạp Dấu Thanh', desc: 'Hai càng kẹp chặt, cái ngòi cong ngược lên lưng chực chích đúng chỗ em quên bỏ dấu.',
+        waves: 11, perWave: CAMPAIGN_PER_WAVE, gap: 2000, speed: 4.2, level: 2, armor: 3 },
+      { emoji: '🦑', name: 'Mực Ngữ Pháp',     desc: 'Xúc tu quấn lấy cả câu, tách rời chủ ngữ khỏi vị ngữ cho em rối tinh lên.',
+        waves: 13, perWave: CAMPAIGN_PER_WAVE, gap: 1850, speed: 4.6, level: 2, armor: 4 },
+      { emoji: '🐲', name: 'Rồng Con Từ Vựng', desc: 'Rồng mới mọc sừng, cánh còn nhỏ nhưng đuôi đã quật rất rát. Nó canh giữ kho từ khó.',
+        waves: 15, perWave: CAMPAIGN_PER_WAVE, gap: 1700, speed: 5.0, level: 3, armor: 4 },
+      { emoji: '👹', name: 'Quỷ Tốc Độ',       desc: 'Sừng đỏ, nanh nhe, vảy lưng dày. Nó ép em gõ nhanh tới mức quên mất phải gõ cho đúng.',
+        waves: 17, perWave: CAMPAIGN_PER_WAVE, gap: 1550, speed: 5.4, level: 3, armor: 4 },
+      { emoji: '🐉', name: 'Rồng Ngôn Ngữ',    desc: 'Rồng trưởng thành: đủ cánh, đủ đuôi, đủ vảy, đủ nanh. Mỗi lớp giáp là một câu dài phải gõ trọn vẹn.',
+        waves: 19, perWave: CAMPAIGN_PER_WAVE, gap: 1400, speed: 5.8, level: 3, armor: 5 },
+      { emoji: '🌌', name: 'Chúa Tể Bàn Phím', desc: 'Vương miện và áo choàng của kẻ cai trị cả chín chặng trước. Hạ được nó nghĩa là em đã làm chủ bàn phím.',
+        waves: 21, perWave: CAMPAIGN_PER_WAVE, gap: 1300, speed: 6.3, level: 3, armor: 5 }
     ]
   };
 

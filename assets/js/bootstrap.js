@@ -4,6 +4,18 @@
   const storage=window.GameStorage;
   let lastModalFocus=null;
 
+  /* Bơm hình nhân vật vào mọi vỏ rỗng có data-art. Nhờ vậy hình chỉ tồn tại ở đúng
+     một chỗ (<template>), sửa một lần là đổi khắp: sàn Đấu Toán, pháp sư màn chọn
+     chiến dịch và pháp sư giữ cổng Gõ Chữ. */
+  function hydrateArt(root){
+    (root||document).querySelectorAll('[data-art]').forEach(host=>{
+      if(host.childElementCount)return;                 // đã bơm rồi thì thôi
+      if(typeof fillArt==='function')fillArt(host,host.dataset.art);
+    });
+  }
+  window.hydrateArt=hydrateArt;
+  hydrateArt();
+
   window.refreshProfileSummary=function refreshProfileSummary(){
     const data=storage?.load?.()||{};
     const records=data.records||{};

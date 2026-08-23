@@ -541,3 +541,102 @@ Hai nhánh đều đã được chứng minh — dự phòng bởi bộ test, nh
 - `tools/smoke-test.mjs` — 4/4 ✓
 - `tools/browser-smoke.mjs` — 46/46 ✓, không lỗi JS runtime
 - Bản dò View Transitions — 2 nhánh ✓
+
+---
+
+# Vòng 8 — sửa nhân vật: boss biến mất, và hai nhân vật cho một trò chơi
+
+Prompt gốc: `/code-review-expert /develop-web-game` — "fix all graphic character because
+something wrong and miss so check and optimal and complete project".
+
+## LỖI NẶNG NHẤT: boss BIẾN MẤT HOÀN TOÀN từ giai đoạn 2
+
+`arena.js` ghi `boss.textContent = b.p2||b.emoji` lên `#bossSprite`. Từ vòng 6 phần tử ấy
+là `<svg>` chứ không còn là `<span>` emoji nữa, mà **`textContent` xoá sạch mọi nút con**.
+Emoji thay vào lại vô hình vì `.fighter svg.sprite{font-size:0}` (main.css). Kết quả: hễ
+boss tụt xuống dưới 50% máu là con quái **biến mất khỏi sân**, và mất luôn cho tới hết
+phiên — `paintBoss()` chỉ đặt biến CSS chứ không dựng lại hình.
+
+`core.js survAdvance()` mắc **đúng một lỗi ấy** ở chế độ Sinh tồn.
+
+Đo được: `#bossSprite.childElementCount` 1 → **0**, `innerHTML` → `"🐛"`. Ảnh chụp cho thấy
+biển "🔥 GIAI ĐOẠN 2" lơ lửng trên bãi cỏ trống.
+
+**Nay**: hoá dạng = TÔ LẠI bảng màu (`applySkin` + `rageArt`), không đụng tới nút con.
+
+## GOTCHA 13: 46 assertion không hề chạm tới một hình nhân vật nào
+
+`grep -n "Sprite|emoji|beast|chr-" tools/*.mjs` trả về **rỗng**. Vì thế một con boss vô hình
+vẫn cho 46/46 xanh. Bài học giống GOTCHA vòng 7 nhưng ở mức nặng hơn: **thứ không có
+assertion thì không tồn tại đối với bộ test**, dù nó là thứ người chơi nhìn vào nhiều nhất.
+
+Đã thêm 5 assertion (46 → **51**), mỗi cái ứng với một lỗi thật, và **đã đối chứng âm**:
+- tái tạo `boss.textContent='🐛'` → đỏ: `Boss vẫn còn hình sau khi vào giai đoạn 2 (0 nút…)`
+- gỡ `.chr-spikes` khỏi quy tắc `.no-horns` → đỏ: `(sừng none, gai inline)`
+
+## Nhân vật lệch nhau ở 4 chỗ khác
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| Màn "BOSS XUẤT HIỆN" | emoji 🐌 cho "Ốc Sên" — trong khi sàn đấu vẽ khối tròn xanh có sừng | dựng đúng con quái ấy, đúng bảng màu, to gấp 2,2 lần cỡ chữ |
+| Pháp sư Gõ Chữ | emoji 🧙‍♀️ (2 chỗ) | cùng một nhân vật với Đấu Toán, bơm từ `tplHero` |
+| Bản đồ 10 chặng | 10 emoji chẳng liên quan tới quái trong trận | 10 bảng màu `STAGE_SKINS`, **dùng chung** với boss thật của chặng |
+| Nhãn tên boss / viên nhãn chặng | có emoji kèm | bỏ — nhân vật đã đứng ngay đó |
+
+## Một nguồn duy nhất — lần này là thật
+
+Vòng 7 ghi "`tplBeast` là NGUỒN DUY NHẤT" nhưng `#bossSprite` vẫn là **bản chép nguyên xi**
+trong `index.html`. Nay `#heroSprite` và `#bossSprite` chỉ còn là **vỏ `<svg>` rỗng** mang
+`data-art="tplHero|tplBeast"`; `bootstrap.js:hydrateArt()` bơm hình vào lúc khởi động. Thêm
+một chỗ cần nhân vật thì chỉ cần đặt `data-art` — không chép hình lần nữa.
+
+## Vẽ lại tay nhân vật
+
+Ảnh phóng to ×4 cho thấy tay là **một nét 4,5px** bên cạnh thân người mập mạp — trông như
+sợi dây, kèm một quả cầu vàng lơ lửng không dính vào đâu. Nay mỗi tay là **hai nét chồng
+nhau** (viền đậm 16px dưới, nét da 9px trên) + nắm tay, thêm ủng vàng. Lại một lần nữa:
+**chỉ ảnh chụp mới chỉ ra được, không assertion nào bắt được.**
+
+## GOTCHA 14: trộn màu gốc với đỏ cho ra NÂU BÙN
+
+`rageArt` bản đầu trộn thẳng `mixHex(art.body,'#d81f3a',.55)`. Boss 1 thân xanh lục → lục
+pha đỏ = nâu, đúng lý thuyết màu, không tránh được. Đảo lại: **lấy đỏ làm nền, chỉ pha 15%
+màu gốc**, giữ nguyên màu sừng làm sợi dây nhận dạng. Ra đỏ sạch (`#8fd36a` → `#be3d3c`).
+
+## GOTCHA 15: đổi emoji thành `<svg>` làm dôi khung
+
+`.typing-hero` cao thêm 30% (hình 1,3em so với glyph 1em) → màn chọn chiến dịch dôi **3px**
+và assertion "5 màn gói trong một khung 1366×768" ĐỎ. Cách chữa: `width:1.25em` nhưng
+`margin:-.125em 0` — hình to hơn mà **chiếm chỗ đúng 1em** như glyph cũ.
+
+Đồng thời `.mapnode.locked{filter:grayscale(1)}` biến 9 chặng chưa mở thành 9 vệt xám
+**giống hệt nhau** (10 chặng dùng chung một hình, chỉ khác màu). Hạ xuống `grayscale(.45)`.
+
+## Mã chết đã gỡ
+
+- `drawMap()` + 5 lời gọi — **không có phần tử `#map` nào** trong `index.html`, hàm luôn
+  `return` ngay dòng đầu.
+- `SURV_MONSTERS`, trường `p2` của cả 10 boss, tham số `emoji` của `prepArenaForMode` —
+  tất cả chỉ còn tồn tại để nuôi hai lỗi ở trên.
+
+## Kết quả kiểm thử
+
+- `tools/smoke-test.mjs` — 4/4 ✓
+- `tools/browser-smoke.mjs` — **51/51 ✓**, không lỗi JS runtime
+- Chơi thử qua CDP: hạ boss → cửa hàng → boss 2 → chết → đánh lại; siêu chưởng; Đấu nhanh;
+  Sinh tồn; gõ thật từ "entry" trong Gõ Chữ (điểm 0 → 28). Hình nhân vật còn nguyên ở **mọi**
+  bước (`bossCon:1, heroCon:1`).
+- Chạy độc lập bằng Playwright client của skill `develop-web-game` — không lỗi console.
+- `sw.js` `CACHE_VERSION` v8 → **v9**.
+
+## TODO cho agent sau
+
+1. **Chưa xem tận mắt boss của chặng trong Gõ Chữ.** `state` và `spawnBoss` nằm trong IIFE
+   nên không gọi được từ ngoài; đã xác minh gián tiếp (map và boss cùng gọi `stageSkin(index)`,
+   `state.stageIndex` đặt ở `startTypingRun`). Muốn chắc thì phải chơi hết 3 đợt chặng 1.
+2. Quái Gõ Chữ vẫn dùng `BEAST_SKINS` (8 bộ) tách rời `STAGE_SKINS` (10 bộ) và `BOSS_ART`
+   (10 bộ) — **ba bảng màu cho cùng một hình**. Gộp lại được nếu muốn.
+3. Icon vật phẩm cửa hàng vẫn là emoji — đó là **icon giao diện**, không phải nhân vật, để
+   nguyên là hợp lý.
+4. `#introEmoji` giờ chứa `<svg>` nhưng tên id vẫn là "emoji" — đổi tên thì phải sửa cả
+   `smoke-test.mjs` (đếm tham chiếu), chưa đáng.

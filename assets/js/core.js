@@ -184,40 +184,119 @@ window.SFX=SFX;
 
 /* ============ 10 BOSS — độ khó tăng dần (KHÔNG hiện lớp) ============ */
 const RANKS={1:'⭐ Khởi Động',2:'⭐⭐ Thử Thách',3:'⭐⭐⭐ Cao Thủ',4:'⭐⭐⭐⭐ Huyền Thoại',5:'⭐⭐⭐⭐⭐ Bậc Thầy'};
-/* Mỗi boss là CÙNG một hình SVG, chỉ khác bảng màu + kiểu sừng. Nhờ vậy 10 boss
-   không cần 10 bản vẽ tay, mà vẫn nhận ra ngay con nào là con nào. */
+/* Mỗi boss là CÙNG một khuôn SVG, khác bảng màu VÀ khác bộ phận lắp lên. Mười cái
+   tên riêng (Ốc Sên, Zombie, Bạch Tuộc...) nay có mười bóng dáng riêng, mà vẫn chỉ
+   một bản vẽ duy nhất phải bảo trì.
+   Bộ phận không chọn cho đẹp — nó BÁO TRƯỚC LỐI ĐÁNH, để trẻ chưa kịp đọc mechTxt
+   vẫn thấy nguy hiểm: giáp → vảy lưng, hút máu → nanh, cuồng nộ → sừng, hồi máu →
+   mũ/gậy phù thuỷ. Độ khó lên thì hình cũng "nặng" thêm: cấp 1–2 mềm và không sừng,
+   cấp 3–4 mọc nanh vảy cánh, cấp 5 đội vương miện và khoác áo choàng. */
 const BOSS_ART=[
-  {body:'#8fd36a',belly:'#e8ffd6',horn:'#c9e88a',horns:0},
-  {body:'#b07cff',belly:'#efe4ff',horn:'#ffc93c',horns:1},
-  {body:'#7fae7a',belly:'#dff0dc',horn:'#9ad18f',horns:1},
-  {body:'#9a8f72',belly:'#efe7d2',horn:'#d8c79a',horns:1},
-  {body:'#ff6a4d',belly:'#ffd9cf',horn:'#ffb02e',horns:1},
-  {body:'#c05a8f',belly:'#ffd9ec',horn:'#f2a0c8',horns:1},
-  {body:'#5fc9e8',belly:'#d6f4ff',horn:'#bfeeff',horns:1},
-  {body:'#ffcf3d',belly:'#fff3c4',horn:'#ff9a2e',horns:1},
-  {body:'#7f6ce0',belly:'#e3dcff',horn:'#b6a6ff',horns:1},
-  {body:'#3fb8b0',belly:'#d3f6f3',horn:'#7fe0d8',horns:1},
+  {body:'#8fd36a',belly:'#e8ffd6',horn:'#c9e88a',horns:0,parts:['shell','stalks']},
+  {body:'#b07cff',belly:'#efe4ff',horn:'#ffc93c',horns:0,parts:['antennae']},
+  {body:'#7fae7a',belly:'#dff0dc',horn:'#9ad18f',horns:0,parts:['stitches','fangs']},
+  {body:'#9a8f72',belly:'#efe7d2',horn:'#d8c79a',horns:1,parts:['plates','tail','fangs']},
+  {body:'#ff6a4d',belly:'#ffd9cf',horn:'#ffb02e',horns:1,parts:['fangs']},
+  {body:'#c05a8f',belly:'#ffd9ec',horn:'#f2a0c8',horns:0,parts:['cape','wings','ears','fangs']},
+  {body:'#5fc9e8',belly:'#d6f4ff',horn:'#bfeeff',horns:1,parts:['wings','tail','plates']},
+  {body:'#ffcf3d',belly:'#fff3c4',horn:'#ff9a2e',horns:1,parts:['crown','cape','fangs']},
+  {body:'#7f6ce0',belly:'#e3dcff',horn:'#b6a6ff',horns:1,parts:['hat','staff','cape']},
+  {body:'#3fb8b0',belly:'#d3f6f3',horn:'#7fe0d8',horns:0,parts:['tentacles','fangs']},
 ];
-function paintBoss(b){
-  const el=$('bossSprite');if(!el)return;
-  const art=b.art||BOSS_ART[BOSSES.indexOf(b)]||BOSS_ART[0];
+/* Bơm hình từ <template> vào một vỏ rỗng. Vỏ là <svg> (như #bossSprite) thì chép
+   phần thân vào trong; vỏ là thẻ thường thì gắn nguyên cả <svg> vào.
+   KHÔNG dùng <use>: <use> giấu nội dung trong shadow DOM nên CSS ngoài không
+   animate được mắt/tay. */
+function buildArt(tplId){
+  const tpl=document.getElementById(tplId);
+  if(!tpl||!tpl.content.firstElementChild)return null;
+  return tpl.content.firstElementChild.cloneNode(true);
+}
+function fillArt(host,tplId){
+  const art=buildArt(tplId);if(!host||!art)return null;
+  host.textContent='';
+  if(host.tagName.toLowerCase()==='svg'){
+    while(art.firstChild)host.appendChild(art.firstChild);
+    return host;
+  }
+  host.appendChild(art);
+  return art;
+}
+/* Kho bộ phận lắp ghép. Mỗi tên ở đây có một <g class="bp bp-*"> trong #tplBeast
+   và một luật .p-* trong main.css. Thêm bộ phận mới = thêm ba chỗ đó, không hơn. */
+const BEAST_PARTS=['wings','tail','shell','plates','tentacles','ghost','fangs','stitches',
+  'crown','hat','cape','stinger','stalks','antennae','ears','coil','claws','staff'];
+/* Tô bảng màu VÀ lắp bộ phận lên một hình quái đã dựng. Tách riêng khỏi paintBoss để
+   bản đồ, màn giới thiệu và Gõ Chữ dùng chung đúng một đường tô màu.
+   TRƯỚC: hàm này chỉ đặt ba biến màu, nên toàn bộ hệ .bp/.p-* là MÃ CHẾT — 20 nhân
+   vật có 20 cái tên riêng nhưng dùng chung một khối tròn có sừng. */
+function applySkin(el,art){
+  if(!el||!art)return el;
   el.style.setProperty('--c-body',art.body);
   el.style.setProperty('--c-belly',art.belly);
   el.style.setProperty('--c-horn',art.horn);
   el.classList.toggle('no-horns',!art.horns);
+  const on=Array.isArray(art.parts)?art.parts:[];
+  /* Bật/tắt CẢ 18 chứ không chỉ bật cái cần: cùng một vỏ <svg> (#bossSprite) bị tô
+     lại cho boss khác, không tắt thì con sau đội luôn vương miện của con trước. */
+  for(const k of BEAST_PARTS)el.classList.toggle('p-'+k,on.includes(k));
+  return el;
+}
+/* Dựng sẵn một con quái theo bảng màu — dùng cho bản đồ, màn giới thiệu, Gõ Chữ. */
+function buildBeastArt(art){
+  const svg=buildArt('tplBeast');
+  return svg?applySkin(svg,art):null;
+}
+/* Trộn hai màu hex. Nhờ đó bảng màu "giai đoạn 2" pha được từ bảng màu gốc,
+   khỏi phải chép tay thêm 10 bảng nữa. */
+function mixHex(a,b,t){
+  const part=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+  const [ar,ag,ab]=part(a),[br,bg,bb]=part(b);
+  const ch=(x,y)=>Math.round(x+(y-x)*t).toString(16).padStart(2,'0');
+  return '#'+ch(ar,br)+ch(ag,bg)+ch(ab,bb);
+}
+/* Giai đoạn 2: thân ngả đỏ, sừng rực vàng và MỌC sừng kể cả con vốn không có —
+   nhìn một cái là biết nó vừa hoá dạng, không cần đọc chữ. */
+function rageArt(art){
+  /* Trộn THẲNG màu gốc với đỏ cho ra nâu bùn khi thân vốn màu lục (lục + đỏ = nâu,
+     không tránh được). Nên đi ngược lại: lấy đỏ giận dữ làm nền, chỉ pha 15% màu gốc
+     để còn nhận ra là con nào, và GIỮ NGUYÊN màu sừng làm sợi dây nhận dạng. */
+  /* Giữ nguyên `parts`: hoá dạng là ĐỔI MÀU, không phải rụng mất cánh với xúc tu. */
+  return {body:mixHex('#c62334',art.body,.15),belly:mixHex(art.belly,'#ff9aa4',.6),
+          horn:art.horn||'#ffb02e',horns:1,parts:art.parts};
+}
+function bossArt(b){return b.art||BOSS_ART[BOSSES.indexOf(b)]||BOSS_ART[0];}
+function paintBoss(b){
+  const el=$('bossSprite');if(!el)return;
+  if(!el.childElementCount)fillArt(el,'tplBeast');   // vỏ rỗng lúc chưa khởi động xong
+  el.classList.remove('phase2');
+  applySkin(el,bossArt(b));
   el.setAttribute('aria-label',b.name||'Quái vật');
 }
+/* `desc` là câu giới thiệu TÍNH CÁCH, hiện ở màn "BOSS XUẤT HIỆN". Nó phải nhắc
+   đúng thứ trẻ NHÌN THẤY trên hình (cái vỏ, vết khâu, xúc tu...) — nếu tả một đằng
+   vẽ một nẻo thì lại rơi vào đúng cái lỗi vừa sửa. */
 const BOSSES=[
- {emoji:'🐌',p2:'🐛',name:'Ốc Sên Chậm Chạp',hp:130,minQ:6, atk:13,tier:1,time:22,arena:'',     mech:'none', mechTxt:'Không có gì đặc biệt',proj:'🍃'},
- {emoji:'👾',p2:'👹',name:'Quái Nhí Tinh Nghịch',hp:170,minQ:7, atk:15,tier:1,time:21,arena:'',     mech:'none', mechTxt:'Nhanh nhẹn hơn một chút',proj:'🟣'},
- {emoji:'🧟',p2:'🧛',name:'Zombie Lười Học',hp:215,minQ:8, atk:17,tier:2,time:21,arena:'night',mech:'heal', mechTxt:'💚 Tự hồi 8 máu mỗi khi em trả lời sai',proj:'🦴'},
- {emoji:'🦖',p2:'🐲',name:'Khủng Long Giáp Sắt',hp:260,minQ:9, atk:18,tier:2,time:20,arena:'',     mech:'armor',mechTxt:'🛡️ Giáp cứng: giảm 4 sát thương mỗi đòn',proj:'🪨'},
- {emoji:'👹',p2:'😈',name:'Quỷ Đỏ Nóng Tính',hp:310,minQ:10,atk:20,tier:3,time:20,arena:'lava', mech:'rage', mechTxt:'😡 Nổi giận khi máu thấp: đánh mạnh gấp rưỡi',proj:'🔥'},
- {emoji:'🧛',p2:'🦇',name:'Ma Cà Rồng Toán Học',hp:360,minQ:11,atk:21,tier:3,time:20,arena:'night',mech:'drain',mechTxt:'🩸 Hút máu: đánh trúng em là hắn hồi máu',proj:'🦇'},
- {emoji:'🐉',p2:'🐲',name:'Rồng Băng Vĩnh Cửu',hp:420,minQ:12,atk:23,tier:4,time:19,arena:'ice',  mech:'armor',mechTxt:'🛡️ Vảy băng: giảm 5 sát thương mỗi đòn',proj:'❄️'},
- {emoji:'👑',p2:'🦹',name:'Vua Quái Vật Tối Thượng',hp:500,minQ:13,atk:25,tier:4,time:19,arena:'lava', mech:'rage', mechTxt:'😡 Cuồng nộ khi máu thấp + đòn đánh cực mạnh',proj:'☄️'},
- {emoji:'🧙',p2:'🔮',name:'Pháp Sư Phân Số',hp:560,minQ:14,atk:26,tier:5,time:19,arena:'night',mech:'heal', mechTxt:'💚 Phép hồi máu: mỗi lần em sai hắn hồi 10 máu',proj:'✨'},
- {emoji:'🐙',p2:'🦖',name:'Bạch Tuộc Vô Cực',hp:640,minQ:15,atk:28,tier:5,time:19,arena:'ice',  mech:'drain',mechTxt:'🩸 Tám xúc tu hút máu + giai đoạn 2 cực mạnh',proj:'🌊'},
+ {emoji:'🐌',name:'Ốc Sên Chậm Chạp',hp:130,minQ:6, atk:13,tier:1,time:22,arena:'',     mech:'none', mechTxt:'Không có gì đặc biệt',proj:'🍃',
+  desc:'Cõng cái vỏ nặng trịch, bò tới đâu ngủ gật tới đó. Hai con mắt trên cuống cứ ngó nghiêng tìm chỗ trốn — em cứ bình tĩnh mà tính.'},
+ {emoji:'👾',name:'Quái Nhí Tinh Nghịch',hp:170,minQ:7, atk:15,tier:1,time:21,arena:'',     mech:'none', mechTxt:'Nhanh nhẹn hơn một chút',proj:'🟣',
+  desc:'Bé tí, chưa mọc sừng, hai cái râu ngoe nguẩy suốt ngày. Nó không mạnh — chỉ nhanh nhẹn và thích chọc phá thôi.'},
+ {emoji:'🧟',name:'Zombie Lười Học',hp:215,minQ:8, atk:17,tier:2,time:21,arena:'night',mech:'heal', mechTxt:'💚 Tự hồi 8 máu mỗi khi em trả lời sai',proj:'🦴',
+  desc:'Cả người chằng chịt vết khâu vì bị đánh gục hoài mà cứ tự vá lại. Em sai một câu là mấy đường chỉ ấy tự liền — đừng cho nó cơ hội.'},
+ {emoji:'🦖',name:'Khủng Long Giáp Sắt',hp:260,minQ:9, atk:18,tier:2,time:20,arena:'',     mech:'armor',mechTxt:'🛡️ Giáp cứng: giảm 4 sát thương mỗi đòn',proj:'🪨',
+  desc:'Dãy vảy nhọn chạy dọc sống lưng cứng như sắt, đuôi quật một cái là rung cả sàn đấu. Đòn của em bị vảy nuốt bớt, phải đánh nhiều hơn.'},
+ {emoji:'👹',name:'Quỷ Đỏ Nóng Tính',hp:310,minQ:10,atk:20,tier:3,time:20,arena:'lava', mech:'rage', mechTxt:'😡 Nổi giận khi máu thấp: đánh mạnh gấp rưỡi',proj:'🔥',
+  desc:'Đôi sừng đỏ rực và cặp nanh lúc nào cũng nhe ra. Càng gần thua nó càng điên tiết, đánh mạnh gấp rưỡi — hạ nhanh khi còn kịp.'},
+ {emoji:'🧛',name:'Ma Cà Rồng Toán Học',hp:360,minQ:11,atk:21,tier:3,time:20,arena:'night',mech:'drain',mechTxt:'🩸 Hút máu: đánh trúng em là hắn hồi máu',proj:'🦇',
+  desc:'Khoác áo choàng, tai dơi dỏng lên nghe từng nhịp thở, hai cái nanh dài chờ sẵn. Mỗi đòn trúng em là một ngụm máu cho hắn.'},
+ {emoji:'🐉',name:'Rồng Băng Vĩnh Cửu',hp:420,minQ:12,atk:23,tier:4,time:19,arena:'ice',  mech:'armor',mechTxt:'🛡️ Vảy băng: giảm 5 sát thương mỗi đòn',proj:'❄️',
+  desc:'Cánh băng, đuôi băng, vảy lưng cũng bằng băng — thứ băng ngàn năm không tan. Đòn của em chạm vào là lạnh cóng và yếu đi.'},
+ {emoji:'👑',name:'Vua Quái Vật Tối Thượng',hp:500,minQ:13,atk:25,tier:4,time:19,arena:'lava', mech:'rage', mechTxt:'😡 Cuồng nộ khi máu thấp + đòn đánh cực mạnh',proj:'☄️',
+  desc:'Vương miện vàng, áo choàng đỏ, sừng cao ngất — kẻ cai trị cả chín con quái trước. Chạm tới vương miện là nó nổi cơn cuồng nộ.'},
+ {emoji:'🧙',name:'Pháp Sư Phân Số',hp:560,minQ:14,atk:26,tier:5,time:19,arena:'night',mech:'heal', mechTxt:'💚 Phép hồi máu: mỗi lần em sai hắn hồi 10 máu',proj:'✨',
+  desc:'Mũ chóp che nửa mặt, cây gậy đầu gắn viên ngọc sáng. Mỗi lần em tính sai một phân số là viên ngọc loé lên và hắn lành lại.'},
+ {emoji:'🐙',name:'Bạch Tuộc Vô Cực',hp:640,minQ:15,atk:28,tier:5,time:19,arena:'ice',  mech:'drain',mechTxt:'🩸 Tám xúc tu hút máu + giai đoạn 2 cực mạnh',proj:'🌊',
+  desc:'Tám cái xúc tu quấn kín sàn đấu, mỗi cái là một cái miệng hút. Hạ được một nửa máu là nó lột xác sang dạng hai — trận cuối cùng, khó nhất.'},
 ];
 /* Giới hạn sát thương mỗi đòn = máu boss / số câu tối thiểu.
    Nhờ vậy dù có combo, chí mạng hay câu vàng cũng KHÔNG THỂ
@@ -277,18 +356,6 @@ function saveAdventureProgress(){
   });
 }
 
-function drawMap(){
-  const m=$('map');if(!m)return;   // trang chủ có thể không hiện bản đồ
-  m.innerHTML='';
-  BOSSES.forEach((b,i)=>{
-    const d=document.createElement('div');
-    d.className='mapnode'+(i>G.cleared+1?' locked':'')+(i<=G.cleared?' done':'');
-    d.innerHTML=`<span class="em">${i<=G.cleared?'✅':b.emoji}</span>${b.name.split(' ')[0]} ${b.name.split(' ')[1]||''}<br><span class="tierlbl">${'⭐'.repeat(b.tier)}</span>`;
-    m.appendChild(d);
-  });
-}
-drawMap();
-
 function startAdventure(){
   const stored=window.GameStorage?.load?.().adventure||{};
   const cleared=Math.min(BOSSES.length-1,Math.max(-1,Number.isInteger(stored.cleared)?stored.cleared:G.cleared));
@@ -307,10 +374,16 @@ function startAdventure(){
 function showIntro(){
   const b=BOSSES[G.bossIndex];
   const ie=$('introEmoji');
-  ie.textContent=b.emoji;
+  /* Trước đây chỗ này là emoji (🐌) trong khi sàn đấu vẽ một con quái SVG khác hẳn —
+     hai nhân vật cho cùng một boss. Nay dựng đúng con quái ấy với đúng bảng màu. */
+  if(!fillArt(ie,'tplBeast'))ie.textContent=b.emoji;
+  else applySkin(ie.firstElementChild,bossArt(b));
   ie.classList.remove('introZoom');void ie.offsetWidth;ie.classList.add('introZoom');
   $('introName').textContent=b.name.toUpperCase();
+  /* Câu giới thiệu tính cách đứng TRƯỚC bảng chỉ số: trẻ vừa nhìn thấy con quái xong,
+     đọc ngay câu tả đúng cái nó vừa nhìn, rồi mới tới máu/sức đánh. */
   $('introDesc').innerHTML=
+    (b.desc?`<span class="bossbio">${b.desc}</span>`:'')+
     `❤️ Máu: <b>${b.hp}</b> &nbsp; ⚔️ Sức đánh: <b>${b.atk}</b> &nbsp; ⏰ Mỗi câu: <b>${b.time+(G.perks?.time||0)*3}s</b><br>
      🏅 Cấp độ: <b>${RANKS[b.tier]}</b><br>
      🎯 Cần trả lời đúng ít nhất <b>${b.minQ} câu</b> mới hạ được boss này!<br>
@@ -327,7 +400,7 @@ function beginBattle(){
   G.bossHp=b.hp;G.bossMaxHp=b.hp;G.locked=false;
   $('arena').className='arena '+b.arena;
   paintBoss(b);
-  $('bossName').textContent=b.emoji+' '+b.name.split(' ').slice(0,2).join(' ');
+  $('bossName').textContent=b.name.split(' ').slice(0,2).join(' ');
   $('bossMech').textContent=
     b.mech==='armor'?'🛡️ Giáp':b.mech==='heal'?'💚 Hồi máu':b.mech==='rage'?'😡 Cuồng nộ':b.mech==='drain'?'🩸 Hút máu':'⭐ Thường';
   $('levelBadge').textContent='Boss '+(G.bossIndex+1)+'/'+BOSSES.length+' • '+'⭐'.repeat(b.tier);
@@ -355,7 +428,7 @@ function goHome(){
   $('restartModal').classList.remove('on');
   G.locked=true;G.mode=null;
   document.querySelector('.hprow').style.display='';
-  drawMap();showScreen('home');
+  showScreen('home');
 }
 
 /* =========================================================
@@ -365,7 +438,6 @@ function goHome(){
    - Sinh tồn: 3 mạng ❤️, độ khó tăng dần vô tận, đổi quái mỗi 6 câu
 ========================================================= */
 const RECORDS={blitz:0,surv:0};
-const SURV_MONSTERS=['👾','🧟','🦖','👹','🧛','🐉','👻','🤖','🦑','🐲','😈','👽'];
 
 function baseRun(mode){
   battleRunId++;
@@ -396,12 +468,12 @@ function startBlitzClock(seconds){
 }
 function startSurvival(){
   baseRun('surv');
-  prepArenaForMode('♾️ Quái Vật Vô Tận',pick(SURV_MONSTERS),'night');
+  prepArenaForMode('♾️ Quái Vật Vô Tận','night');
   showScreen('battle');
   SFX.bossRoar();
   newQuestion();
 }
-function prepArenaForMode(name,emoji,theme){
+function prepArenaForMode(name,theme){
   document.querySelector('.hprow').style.display='none';   // 2 chế độ này không dùng thanh máu
   $('arena').className='arena '+theme;
   paintBoss({art:BOSS_ART[G.bossIndex%BOSS_ART.length],name:'Quái vật'});
@@ -456,7 +528,9 @@ function survAdvance(){
   const boss=$('bossSprite');
   boss.classList.add('morphing');
   setTimeout(()=>{
-    boss.textContent=pick(SURV_MONSTERS);
+    /* boss.textContent=... sẽ XOÁ SẠCH các nút con của <svg> và con quái biến mất
+       hẳn (font-size:0 nên emoji thay thế cũng không hiện). Đổi quái = tô lại. */
+    applySkin(boss,pick(BOSS_ART));
     boss.classList.remove('morphing');
   },400);
   G.tier=Math.min(5,G.tier+1);
@@ -514,7 +588,6 @@ function doRestart(){
     perks:{atk:0,hp:0,time:0,luck:0,def:0,gold:0},
     inv:{potion:0,hint:0,freeze:0,shield:0,bomb:0,revive:0}});
   G={bossIndex:0,cleared:-1};   // xoá sạch tiến độ, xu, vật phẩm
-  drawMap();
   startAdventure();
 }
 const BUSY_SCREENS=['battle','typingGame','sudokuGame'];
@@ -605,7 +678,7 @@ function nextBossGo(){
   G.bossIndex++;
   G.heroHp=Math.min(heroMaxHp(),G.heroHp+40);
   saveAdventureProgress();
-  drawMap();showIntro();
+  showIntro();
 }
 
 /* ============ HẠT MÔI TRƯỜNG ============ */

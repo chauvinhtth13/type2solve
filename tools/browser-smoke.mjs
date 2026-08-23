@@ -503,6 +503,52 @@ try {
     return {variant:getComputedStyle(n).fontVariantNumeric, deu:JSON.stringify(a)===JSON.stringify(b)}})()`);
   assert(tabular.variant === 'tabular-nums' && tabular.deu, `Ô số liệu dùng chữ số đều bề ngang (${tabular.variant})`);
 
+  /* ===== NHÂN VẬT =====
+     Cả bộ test cũ (46 assertion) KHÔNG hề chạm tới một hình nhân vật nào, nên lỗi
+     "boss biến mất hoàn toàn từ giai đoạn 2" vẫn xanh 46/46 trong lúc đang tồn tại.
+     Năm assertion dưới đây ứng với năm lỗi thật đã tìm ra bằng ảnh chụp. */
+
+  // Vỏ rỗng data-art phải được bootstrap bơm hình vào, nếu không sàn đấu trống trơn.
+  const boms = await evaluate(`(()=>{const v=[...document.querySelectorAll('[data-art]')];
+    return {tong:v.length, rong:v.filter(e=>!e.childElementCount).map(e=>e.id||e.dataset.art)}})()`);
+  assert(boms.tong >= 4 && boms.rong.length === 0,
+    boms.rong.length ? `Còn vỏ nhân vật rỗng: ${boms.rong.join(', ')}` : `Mọi vỏ nhân vật đều được bơm hình (${boms.tong})`);
+
+  // LỖI THẬT: boss.textContent='🐛' xoá sạch nút con của <svg> → boss biến mất hẳn
+  // phần còn lại của phiên (font-size:0 nên emoji thay thế cũng vô hình).
+  await evaluate(`goHome();localStorage.clear();startAdventure();beginBattle()`); await sleep(500);
+  const truoc = await evaluate(`document.getElementById('bossSprite').style.getPropertyValue('--c-body')`);
+  await evaluate(`G.bossHp=Math.floor(G.bossMaxHp*0.3);checkPhase2()`); await sleep(900);
+  const sau = await evaluate(`(()=>{const el=document.getElementById('bossSprite');
+    return {con:el.childElementCount, mau:el.style.getPropertyValue('--c-body'), rage:el.classList.contains('phase2')}})()`);
+  assert(sau.con > 0 && sau.rage && sau.mau !== truoc,
+    `Boss vẫn còn hình sau khi vào giai đoạn 2 (${sau.con} nút, màu ${truoc}→${sau.mau})`);
+
+  // Cùng một lỗi ở chế độ Sinh tồn (survAdvance).
+  await evaluate(`goHome();startSurvival()`); await sleep(400);
+  await evaluate(`survAdvance()`); await sleep(700);
+  const sinhTon = await evaluate(`document.getElementById('bossSprite').childElementCount`);
+  assert(sinhTon > 0, `Boss vẫn còn hình sau khi Sinh tồn đổi quái (${sinhTon} nút)`);
+
+  // LỖI THẬT: main.css giấu .chr-horns mà quên .chr-spikes, nên boss "chưa mọc sừng"
+  // vẫn còn ba cái gai trên đầu — trong khi Gõ Chữ giấu cả hai.
+  await evaluate(`goHome();G.bossIndex=0;beginBattle()`); await sleep(500);
+  const gai = await evaluate(`(()=>{const el=document.getElementById('bossSprite');
+    if(!el.classList.contains('no-horns'))return {bo:true};
+    return {sung:getComputedStyle(el.querySelector('.chr-horns')).display,
+            gai:getComputedStyle(el.querySelector('.chr-spikes')).display}})()`);
+  assert(gai.bo || (gai.sung === 'none' && gai.gai === 'none'),
+    `Boss không sừng thì giấu cả gai (sừng ${gai.sung}, gai ${gai.gai})`);
+
+  // LỖI THẬT: màn giới thiệu vẽ emoji 🐌 trong khi sàn đấu vẽ một con quái khác hẳn.
+  await evaluate(`goHome();startAdventure()`); await sleep(400);
+  const gioiThieu = await evaluate(`(()=>{const art=document.querySelector('#introEmoji>svg.beast-art');
+    if(!art)return {co:false};
+    return {co:true, mau:art.style.getPropertyValue('--c-body'), boss:BOSS_ART[G.bossIndex].body}})()`);
+  assert(gioiThieu.co && gioiThieu.mau === gioiThieu.boss,
+    `Màn giới thiệu vẽ đúng con quái sắp gặp (${gioiThieu.mau})`);
+  await evaluate(`goHome()`); await sleep(300);
+
   // Game desktop: mọi màn gói trong MỘT khung, khung ngoài không bao giờ cuộn.
   await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
   await evaluate(`goHome()`); await sleep(400);

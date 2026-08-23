@@ -445,7 +445,11 @@ function checkPhase2(){
   arena.appendChild(fx);setTimeout(()=>fx.remove(),1150);
   boss.classList.add('morphing');
   battleLater(()=>{
-    boss.textContent=b.p2||b.emoji;
+    /* KHÔNG ghi textContent vào đây: #bossSprite là <svg>, textContent xoá sạch mọi
+       nút con nên con quái BIẾN MẤT hẳn phần còn lại của phiên (paintBoss chỉ đặt
+       biến CSS, không dựng lại hình). Hoá dạng = tô lại bảng màu nổi giận. */
+    applySkin(boss,rageArt(bossArt(b)));
+    boss.classList.add('phase2');
     boss.classList.remove('morphing');
     $('bossMech').textContent='🔥 GIAI ĐOẠN 2';
     comboPopup('🔥 BOSS BIẾN HÌNH!');
@@ -767,13 +771,13 @@ function bossDefeated(){
       $('stGold').textContent=G.goldHit;
       $('stStreak').textContent=G.bestStreak;
       $('stCoins').textContent=G.coins;
-      drawMap();confetti(60);showScreen('victory');
+      confetti(60);showScreen('victory');
     }else{
       const reward=50+BOSSES[G.bossIndex].tier*20;
       G.coins+=reward;
       saveAdventureProgress();
       $('bossWinTitle').textContent='HẠ GỤC '+BOSSES[G.bossIndex].name.toUpperCase()+'!';
-      $('bossWinSub').innerHTML='🎉 Nhận thưởng <b>+'+reward+' 💰</b> (em đang có <b>'+G.coins+' 💰</b>)<br>Boss tiếp theo: <b>'+BOSSES[G.bossIndex+1].emoji+' '+BOSSES[G.bossIndex+1].name+'</b> ('+RANKS[BOSSES[G.bossIndex+1].tier]+')';
+      $('bossWinSub').innerHTML='🎉 Nhận thưởng <b>+'+reward+' 💰</b> (em đang có <b>'+G.coins+' 💰</b>)<br>Boss tiếp theo: <b>'+BOSSES[G.bossIndex+1].name+'</b> ('+RANKS[BOSSES[G.bossIndex+1].tier]+')';
       showScreen('bossWin');
     }
   },1300);

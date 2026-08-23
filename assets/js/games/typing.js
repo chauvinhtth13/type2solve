@@ -429,13 +429,22 @@
       node.className = 'mapnode' + (locked ? ' locked' : '') + (index <= cleared ? ' done' : '')
         + (index === selectedStage ? ' picked' : '');
       node.disabled = locked;
-      node.setAttribute('aria-label', `Chặng ${index + 1}: ${stage.name}`
-        + (locked ? ' (chưa mở khoá)' : index <= cleared ? ' (đã hạ)' : ''));
+      /* Câu tả nhân vật đi vào title + aria-label chứ KHÔNG thêm dòng chữ lên thẻ:
+         thêm một dòng nữa là 5 thẻ chặng tràn khỏi khung 1366×768 mà browser-smoke
+         đang bắt. Rê chuột hoặc dùng trình đọc màn hình vẫn nghe được đầy đủ. */
+      const trangThai = locked ? ' (chưa mở khoá)' : index <= cleared ? ' (đã hạ)' : '';
+      node.setAttribute('aria-label', `Chặng ${index + 1}: ${stage.name}${trangThai}`
+        + (stage.desc ? '. ' + stage.desc : ''));
+      if (stage.desc) node.title = `${stage.name} — ${stage.desc}`;
       node.setAttribute('aria-pressed', String(index === selectedStage));
 
       const emoji = document.createElement('span');
       emoji.className = 'em';
-      emoji.textContent = index <= cleared ? '✅' : stage.emoji;
+      // Đã hạ thì hiện dấu tick (trạng thái, không phải nhân vật); chưa hạ thì hiện
+      // đúng con boss sẽ gặp — trước đây là emoji chẳng liên quan gì tới hình trong trận.
+      const preview = index <= cleared ? null : buildBeast(stageSkin(index));
+      if (preview) emoji.appendChild(preview);
+      else emoji.textContent = index <= cleared ? '✅' : stage.emoji;
       const name = document.createElement('span');
       name.textContent = `${index + 1}. ${stage.name}`;
       const info = document.createElement('span');
@@ -789,30 +798,52 @@
     });
   }
 
-  /* 8 bộ màu thay cho 8 emoji cũ. Cùng một hình quái, khác màu + sừng — nhận ra
-     ngay con nào là con nào mà không cần 8 bản vẽ. */
+  /* 8 LOÀI quái thường, đúng theo 8 emoji cũ 👾 👻 🦠 🤖 🧟 🦇 🐙 👹 — mỗi loài một
+     bảng màu VÀ một bộ phận riêng, nên nhìn bóng dáng là biết loài gì.
+     Trước đây `emoji` và `skin` bốc ngẫu nhiên ĐỘC LẬP nhau: một con dán nhãn 👻 mà
+     hình lại là khối tím có sừng. Nay chỉ còn MỘT con số quyết định cả hai. */
   const BEAST_SKINS = [
-    { body:'#8d6bff', belly:'#e6dcff', horn:'#c3b0ff', horns:1 },
-    { body:'#4fc3e8', belly:'#d6f2fb', horn:'#a8e6f7', horns:0 },
-    { body:'#7ed07a', belly:'#e2f7dd', horn:'#b4e8ae', horns:0 },
-    { body:'#ff8f5a', belly:'#ffe3d2', horn:'#ffc199', horns:1 },
-    { body:'#e56aa8', belly:'#ffdcee', horn:'#ffaed4', horns:1 },
-    { body:'#c9a227', belly:'#fff2cc', horn:'#ffd966', horns:1 },
-    { body:'#6f7fd6', belly:'#dfe4ff', horn:'#aab6ff', horns:0 },
-    { body:'#3fb8b0', belly:'#d3f6f3', horn:'#7fe0d8', horns:1 },
+    { body:'#8d6bff', belly:'#e6dcff', horn:'#c3b0ff', horns:0, parts:['antennae'] },              // 👾
+    { body:'#bcd4e6', belly:'#f2f9ff', horn:'#dceaf5', horns:0, parts:['ghost'] },                 // 👻
+    { body:'#7ed07a', belly:'#e2f7dd', horn:'#b4e8ae', horns:1, parts:[] },                        // 🦠
+    { body:'#6f7fd6', belly:'#dfe4ff', horn:'#aab6ff', horns:0, parts:['antennae','plates'] },     // 🤖
+    { body:'#8fae72', belly:'#e8f2d8', horn:'#c2d89a', horns:0, parts:['stitches','fangs'] },      // 🧟
+    { body:'#5b4fa8', belly:'#e0dbf7', horn:'#9c8fe0', horns:0, parts:['wings','ears'] },          // 🦇
+    { body:'#3fb8b0', belly:'#d3f6f3', horn:'#7fe0d8', horns:0, parts:['tentacles'] },             // 🐙
+    { body:'#e0503f', belly:'#ffdcd2', horn:'#ffb02e', horns:1, parts:['fangs'] },                 // 👹
   ];
-  /* Boss của chặng: tối màu hơn, luôn có sừng, để phân biệt với quái thường. */
-  const BOSS_SKIN = { body:'#8a2f5f', belly:'#ffd6ea', horn:'#ff8dc0', horns:1 };
+  /* Boss của luyện tự do: tối màu, đội vương miện và khoác áo choàng — không thể
+     nhầm với đám quái thường dù chỉ liếc một cái. */
+  const BOSS_SKIN = { body:'#8a2f5f', belly:'#ffd6ea', horn:'#ff8dc0', horns:1,
+                      parts:['crown','cape','fangs'] };
 
+  /* Boss riêng của từng chặng — 10 bảng màu đậm dần. Icon trên bản đồ chặng và con
+     boss thật sự gặp trong chặng ấy dùng CHUNG bảng này, nên xem bản đồ là biết
+     trước mình sắp đánh con nào. */
+  /* Mười chặng, mười cái tên rất cụ thể — Sâu, Ma, Dơi, Rắn, Bọ Cạp, Mực, Rồng Con,
+     Quỷ, Rồng, Chúa Tể — nên phải là mười BÓNG DÁNG, không phải mười sắc độ.
+     Thứ tự bộ phận cũng leo thang đúng theo độ khó: chặng 1 chỉ có râu, chặng 10
+     đội vương miện + áo choàng + cánh + nanh. */
+  const STAGE_SKINS = [
+    { body:'#7ed07a', belly:'#e6f9e2', horn:'#b9ecb2', horns:0, parts:['antennae','coil'] },                 // Sâu Chữ Cái
+    { body:'#bcc9de', belly:'#f2f7ff', horn:'#dbe5f2', horns:0, parts:['ghost'] },                           // Ma Gõ Nhầm
+    { body:'#6f5fa8', belly:'#e6e0f7', horn:'#a99ae0', horns:0, parts:['wings','ears','fangs'] },            // Dơi Lạc Phím
+    { body:'#3fa87c', belly:'#dcf5ea', horn:'#8fdcbb', horns:0, parts:['coil','fangs'] },                    // Rắn Chính Tả
+    { body:'#c2703a', belly:'#ffe6d2', horn:'#ffb173', horns:0, parts:['stinger','claws'] },                 // Bọ Cạp Dấu Thanh
+    { body:'#3f7fa8', belly:'#dceefb', horn:'#8fc9e8', horns:0, parts:['tentacles'] },                       // Mực Ngữ Pháp
+    { body:'#a83f5a', belly:'#ffdce5', horn:'#ff9bb3', horns:1, parts:['wings','tail'] },                    // Rồng Con Từ Vựng
+    { body:'#7a4fa8', belly:'#ecdcfb', horn:'#c39be8', horns:1, parts:['fangs','plates'] },                  // Quỷ Tốc Độ
+    { body:'#a8813f', belly:'#fbf0dc', horn:'#e8c78f', horns:1, parts:['wings','tail','plates','fangs'] },   // Rồng Ngôn Ngữ
+    { body:'#4a3f6b', belly:'#ddd6f0', horn:'#ff6a4d', horns:1, parts:['crown','cape','wings','fangs'] },    // Chúa Tể Bàn Phím
+  ];
+  function stageSkin(index) {
+    return STAGE_SKINS[Math.max(0, index) % STAGE_SKINS.length];
+  }
+
+  /* Dựng hình quái. Khuôn và đường tô màu nằm ở core.js để Đấu Toán và Gõ Chữ
+     không có hai bản sao lệch nhau. */
   function buildBeast(skin) {
-    const tpl = document.getElementById('tplBeast');
-    if (!tpl) return null;                       // thiếu khuôn thì để gọi bên ngoài quay về emoji
-    const svg = tpl.content.firstElementChild.cloneNode(true);
-    svg.style.setProperty('--c-body', skin.body);
-    svg.style.setProperty('--c-belly', skin.belly);
-    svg.style.setProperty('--c-horn', skin.horn);
-    if (!skin.horns) svg.classList.add('no-horns');
-    return svg;
+    return typeof global.buildBeastArt === 'function' ? global.buildBeastArt(skin) : null;
   }
 
   function laneTop(lane) {
@@ -846,12 +877,15 @@
   function spawnMonster() {
     const item = pickWordForCurrentWave();
     const emojis = global.TYPING_CONTENT.monsterEmojis || ['👾'];
+    /* MỘT con số chọn loài: hình SVG và emoji dự phòng phải là cùng một con quái.
+       Bốc riêng hai lần thì con dán nhãn 👻 lại mang hình bạch tuộc. */
+    const kind = Math.floor(Math.random() * BEAST_SKINS.length);
     const monster = {
       id: state.nextMonsterId++,
       item,
       bonus: rollBonus(),
-      emoji: randomItem(emojis),
-      skin: Math.floor(Math.random() * 8),   // chọn bộ màu cho hình SVG
+      emoji: emojis[kind % emojis.length],
+      skin: kind,
       lane: emptiestLane(),
       x: START_X,
       speed: 0,
@@ -943,7 +977,9 @@
 
     const emoji = document.createElement('span');
     emoji.className = 'monster-emoji';
-    const art = buildBeast(monster.boss ? BOSS_SKIN : BEAST_SKINS[monster.skin % BEAST_SKINS.length]);
+    const bossSkin = state.config.campaign && state.stageIndex !== null
+      ? stageSkin(state.stageIndex) : BOSS_SKIN;
+    const art = buildBeast(monster.boss ? bossSkin : BEAST_SKINS[monster.skin % BEAST_SKINS.length]);
     if (art) emoji.appendChild(art);
     else emoji.textContent = monster.emoji;      // khuôn không có thì vẫn còn emoji cũ
     root.appendChild(emoji);
@@ -1571,7 +1607,7 @@
     const stageLabel = byId('typingStage');
     if (stagePill) stagePill.hidden = state.stageIndex === null;
     if (stageLabel && state.stageIndex !== null) {
-      stageLabel.textContent = `${state.stageIndex + 1}/${CAMPAIGN_STAGES} · ${state.config.stageEmoji}`;
+      stageLabel.textContent = `${state.stageIndex + 1}/${CAMPAIGN_STAGES}`;
     }
     if (force && combo) {
       combo.classList.remove('pop');
