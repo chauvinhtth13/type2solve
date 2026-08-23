@@ -34,65 +34,190 @@ function shuffle(a){
 }
 const $=id=>document.getElementById(id);
 
-/* ============ ÂM THANH 8-BIT ============ */
-let AC=null, SOUND_ON=true;
-function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC}
+let SOUND_ON=true;
 function toggleSound(){
   SOUND_ON=!SOUND_ON;
   document.querySelectorAll('#sndBtn,#sndBtnHome').forEach(b=>{
     b.textContent=SOUND_ON?'🔊':'🔇';b.classList.toggle('muted',!SOUND_ON);
-    b.setAttribute('aria-pressed',String(!SOUND_ON));
+    b.setAttribute('aria-pressed',String(SOUND_ON));   // nút đang "bấm xuống" = âm thanh đang bật
   });
   window.GameStorage?.updateSettings?.({sound:SOUND_ON});
   if(SOUND_ON)SFX.click();
 }
-function tone(freq,dur,type='square',vol=.15,delay=0){
+/* ============ ÂM THANH ============
+   Vẫn tự sinh hoàn toàn bằng Web Audio, không kèm một file .mp3/.ogg nào — PWA giữ
+   nguyên kích thước và chơi offline được. Khác bản 8-bit cũ ở bốn điểm:
+     1. Có envelope ADSR thật: bản cũ nhảy gain 0→vol tức thì nên tiếng nào cũng "cụp"
+        một phát ở đầu. Attack 6–20ms khử hẳn tiếng cụp đó.
+     2. Mỗi tiếng đi qua lowpass; sawtooth/square thô được bo lại cho đỡ chói tai trẻ con.
+     3. Có bus master: gain → compressor → loa, kèm một nhánh reverb dùng ConvolverNode
+        với impulse response TỰ SINH (nhiễu tắt dần) nên vẫn không cần file.
+     4. Cao độ dao động ngẫu nhiên ±1.5% và có giới hạn số giọng cùng lúc, để nghe
+        100 lần không bị nhàm và không vỡ tiếng khi nhiều hiệu ứng chồng nhau. */
+let AC=null, BUS=null, VOICES=0;
+const MAX_VOICES=14;          // quá số này thì bỏ tiếng mới, tránh vỡ loa khi combo dài
+function ac(){
+  if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
+  return AC;
+}
+/* Chính sách autoplay: AudioContext sinh ra ở trạng thái suspended cho tới khi có
+   thao tác thật của người dùng. Gọi lại resume() ở mỗi lần phát cho chắc. */
+function audioBus(){
+  const a=ac();
+  if(a.state==='suspended')a.resume().catch(()=>{});
+  if(BUS)return BUS;
+  const master=a.createGain();master.gain.value=.9;
+  const comp=a.createDynamicsCompressor();
+  comp.threshold.value=-14;comp.knee.value=22;comp.ratio.value=8;
+  comp.attack.value=.004;comp.release.value=.18;
+  // Impulse response tự sinh: nhiễu trắng tắt dần theo hàm mũ = phòng nhỏ.
+  const dur=1.1,rate=a.sampleRate,len=Math.floor(rate*dur);
+  const ir=a.createBuffer(2,len,rate);
+  for(let ch=0;ch<2;ch++){
+    const d=ir.getChannelData(ch);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);
+  }
+  const conv=a.createConvolver();conv.buffer=ir;
+  const wet=a.createGain();wet.gain.value=.16;   // vọng nhẹ thôi, đủ tạo chiều sâu
+  master.connect(comp);comp.connect(a.destination);
+  master.connect(conv);conv.connect(wet);wet.connect(comp);
+  BUS={a,master};
+  return BUS;
+}
+function voice(node,stopAt){
+  VOICES++;
+  node.onended=()=>{VOICES--};
+  try{node.stop(stopAt)}catch(e){VOICES--}
+}
+/* Một nốt có nhạc tính: ADSR + lowpass + rung cao độ nhẹ. */
+function tone(freq,dur,type='square',vol=.15,delay=0,opt){
   if(!SOUND_ON)return;
+  if(VOICES>=MAX_VOICES)return;
   try{
-    const a=ac(),o=a.createOscillator(),g=a.createGain();
-    o.type=type;o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,a.currentTime+delay);
-    g.gain.exponentialRampToValueAtTime(.001,a.currentTime+delay+dur);
-    o.connect(g);g.connect(a.destination);
-    o.start(a.currentTime+delay);o.stop(a.currentTime+delay+dur);
+    const {a,master}=audioBus();
+    const o=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
+    const t=a.currentTime+delay;
+    const wobble=1+(Math.random()-.5)*.03;        // ±1,5% để không nghe như máy
+    o.type=type;o.frequency.setValueAtTime(freq*wobble,t);
+    if(opt&&opt.glide)o.frequency.exponentialRampToValueAtTime(Math.max(20,opt.glide),t+dur);
+    if(opt&&opt.detune)o.detune.setValueAtTime(opt.detune,t);
+    lp.type='lowpass';
+    lp.frequency.setValueAtTime((opt&&opt.cutoff)||Math.min(a.sampleRate/2-1000,freq*5+900),t);
+    lp.Q.value=(opt&&opt.q)||.7;
+    const atk=(opt&&opt.attack)||.008, rel=Math.max(.03,dur-atk);
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),t+atk);   // attack: hết tiếng "cụp"
+    g.gain.exponentialRampToValueAtTime(.0001,t+atk+rel);
+    o.connect(lp);lp.connect(g);g.connect(master);
+    o.start(t);voice(o,t+atk+rel+.02);
   }catch(e){}
 }
+/* Nhiễu có bao hình — dùng cho tiếng va chạm, nổ, gõ. Đây là thứ bản cũ thiếu hẳn:
+   sóng vuông không bao giờ ra được tiếng "bụp" của một cú đánh. */
+function noise(dur,vol=.15,delay=0,opt){
+  if(!SOUND_ON)return;
+  if(VOICES>=MAX_VOICES)return;
+  try{
+    const {a,master}=audioBus();
+    const len=Math.max(1,Math.floor(a.sampleRate*dur));
+    const buf=a.createBuffer(1,len,a.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,(opt&&opt.shape)||1.8);
+    const src=a.createBufferSource();src.buffer=buf;
+    const f=a.createBiquadFilter();
+    f.type=(opt&&opt.type)||'bandpass';
+    const t=a.currentTime+delay;
+    f.frequency.setValueAtTime((opt&&opt.freq)||900,t);
+    if(opt&&opt.sweep)f.frequency.exponentialRampToValueAtTime(Math.max(60,opt.sweep),t+dur);
+    f.Q.value=(opt&&opt.q)||1.1;
+    const g=a.createGain();
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),t+.006);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    src.connect(f);f.connect(g);g.connect(master);
+    src.start(t);voice(src,t+dur+.02);
+  }catch(e){}
+}
+/* Hợp âm rải — dùng cho các khoảnh khắc vui (thắng, lên cấp, mua đồ). */
+function arp(freqs,step,dur,type,vol,opt){
+  freqs.forEach((f,i)=>tone(f,dur,type,vol,i*step,opt));
+}
 const SFX={
-  shoot(){tone(300,.12,'sawtooth',.12);tone(600,.15,'square',.1,.05)},
-  hit(){tone(150,.2,'square',.18);tone(90,.25,'sawtooth',.15,.05)},
-  crit(){[400,600,800,1200].forEach((f,i)=>tone(f,.15,'square',.14,i*.06))},
-  right(){tone(660,.1,'square',.12);tone(880,.15,'square',.12,.1)},
-  wrong(){tone(200,.2,'sawtooth',.15);tone(140,.3,'sawtooth',.13,.12)},
-  heal(){tone(523,.1,'sine',.14);tone(659,.1,'sine',.14,.08);tone(784,.15,'sine',.14,.16)},
-  win(){[523,659,784,1047].forEach((f,i)=>tone(f,.2,'square',.13,i*.12))},
-  tick(){tone(1000,.05,'square',.08)},
-  click(){tone(520,.05,'square',.07);tone(760,.05,'square',.06,.04)},
-  open(){tone(392,.09,'sine',.11);tone(523,.12,'sine',.11,.07)},
-  buy(){[523,659,784].forEach((f,i)=>tone(f,.11,'triangle',.12,i*.06))},
-  item(){tone(880,.08,'triangle',.12);tone(1175,.12,'triangle',.11,.07)},
-  shield(){tone(300,.14,'sine',.14);tone(450,.18,'sine',.12,.08)},
-  unlock(){tone(700,.06,'square',.08);tone(1000,.08,'square',.08,.05)},
-  bossRoar(){[180,150,120,90].forEach((f,i)=>tone(f,.28,'sawtooth',.16,i*.09))},
-  defeat(){[400,330,260,190].forEach((f,i)=>tone(f,.26,'sawtooth',.13,i*.16))},
-  levelup(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.14,'triangle',.12,i*.07))},
-  gold(){[784,988,1175,1568].forEach((f,i)=>tone(f,.12,'sine',.13,i*.07))},
-  perk(){tone(440,.1,'square',.12);tone(554,.1,'square',.12,.08);tone(659,.2,'square',.13,.16)},
+  // Chưởng bay: nhiễu quét xuống + một nốt trượt cao độ = tiếng "vút"
+  shoot(){noise(.16,.09,0,{type:'bandpass',freq:2600,sweep:700,q:.9});
+          tone(520,.14,'sawtooth',.07,0,{glide:240,cutoff:2200,attack:.006})},
+  // Va chạm: cú "bụp" trầm + thân nhiễu, thay cho hai sóng vuông cũ
+  hit(){noise(.2,.16,0,{type:'lowpass',freq:1500,sweep:200,shape:2.4});
+        tone(120,.22,'triangle',.15,0,{glide:60,cutoff:900,attack:.004})},
+  crit(){noise(.26,.15,0,{type:'lowpass',freq:2600,sweep:260,shape:2.2});
+         arp([500,760,1010,1420],.055,.16,'triangle',.11,{attack:.006,cutoff:4200})},
+  right(){arp([660,880,1180],.07,.16,'triangle',.11,{attack:.01,cutoff:4000})},
+  wrong(){tone(210,.28,'sawtooth',.12,0,{glide:120,cutoff:900,attack:.01});
+          tone(150,.32,'triangle',.1,.06,{glide:88,cutoff:700})},
+  heal(){arp([523,659,784,1047],.075,.24,'sine',.11,{attack:.03,cutoff:5200})},
+  win(){arp([523,659,784,1047,1319],.11,.42,'triangle',.11,{attack:.014,cutoff:6000});
+        noise(.5,.05,.05,{type:'highpass',freq:2400,shape:1.1})},
+  tick(){tone(1150,.045,'sine',.06,0,{attack:.003,cutoff:3600})},
+  click(){tone(560,.055,'sine',.07,0,{attack:.003,cutoff:2600});
+          tone(820,.05,'sine',.045,.035,{attack:.003,cutoff:3400})},
+  open(){arp([392,523,698],.06,.2,'sine',.09,{attack:.02,cutoff:4200})},
+  buy(){arp([523,659,784,1047],.055,.18,'triangle',.1,{attack:.008,cutoff:5000});
+        noise(.12,.05,0,{type:'highpass',freq:3200,shape:1.4})},
+  item(){tone(920,.1,'triangle',.1,0,{attack:.005,cutoff:5200});
+         tone(1240,.14,'sine',.09,.06,{attack:.006,cutoff:6000})},
+  shield(){tone(300,.3,'sine',.12,0,{glide:440,attack:.05,cutoff:2400});
+           noise(.3,.05,0,{type:'bandpass',freq:1200,sweep:2600,q:2})},
+  unlock(){tone(740,.07,'triangle',.08,0,{attack:.004,cutoff:4000});
+           tone(1050,.1,'sine',.08,.05,{attack:.005,cutoff:5000})},
+  // Boss gầm: hai dao động lệch nhau tạo nhịp đập, cộng nhiễu trầm
+  bossRoar(){tone(92,.62,'sawtooth',.15,0,{glide:58,cutoff:520,attack:.03});
+             tone(96,.6,'sawtooth',.12,0,{glide:61,cutoff:480,attack:.03,detune:14});
+             noise(.55,.1,0,{type:'lowpass',freq:700,sweep:130,shape:1.5})},
+  defeat(){arp([420,340,268,196],.16,.34,'sawtooth',.11,{attack:.02,cutoff:1400});
+           noise(.5,.06,.2,{type:'lowpass',freq:900,sweep:150,shape:2})},
+  levelup(){arp([523,659,784,1047,1319,1568],.065,.3,'triangle',.1,{attack:.008,cutoff:6500});
+            noise(.35,.05,.1,{type:'highpass',freq:2800,shape:1.2})},
+  gold(){arp([880,1175,1568,2093],.055,.2,'sine',.1,{attack:.004,cutoff:7000})},
+  perk(){arp([440,554,659,880],.075,.26,'triangle',.11,{attack:.01,cutoff:4800})},
 };
 window.SFX=SFX;
 
 /* ============ 10 BOSS — độ khó tăng dần (KHÔNG hiện lớp) ============ */
 const RANKS={1:'⭐ Khởi Động',2:'⭐⭐ Thử Thách',3:'⭐⭐⭐ Cao Thủ',4:'⭐⭐⭐⭐ Huyền Thoại',5:'⭐⭐⭐⭐⭐ Bậc Thầy'};
+/* Mỗi boss là CÙNG một hình SVG, chỉ khác bảng màu + kiểu sừng. Nhờ vậy 10 boss
+   không cần 10 bản vẽ tay, mà vẫn nhận ra ngay con nào là con nào. */
+const BOSS_ART=[
+  {body:'#8fd36a',belly:'#e8ffd6',horn:'#c9e88a',horns:0},
+  {body:'#b07cff',belly:'#efe4ff',horn:'#ffc93c',horns:1},
+  {body:'#7fae7a',belly:'#dff0dc',horn:'#9ad18f',horns:1},
+  {body:'#9a8f72',belly:'#efe7d2',horn:'#d8c79a',horns:1},
+  {body:'#ff6a4d',belly:'#ffd9cf',horn:'#ffb02e',horns:1},
+  {body:'#c05a8f',belly:'#ffd9ec',horn:'#f2a0c8',horns:1},
+  {body:'#5fc9e8',belly:'#d6f4ff',horn:'#bfeeff',horns:1},
+  {body:'#ffcf3d',belly:'#fff3c4',horn:'#ff9a2e',horns:1},
+  {body:'#7f6ce0',belly:'#e3dcff',horn:'#b6a6ff',horns:1},
+  {body:'#3fb8b0',belly:'#d3f6f3',horn:'#7fe0d8',horns:1},
+];
+function paintBoss(b){
+  const el=$('bossSprite');if(!el)return;
+  const art=b.art||BOSS_ART[BOSSES.indexOf(b)]||BOSS_ART[0];
+  el.style.setProperty('--c-body',art.body);
+  el.style.setProperty('--c-belly',art.belly);
+  el.style.setProperty('--c-horn',art.horn);
+  el.classList.toggle('no-horns',!art.horns);
+  el.setAttribute('aria-label',b.name||'Quái vật');
+}
 const BOSSES=[
  {emoji:'🐌',p2:'🐛',name:'Ốc Sên Chậm Chạp',hp:130,minQ:6, atk:13,tier:1,time:22,arena:'',     mech:'none', mechTxt:'Không có gì đặc biệt',proj:'🍃'},
  {emoji:'👾',p2:'👹',name:'Quái Nhí Tinh Nghịch',hp:170,minQ:7, atk:15,tier:1,time:21,arena:'',     mech:'none', mechTxt:'Nhanh nhẹn hơn một chút',proj:'🟣'},
  {emoji:'🧟',p2:'🧛',name:'Zombie Lười Học',hp:215,minQ:8, atk:17,tier:2,time:21,arena:'night',mech:'heal', mechTxt:'💚 Tự hồi 8 máu mỗi khi em trả lời sai',proj:'🦴'},
  {emoji:'🦖',p2:'🐲',name:'Khủng Long Giáp Sắt',hp:260,minQ:9, atk:18,tier:2,time:20,arena:'',     mech:'armor',mechTxt:'🛡️ Giáp cứng: giảm 4 sát thương mỗi đòn',proj:'🪨'},
  {emoji:'👹',p2:'😈',name:'Quỷ Đỏ Nóng Tính',hp:310,minQ:10,atk:20,tier:3,time:20,arena:'lava', mech:'rage', mechTxt:'😡 Nổi giận khi máu thấp: đánh mạnh gấp rưỡi',proj:'🔥'},
- {emoji:'🧛',p2:'🦇',name:'Ma Cà Rồng Toán Học',hp:360,minQ:11,atk:21,tier:3,time:19,arena:'night',mech:'drain',mechTxt:'🩸 Hút máu: đánh trúng em là hắn hồi máu',proj:'🦇'},
+ {emoji:'🧛',p2:'🦇',name:'Ma Cà Rồng Toán Học',hp:360,minQ:11,atk:21,tier:3,time:20,arena:'night',mech:'drain',mechTxt:'🩸 Hút máu: đánh trúng em là hắn hồi máu',proj:'🦇'},
  {emoji:'🐉',p2:'🐲',name:'Rồng Băng Vĩnh Cửu',hp:420,minQ:12,atk:23,tier:4,time:19,arena:'ice',  mech:'armor',mechTxt:'🛡️ Vảy băng: giảm 5 sát thương mỗi đòn',proj:'❄️'},
- {emoji:'👑',p2:'🦹',name:'Vua Quái Vật Tối Thượng',hp:500,minQ:14,atk:25,tier:4,time:18,arena:'lava', mech:'rage', mechTxt:'😡 Cuồng nộ khi máu thấp + đòn đánh cực mạnh',proj:'☄️'},
- {emoji:'🧙',p2:'🔮',name:'Pháp Sư Phân Số',hp:560,minQ:15,atk:26,tier:5,time:19,arena:'night',mech:'heal', mechTxt:'💚 Phép hồi máu: mỗi lần em sai hắn hồi 10 máu',proj:'✨'},
- {emoji:'🐙',p2:'🦖',name:'Bạch Tuộc Vô Cực',hp:640,minQ:17,atk:28,tier:5,time:19,arena:'ice',  mech:'drain',mechTxt:'🩸 Tám xúc tu hút máu + giai đoạn 2 cực mạnh',proj:'🌊'},
+ {emoji:'👑',p2:'🦹',name:'Vua Quái Vật Tối Thượng',hp:500,minQ:13,atk:25,tier:4,time:19,arena:'lava', mech:'rage', mechTxt:'😡 Cuồng nộ khi máu thấp + đòn đánh cực mạnh',proj:'☄️'},
+ {emoji:'🧙',p2:'🔮',name:'Pháp Sư Phân Số',hp:560,minQ:14,atk:26,tier:5,time:19,arena:'night',mech:'heal', mechTxt:'💚 Phép hồi máu: mỗi lần em sai hắn hồi 10 máu',proj:'✨'},
+ {emoji:'🐙',p2:'🦖',name:'Bạch Tuộc Vô Cực',hp:640,minQ:15,atk:28,tier:5,time:19,arena:'ice',  mech:'drain',mechTxt:'🩸 Tám xúc tu hút máu + giai đoạn 2 cực mạnh',proj:'🌊'},
 ];
 /* Giới hạn sát thương mỗi đòn = máu boss / số câu tối thiểu.
    Nhờ vậy dù có combo, chí mạng hay câu vàng cũng KHÔNG THỂ
@@ -193,7 +318,7 @@ function showIntro(){
      ✨ Đặc điểm: <b>${b.mechTxt}</b>`;
   $('introCoins').textContent=G.coins||0;
   const bag=['potion','hint','freeze','shield','bomb'].reduce((s,k)=>s+(G.inv?.[k]||0),0);
-  if(bag>0)$('introDesc').innerHTML+=`<br><span style="color:#1c9c5b">🎒 Em đang mang <b>${bag} vật phẩm</b> — bấm nút vật phẩm ngay trên câu hỏi để dùng!</span>`;
+  if(bag>0)$('introDesc').innerHTML+=`<br><span style="color:var(--green-ink)">🎒 Em đang mang <b>${bag} vật phẩm</b> — bấm nút vật phẩm ngay trên câu hỏi để dùng!</span>`;
   showScreen('intro');
 }
 function beginBattle(){
@@ -201,7 +326,7 @@ function beginBattle(){
   const b=BOSSES[G.bossIndex];
   G.bossHp=b.hp;G.bossMaxHp=b.hp;G.locked=false;
   $('arena').className='arena '+b.arena;
-  $('bossSprite').textContent=b.emoji;
+  paintBoss(b);
   $('bossName').textContent=b.emoji+' '+b.name.split(' ').slice(0,2).join(' ');
   $('bossMech').textContent=
     b.mech==='armor'?'🛡️ Giáp':b.mech==='heal'?'💚 Hồi máu':b.mech==='rage'?'😡 Cuồng nộ':b.mech==='drain'?'🩸 Hút máu':'⭐ Thường';
@@ -279,7 +404,7 @@ function startSurvival(){
 function prepArenaForMode(name,emoji,theme){
   document.querySelector('.hprow').style.display='none';   // 2 chế độ này không dùng thanh máu
   $('arena').className='arena '+theme;
-  $('bossSprite').textContent=emoji;
+  paintBoss({art:BOSS_ART[G.bossIndex%BOSS_ART.length],name:'Quái vật'});
   $('bossName').textContent=name;
   $('bossMech').textContent=G.mode==='blitz'?'⚡ 60 giây':'♾️ Sinh tồn';
   G.bossHp=100;G.bossMaxHp=100;
@@ -315,8 +440,8 @@ function endRun(){
   const r=ranks.find(x=>G.score>=x[0]);
   $('seEmoji').textContent=r[1];
   $('seTitle').textContent=isBlitz?'HẾT 60 GIÂY!':'HẾT MẠNG RỒI!';
-  $('seRank').innerHTML=`Xếp hạng: <b style="font-size:1.3em;color:#c98a00">${r[2]}</b><br>${r[3]}`
-    +(isRecord&&G.score>0?'<br><b style="color:#1c9c5b">🎉 KỶ LỤC MỚI!</b>':'');
+  $('seRank').innerHTML=`Xếp hạng: <b style="font-size:1.3em;color:var(--gold-ink)">${r[2]}</b><br>${r[3]}`
+    +(isRecord&&G.score>0?'<br><b style="color:var(--green-ink)">🎉 KỶ LỤC MỚI!</b>':'');
   $('seScore').textContent=G.score;
   $('seCorrect').textContent=G.correct;
   $('seStreak').textContent=G.bestStreak;
@@ -392,14 +517,38 @@ function doRestart(){
   drawMap();
   startAdventure();
 }
-function showScreen(id){
+const BUSY_SCREENS=['battle','typingGame','sudokuGame'];
+/* Hỏi lại mỗi lần thay vì nhớ một lần: người dùng có thể đổi cài đặt hệ điều hành
+   giữa chừng mà không tải lại trang. */
+function REDUCED_MOTION(){return window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches}
+/* Đổi màn: phần THAY ĐỔI DOM tách riêng để View Transitions gọi lại được.
+   Trả về phần tử màn để nhánh gọi còn chuyển tiêu điểm. */
+function swapScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const screen=$(id);screen.classList.add('active');
-  requestAnimationFrame(()=>{
-    const heading=screen.querySelector('h1,h2');
-    if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
-    window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-  });
+  document.body.classList.toggle('fx-quiet',BUSY_SCREENS.includes(id));
+  return screen;
+}
+function focusScreen(screen){
+  const heading=screen.querySelector('h1,h2');
+  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+  window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+function showScreen(id){
+  /* Người tắt hiệu ứng, hoặc trình duyệt chưa có API: đổi thẳng như cũ.
+     KHÔNG await ở đây — tiêu điểm phải nhảy ngay, người dùng bàn phím không
+     được chờ hết 380ms hoạt hình mới đọc được tiêu đề màn mới. */
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||typeof document.startViewTransition!=='function'){
+    const screen=swapScreen(id);
+    requestAnimationFrame(()=>focusScreen(screen));
+    return;
+  }
+  let screen=null;
+  const vt=document.startViewTransition(()=>{screen=swapScreen(id);});
+  /* Đặt tiêu điểm ngay khi DOM đã đổi (vt.ready), chứ không đợi vt.finished:
+     ảnh chụp chuyển tiếp chỉ là lớp phủ, nội dung thật đã sẵn sàng rồi. */
+  vt.ready.then(()=>focusScreen(screen)).catch(()=>{if(screen)focusScreen(screen);});
 }
 
 /* ============ CỬA HÀNG ============ */
@@ -428,7 +577,7 @@ function renderShop(){
     const tag=it.kind==='perk'?'🗺️ suốt hành trình':'🎒 mang vào trận';
     d.innerHTML=`<span class="si">${it.icon}</span>
       <span style="flex:1"><span class="sn">${it.name}</span>${owned?` <span class="own">(có ${owned})</span>`:''}<br>
-      <span class="sd">${it.desc}</span><br><span class="sd" style="color:#8d6bff">${tag}</span></span>
+      <span class="sd">${it.desc}</span><br><span class="sd" style="color:var(--purple-ink)">${tag}</span></span>
       <span class="sp">${maxed?'ĐỦ':price+' 💰'}</span>`;
     d.onclick=()=>buyItem(it);
     grid.appendChild(d);
@@ -477,6 +626,7 @@ function drawGround(theme){
     g.appendChild(d);
   }
 }
+let ambientTimers=[];
 function startAmbient(theme){
   stopAmbient();
   drawGround(theme);
@@ -491,12 +641,17 @@ function startAmbient(theme){
       d.style.left=ri(2,95)+'%';d.style.bottom=ri(10,60)+'%';d.style.animation=`riseUp ${ri(30,55)/10}s ease forwards`;}
     else{d.textContent='☁️';d.style.fontSize=ri(16,28)+'px';d.style.opacity=.8;
       d.style.left='-60px';d.style.top=ri(2,22)+'%';d.style.animation=`driftRight ${ri(70,120)/10}s linear forwards`;}
-    arena.appendChild(d);setTimeout(()=>d.remove(),13000);
+    // Gỡ chính mình khỏi danh sách khi chạy xong, nếu không mảng phình suốt ván
+    // (theme lava đẻ quái nền mỗi 450ms).
+    arena.appendChild(d);
+    const gone=setTimeout(()=>{d.remove();ambientTimers=ambientTimers.filter(id=>id!==gone)},12500);
+    ambientTimers.push(gone);
   };
   spawn();spawn();
   ambientId=setInterval(spawn, theme==='lava'?450:theme==='ice'?600:1600);
 }
 function stopAmbient(){
   if(ambientId){clearInterval(ambientId);ambientId=null;}
+  ambientTimers.forEach(clearTimeout);ambientTimers=[];
   document.querySelectorAll('.ambient').forEach(e=>e.remove());
 }

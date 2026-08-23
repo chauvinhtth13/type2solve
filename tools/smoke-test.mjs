@@ -77,10 +77,6 @@ try {
 }
 
 if (!html.includes('Châu Vinh')) fail('Trang chủ chưa ghi công tác giả Châu Vinh');
-if (!html.includes('coffee-qr-placeholder')) fail('Thiếu trạng thái chờ cho khu vực QR cà phê');
-if (!html.includes('mathx.vn/khoa-hoc/toan-tu-duy-singapore-lop-3.html')) {
-  fail('Thiếu liên kết nguồn tham khảo Toán tư duy Singapore lớp 3');
-}
 if (/<img\b[^>]*\bsrc\s*=\s*["']\s*["']/i.test(html)) fail('Không được để ảnh có src rỗng');
 if (!html.includes('id="sudokuGame"') || !html.includes('assets/js/games/sudoku.js')) {
   fail('Màn chơi hoặc script Sudoku chưa được tích hợp');
@@ -151,6 +147,17 @@ try {
   else {
     const quotedPath = /["']([^"']+)["']/g;
     for (const match of coreList[1].matchAll(quotedPath)) {
+      await checkReference(match[1], serviceWorkerFile);
+    }
+  }
+  /* Kho từ nặng đã tách khỏi CORE_ASSETS để không chặn lúc cài đặt. Nó vẫn
+     phải được kiểm tra đường dẫn, nếu không thì gõ sai tên file sẽ lọt lưới
+     và người chơi mất offline mà không ai hay. */
+  const deferredList = serviceWorker.match(/const\s+DEFERRED_ASSETS\s*=\s*\[([\s\S]*?)\];/);
+  if (!deferredList) fail('sw.js không khai báo DEFERRED_ASSETS');
+  else {
+    const quotedPath = /["']([^"']+)["']/g;
+    for (const match of deferredList[1].matchAll(quotedPath)) {
       await checkReference(match[1], serviceWorkerFile);
     }
   }

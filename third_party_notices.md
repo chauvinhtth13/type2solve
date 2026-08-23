@@ -6,6 +6,10 @@ Danh mục công khai của khóa **Toán tư duy Singapore lớp 3** trên Math
 
 - https://mathx.vn/khoa-hoc/toan-tu-duy-singapore-lop-3.html
 
+> Ghi chú: từ 2026-08-23, phần ghi nguồn này **chỉ còn ở file này**, không hiển thị trên
+> trang chủ nữa (theo yêu cầu của chủ dự án). MathX chỉ được dùng để tham khảo cách phân
+> nhóm chuyên đề; không có nội dung nào của MathX được sao chép vào game.
+
 Ứng dụng không sao chép hay phân phối video và phần luyện tập yêu cầu đăng nhập của MathX. Các câu hỏi triển khai trong mã được biên soạn từ đề bài do người dùng cung cấp hoặc là biến thể sinh mới, kèm lời giải được kiểm chứng độc lập.
 
 ## Kho từ Anh–Việt

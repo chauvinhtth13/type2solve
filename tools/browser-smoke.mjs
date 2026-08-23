@@ -430,6 +430,98 @@ try {
   const sudokuCached = await evaluate(`caches.match(new URL('assets/js/games/sudoku.js', location.href).href).then(Boolean)`);
   assert(sudokuCached, 'Sudoku được cache để chơi offline');
 
+  /* ===== Hồi quy cho các lỗi đã sửa =====
+     Mỗi mục dưới đây tương ứng một lỗi THẬT từng lọt qua 40 assertion cũ.
+     Chú thích ghi rõ số đo lúc chưa vá để lần sau đỏ lên là biết ngay vì sao. */
+
+  // aria-pressed của nút âm thanh từng bị ĐẢO lúc khởi động (bootstrap ghi String(!SOUND_ON)),
+  // xoá sạch bản vá trong toggleSound(). Xảy ra ở MỌI lần tải vì normalize() luôn ép boolean.
+  await evaluate(`GameStorage.updateSettings({sound:false})`);
+  await send('Page.navigate', { url: `http://127.0.0.1:${httpPort}/index.html` });
+  for (let i = 0; i < 80; i++) { if (await evaluate('document.readyState') === 'complete') break; await sleep(100); }
+  await sleep(400);
+  const soundAria = await evaluate(`({on:SOUND_ON,home:sndBtnHome.getAttribute('aria-pressed'),battle:sndBtn.getAttribute('aria-pressed')})`);
+  assert(soundAria.on === false && soundAria.home === 'false' && soundAria.battle === 'false',
+    `aria-pressed của nút âm thanh khớp trạng thái ngay khi tải (${soundAria.home}/${soundAria.battle})`);
+  await evaluate(`GameStorage.updateSettings({sound:true})`);
+
+  // Sudoku vẽ lại TỪNG PHẦN khi đổi ô chọn; bỏ sót ô đang giữ tab stop là có HAI ô tabIndex=0.
+  await evaluate(`openSudokuGame();startSudoku('beginner')`);
+  await sleep(500);
+  const tabStops = await evaluate(`(()=>{
+    const count=()=>[...document.querySelectorAll('#sudokuBoard .sudoku-cell')].filter(c=>c.tabIndex===0).length;
+    const seen=[count()];
+    for(const i of [0,40,80,4,44,13,72]){document.querySelector('#sudokuBoard [data-index="'+i+'"]').click();seen.push(count())}
+    return seen})()`);
+  assert(tabStops.every(n => n === 1), `Bàn Sudoku luôn đúng một tab stop qua ${tabStops.length} lần chọn [${tabStops}]`);
+
+  // Khép xong hàng/cột/khối phải có phản hồi; trước đây hoàn toàn im lặng.
+  const unitClear = await evaluate(`(async()=>{
+    const cells=[...document.querySelectorAll('#sudokuBoard .sudoku-cell')];
+    const grid=cells.map(c=>{const v=c.querySelector('.sudoku-value');return v?+v.textContent:0});
+    const res=SudokuGame.solveGrid(grid,1);
+    if(!res.solution) return {ok:false};
+    const trong=[];for(let i=0;i<9;i++) if(!grid[i]) trong.push(i);
+    for(const i of trong){cells[i].click();sudokuInput(res.solution[i]);await new Promise(r=>setTimeout(r,60))}
+    await new Promise(r=>setTimeout(r,80));
+    return {ok:true,sang:document.querySelectorAll('.sudoku-cell.unit-clear').length}})()`);
+  assert(unitClear.ok && unitClear.sang === 9, `Khép xong một nhóm 9 ô thì cả 9 ô sáng lên (${unitClear.sang})`);
+  await evaluate(`goHome()`); await sleep(300);
+
+  // state.fieldH chỉ ghi trong laneLayout() (chạy MỘT lần lúc vào ván). Không đo lại khi đổi
+  // cỡ cửa sổ thì đường bay của chưởng lệch hẳn — đo được 92,8px ở bản chưa vá.
+  await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await evaluate(`openTypingGame()`); await sleep(300);
+  await evaluate(`startTypingRun({lang:'vi',difficulty:'slow',accentAssist:false})`);
+  for (let i = 0; i < 40; i++) { if (await evaluate(`document.querySelectorAll('.typing-monster').length`)) break; await sleep(250); }
+  await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 560, deviceScaleFactor: 1, mobile: false });
+  await sleep(800);
+  const spell = await evaluate(`(()=>{
+    const field=document.getElementById('typingField'), m=document.querySelector('.typing-monster');
+    if(!m) return {err:'khong con quai'};
+    const topPct=parseFloat(m.style.top);
+    const input=document.getElementById('typingInput');
+    input.value=(m.querySelector('.monster-word')?.textContent||'').trim();
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    const s=document.querySelector('.typing-spell');
+    if(!s) return {err:'khong tung duoc phep'};
+    const kf=s.getAnimations()[0]?.effect?.getKeyframes()||[];
+    const tf=kf[kf.length-1]?.transform||s.style.transform||'';
+    const mm=/translate\\(([-\\d.]+)px,\\s*([-\\d.]+)px\\)/.exec(tf);
+    return {dy:mm?parseFloat(mm[2]):null, dung:((topPct-78)/100)*field.clientHeight}})()`);
+  assert(!spell.err && Math.abs(spell.dy - spell.dung) < 3,
+    spell.err ? `Đường bay chưởng: ${spell.err}`
+              : `Đường bay chưởng bám chiều cao sân MỚI sau khi đổi cỡ (lệch ${Math.abs(spell.dy - spell.dung).toFixed(1)}px)`);
+  await evaluate(`goHome()`); await sleep(300);
+
+  // Baloo 2 có chữ số rộng KHÔNG đều (đo được 7,88–12,13px) nên số liệu phải dùng tabular-nums.
+  await evaluate(`showScreen('scoreEnd')`); await sleep(300);
+  const tabular = await evaluate(`(()=>{const n=document.querySelector('.stat .num');
+    const set=v=>[...document.querySelectorAll('.stat .num')].forEach(e=>e.textContent=v);
+    set('1111'); const a=[...document.querySelectorAll('.stat')].map(s=>Math.round(s.getBoundingClientRect().width));
+    set('8888'); const b=[...document.querySelectorAll('.stat')].map(s=>Math.round(s.getBoundingClientRect().width));
+    return {variant:getComputedStyle(n).fontVariantNumeric, deu:JSON.stringify(a)===JSON.stringify(b)}})()`);
+  assert(tabular.variant === 'tabular-nums' && tabular.deu, `Ô số liệu dùng chữ số đều bề ngang (${tabular.variant})`);
+
+  // Game desktop: mọi màn gói trong MỘT khung, khung ngoài không bao giờ cuộn.
+  await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+  await evaluate(`goHome()`); await sleep(400);
+  const manHinh = [['Trang chủ', `showScreen('home')`], ['Đấu trường', `startAdventure();beginBattle()`],
+    ['Cửa hàng', `openShop('intro')`], ['Gõ chữ', `goHome();openTypingGame()`],
+    ['Sudoku', `goHome();openSudokuGame();startSudoku('beginner')`]];
+  const tran = [];
+  for (const [ten, setup] of manHinh) {
+    await evaluate(setup); await sleep(500);
+    const d = await evaluate(`(()=>{const el=document.documentElement,b=document.body;
+      const sh=Math.max(el.scrollHeight,b.scrollHeight);
+      const c=document.querySelector('.screen.active>.card,.screen.active>.game-card');
+      return {trang:Math.max(0,sh-innerHeight), the:c?Math.max(0,c.scrollHeight-c.clientHeight):0}})()`);
+    if (d.trang > 1 || d.the > 1) tran.push(`${ten}(trang ${d.trang}px, thẻ ${d.the}px)`);
+  }
+  assert(tran.length === 0, tran.length ? `Có màn phải cuộn: ${tran.join(', ')}` : 'Cả 5 màn gói gọn trong một khung 1366×768');
+  await send('Emulation.clearDeviceMetricsOverride');
+  await evaluate(`goHome()`); await sleep(300);
+
   await sleep(500);
   assert(runtimeErrors.length === 0, runtimeErrors.length ? `Không lỗi runtime: ${runtimeErrors.join(' | ')}` : 'Không có lỗi JavaScript runtime');
 } finally {

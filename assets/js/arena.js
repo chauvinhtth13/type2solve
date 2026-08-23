@@ -112,9 +112,10 @@ function newQuestion(){
   box.innerHTML='';box.className='answers'+(currentQ.three?' three':'')+(currentQ.choices.length===5?' five':'');
   box.hidden=G.typedAnswer;form.hidden=!G.typedAnswer;
   input.value='';input.className='';input.placeholder='Nhập kết quả rồi nhấn Enter…';input.disabled=true;submit.disabled=true;
-  if(!G.typedAnswer)currentQ.choices.forEach(v=>{
+  if(!G.typedAnswer)currentQ.choices.forEach((v,i)=>{
     const btn=document.createElement('button');
     btn.className='ans locked';btn.textContent=v;btn.disabled=true;
+    btn.setAttribute('aria-keyshortcuts',String(i+1));   // khớp với phím 1–5 ở bootstrap.js
     btn.onclick=e=>{ripple(btn,e);answer(btn,v)};
     box.appendChild(btn);
   });
@@ -355,6 +356,9 @@ function renderEnergy(){
   const f=$('energyFill');if(!f)return;
   const pct=(G.energy||0)/ENERGY_MAX*100;
   f.style.width=pct+'%';
+  // Rỗng thì không có gì để nhìn: gắn cờ cho CSS dừng hẳn animation nền,
+  // thay vì chạy vô hạn suốt trận trên một phần tử bề rộng 0.
+  f.classList.toggle('charging',pct>0);
   f.classList.toggle('full',pct>=100);
   $('ultBtn').classList.toggle('on',pct>=100&&!G.locked);
 }
@@ -579,26 +583,46 @@ function boomAt(x,y){
   bm.style.left=(x-23)+'px';bm.style.top=(y-23)+'px';
   arena.appendChild(bm);setTimeout(()=>bm.remove(),550);
 }
+/* Đường cong cubic-bezier(.3,0,.7,1) — chính là easing khai báo cho .proj trong CSS.
+   Tính lại bằng công thức để vệt khói bám sát chưởng khí mà KHÔNG phải đo DOM
+   giữa lúc chưởng đang bay (đo rồi ghi xen kẽ là đúng kiểu gây layout thrashing). */
+function projEase(t){
+  const cx=.9,bx=.3,ax=-.2,cy=0,by=3,ay=-2;   // hệ số suy ra từ (x1,y1,x2,y2)=(.3,0,.7,1)
+  let u=t;
+  for(let i=0;i<4;i++){                        // Newton 4 vòng đủ khít cho 450ms
+    const dx=((ax*u+bx)*u+cx)*u-t, d=(3*ax*u+2*bx)*u+cx;
+    if(Math.abs(d)<1e-6)break;
+    u-=dx/d;
+  }
+  return ((ay*u+by)*u+cy)*u;
+}
 function shootProjectile(fromId,toId,emoji,dark,onHit){
   const arena=$('arena');
-  const from=spriteCenter(fromId),to=spriteCenter(toId);
+  const from=spriteCenter(fromId),to=spriteCenter(toId);   // đo đúng một lần, trước khi bay
+  const dx=to.x-from.x;
   const p=document.createElement('div');
   p.className='proj'+(dark?' dark':'');
   p.innerHTML=`<span class="core">${emoji}</span>`;
   p.style.left=(from.x-17)+'px';p.style.top=(from.y-17)+'px';
   arena.appendChild(p);SFX.shoot();
+  const trailBg=dark?'radial-gradient(circle,rgba(160,80,220,.7),transparent)'
+                    :'radial-gradient(circle,rgba(255,220,80,.8),transparent)';
+  const t0=performance.now();
   let trailN=0;
-  const trailId=setInterval(()=>{
-    const r=p.getBoundingClientRect(),a=arenaRect();
+  // Giảm chuyển động: CSS ép transition còn .001ms nên chưởng tới đích ngay lập tức;
+  // rải vệt khói theo đường cong 450ms nữa thì khói treo lại giữa sân. Bỏ hẳn.
+  const trailId=REDUCED_MOTION()?null:setInterval(()=>{
     const t=document.createElement('div');t.className='trail';
-    t.style.left=(r.left-a.left+8)+'px';t.style.top=(r.top-a.top+8)+'px';
+    t.style.left=(from.x-9+dx*projEase(Math.min(1,(performance.now()-t0)/450)))+'px';
+    t.style.top=(from.y-9)+'px';
     t.style.width='18px';t.style.height='18px';
-    t.style.background=dark?'radial-gradient(circle,rgba(160,80,220,.7),transparent)':'radial-gradient(circle,rgba(255,220,80,.8),transparent)';
+    t.style.background=trailBg;
     arena.appendChild(t);setTimeout(()=>t.remove(),500);
     if(++trailN>8)clearInterval(trailId);
   },50);
-  requestAnimationFrame(()=>{p.style.left=(to.x-17)+'px';p.style.transform='scale(1.3)';});
-  setTimeout(()=>{clearInterval(trailId);p.remove();boomAt(to.x,to.y);onHit(to);},460);
+  // transform thay cho left: chỉ chạm bước composite, không đụng layout.
+  requestAnimationFrame(()=>{p.style.transform=`translateX(${dx}px) scale(1.3)`;});
+  setTimeout(()=>{if(trailId)clearInterval(trailId);p.remove();boomAt(to.x,to.y);onHit(to);},460);
 }
 function shootBeam(onHit){
   const arena=$('arena');

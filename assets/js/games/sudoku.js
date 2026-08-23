@@ -36,6 +36,23 @@
     return document.getElementById(id);
   }
 
+  /* Hẹn giờ có theo dõi: rời màn giữa lúc hiệu ứng đang chạy thì phải huỷ hết,
+     nếu không callback sẽ đụng vào DOM của màn khác. Cùng kỷ luật với các game kia. */
+  let fxTimers = [];
+  function later(fn, ms) {
+    const id = global.setTimeout(() => {
+      fxTimers = fxTimers.filter(t => t !== id);
+      fn();
+    }, ms);
+    fxTimers.push(id);
+    return id;
+  }
+  function clearFxTimers() {
+    fxTimers.forEach(global.clearTimeout);
+    fxTimers = [];
+    document.querySelectorAll('.sudoku-cell.unit-clear').forEach(el => el.classList.remove('unit-clear'));
+  }
+
   function safeSound(name) {
     try {
       if (global.SFX && typeof global.SFX[name] === 'function') global.SFX[name]();
@@ -271,6 +288,36 @@
     return rowOf(a) === rowOf(b) || columnOf(a) === columnOf(b) || boxOf(a) === boxOf(b);
   }
 
+  /* Khép xong một hàng/cột/khối là mốc sướng nhất của Sudoku, mà bản cũ im lặng
+     bỏ qua hoàn toàn. Phát hiện ngay lúc điền rồi làm sáng đúng 9 ô vừa hoàn thành. */
+  function unitsCompletedBy(index) {
+    if (!state) return [];
+    const row = rowOf(index), col = columnOf(index), box = boxOf(index);
+    const rowCells = [], colCells = [], boxCells = [];
+    for (let i = 0; i < 81; i += 1) {
+      if (rowOf(i) === row) rowCells.push(i);
+      if (columnOf(i) === col) colCells.push(i);
+      if (boxOf(i) === box) boxCells.push(i);
+    }
+    const full = list => list.every(i => state.values[i] && !hasRuleConflict(i));
+    return [rowCells, colCells, boxCells].filter(full);
+  }
+
+  function celebrateUnits(units) {
+    if (!units.length) return;
+    units.forEach(cells => cells.forEach((index, n) => {
+      const el = cellAt(index);
+      if (!el) return;
+      el.classList.remove('unit-clear');
+      void el.offsetWidth;                       // ép khởi động lại animation nếu ô vừa sáng xong
+      el.style.setProperty('--wave', (n * 42) + 'ms');
+      el.classList.add('unit-clear');
+      later(() => el.classList.remove('unit-clear'), 900 + n * 42);
+    }));
+    // Khép 2–3 đơn vị cùng lúc thì thưởng to hơn.
+    safeSound(units.length > 1 ? 'levelup' : 'gold');
+  }
+
   function hasRuleConflict(index) {
     if (!state || !state.values[index]) return false;
     return state.values.some((value, other) => other !== index && value === state.values[index] && peers(index, other));
@@ -286,7 +333,7 @@
   }
 
   function renderCell(index) {
-    const cell = byId('sudokuBoard')?.children[index];
+    const cell = cellAt(index);
     if (!cell || !state) return;
     const value = state.values[index];
     const selectedValue = state.selected >= 0 ? state.values[state.selected] : 0;
@@ -301,6 +348,8 @@
     cell.setAttribute('aria-label', cellLabel(index));
     cell.setAttribute('aria-selected', String(index === state.selected));
     cell.setAttribute('aria-readonly', String(Boolean(state.puzzle[index])));
+    // Chỉ ô đang chọn nằm trong thứ tự Tab; các ô còn lại đi bằng phím mũi tên.
+    cell.tabIndex = index === (state.selected >= 0 ? state.selected : 0) ? 0 : -1;
     cell.textContent = '';
     if (value) {
       const number = document.createElement('span');
@@ -319,19 +368,33 @@
     cell.appendChild(noteGrid);
   }
 
+  function cellAt(index) {
+    const board = byId('sudokuBoard');
+    return board ? board.querySelector(`[data-index="${index}"]`) : null;
+  }
+
   function renderBoard() {
     const board = byId('sudokuBoard');
     if (!board || !state) return;
     board.textContent = '';
-    for (let index = 0; index < 81; index += 1) {
-      const cell = document.createElement('button');
-      cell.type = 'button';
-      cell.setAttribute('role', 'gridcell');
-      cell.dataset.index = index;
-      cell.addEventListener('click', () => selectCell(index));
-      board.appendChild(cell);
-      renderCell(index);
+    for (let row = 0; row < 9; row += 1) {
+      // role="grid" đòi phần tử con mang role="row"; .sudoku-row dùng display:contents
+      // nên 81 ô vẫn nằm thẳng trong lưới 9 cột như cũ.
+      const rowEl = document.createElement('div');
+      rowEl.className = 'sudoku-row';
+      rowEl.setAttribute('role', 'row');
+      for (let column = 0; column < 9; column += 1) {
+        const index = row * 9 + column;
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.setAttribute('role', 'gridcell');
+        cell.dataset.index = index;
+        cell.addEventListener('click', () => selectCell(index));
+        rowEl.appendChild(cell);
+      }
+      board.appendChild(rowEl);
     }
+    for (let index = 0; index < 81; index += 1) renderCell(index);
   }
 
   function renderAllCells() {
@@ -366,10 +429,23 @@
     }
   }
 
+  /* Đổi ô chọn chỉ ảnh hưởng tới: ô cũ, ô mới, các ô cùng hàng/cột/khối với hai ô đó,
+     và các ô trùng giá trị. Vẽ lại đúng ngần ấy thay vì dựng lại cả 81 ô (mỗi lần
+     dựng lại là ~700 phần tử ghi chú bị xoá rồi tạo lại cho một lần bấm phím). */
   function selectCell(index) {
     if (!state || !Number.isInteger(index) || index < 0 || index > 80) return;
+    const previous = state.selected;
+    if (previous === index) return;
     state.selected = index;
-    renderAllCells();
+    const touched = new Set([index]);
+    if (previous >= 0) touched.add(previous);
+    else touched.add(0);   // ô 0 là tab stop mặc định của renderCell()
+    const values = [state.values[index], previous >= 0 ? state.values[previous] : 0];
+    for (let other = 0; other < 81; other += 1) {
+      if (peers(other, index) || (previous >= 0 && peers(other, previous))) touched.add(other);
+      else if (state.values[other] && values.includes(state.values[other])) touched.add(other);
+    }
+    touched.forEach(renderCell);
   }
 
   function firstEditableBlank() {
@@ -406,8 +482,14 @@
       setFeedback(`Số ${digit} đang bị trùng trong hàng, cột hoặc khối 3×3.`, 'error');
       safeSound('wrong');
     } else {
-      setFeedback('Đã điền số. Tiếp tục suy luận nhé!', 'success');
-      safeSound('click');
+      const done = unitsCompletedBy(index);
+      if (done.length) {
+        setFeedback(done.length > 1 ? '🎉 Khép liền ' + done.length + ' nhóm một lúc!' : '✨ Hoàn thành một nhóm 9 ô!', 'success');
+        celebrateUnits(done);
+      } else {
+        setFeedback('Đã điền số. Tiếp tục suy luận nhé!', 'success');
+        safeSound('click');
+      }
     }
     if (state.values.every(Boolean)) checkSudoku(true);
   }
@@ -598,7 +680,7 @@
     const initialSelection = state.selected;
     requestAnimationFrame(() => {
       if (state && byId('sudokuGame')?.classList.contains('active')) {
-        byId('sudokuBoard')?.children[initialSelection]?.focus({ preventScroll: true });
+        cellAt(initialSelection)?.focus({ preventScroll: true });
       }
     });
     safeSound('open');
@@ -661,6 +743,7 @@
     clearInterval(timerId);
     timerId = null;
     autoPaused = false;
+    clearFxTimers();
   }
 
   function leaveSudokuGame() {
@@ -680,7 +763,7 @@
         : key === 'ArrowLeft' ? row * 9 + Math.max(0, column - 1)
           : row * 9 + Math.min(8, column + 1);
     selectCell(target);
-    byId('sudokuBoard')?.children[target]?.focus({ preventScroll: true });
+    cellAt(target)?.focus({ preventScroll: true });
   }
 
   function handleKeyboard(event) {

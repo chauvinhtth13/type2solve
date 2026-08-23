@@ -11,6 +11,15 @@
     if($('profileStars'))$('profileStars').textContent=Number(data.profile?.stars)||0;
     if($('profileTyping'))$('profileTyping').textContent=typingBest;
     if($('profileSudoku'))$('profileSudoku').textContent=Number(records.sudoku?.wins)||0;
+    // Ô "Phiêu lưu" chiếm hai hàng trong lưới bento nên phải có nội dung xứng chỗ:
+    // hiện luôn đã hạ được bao nhiêu boss thay vì để trống.
+    const progress=$('advProgress');
+    if(progress){
+      const total=(typeof BOSSES!=='undefined'&&BOSSES.length)||10;
+      const cleared=Math.max(0,Math.min(total,Number(data.adventure?.cleared ?? -1)+1));
+      progress.innerHTML=`Đã hạ <b>${cleared}/${total}</b> boss<i></i>`;
+      progress.style.setProperty('--done',(cleared/total*100)+'%');
+    }
   };
 
   const saved=storage?.load?.()||{};
@@ -22,7 +31,7 @@
     SOUND_ON=saved.settings.sound;
     document.querySelectorAll('#sndBtn,#sndBtnHome').forEach(button=>{
       button.textContent=SOUND_ON?'🔊':'🔇';
-      button.setAttribute('aria-pressed',String(!SOUND_ON));
+      button.setAttribute('aria-pressed',String(SOUND_ON));   // "bấm xuống" = đang bật, khớp toggleSound()
     });
   }
 
@@ -31,7 +40,6 @@
   window.addEventListener('game-storage:change',refreshProfileSummary);
   window.addEventListener('storage',refreshProfileSummary);
 
-  document.querySelectorAll('.ans').forEach((button,index)=>button.setAttribute('aria-keyshortcuts',String(index+1)));
   document.addEventListener('keydown',event=>{
     if(event.isComposing)return;
     const tag=document.activeElement?.tagName;
@@ -68,6 +76,7 @@
   modalObserver.observe($('restartModal'),{attributes:true,attributeFilter:['class']});
 
   document.addEventListener('visibilitychange',()=>{
+    document.body.classList.toggle('fx-quiet',document.hidden||BUSY_SCREENS.some(id=>$(id)?.classList.contains('active')));
     if(document.hidden&&$('battle').classList.contains('active')&&!$('restartModal').classList.contains('on'))askRestart();
     if(document.hidden&&$('typingGame').classList.contains('active')&&typeof pauseTypingForVisibility==='function')pauseTypingForVisibility();
   });

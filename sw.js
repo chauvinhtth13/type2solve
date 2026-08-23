@@ -2,8 +2,9 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v8';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
+/* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -16,27 +17,55 @@ const CORE_ASSETS = [
   './assets/js/question-bank.js',
   './assets/js/arena.js',
   './assets/js/data/typing-content.js',
-  './assets/data/english-vocabulary.json',
   './assets/js/games/typing.js',
   './assets/js/games/sudoku.js',
   './assets/js/bootstrap.js',
+];
+
+/* Tài sản NẶNG, chỉ Gõ Chữ mới cần. Kho từ 4,6 MB trước đây nằm chung
+   CORE_ASSETS nên `install` tải nó bằng `cache:'reload'` NGAY lượt ghé đầu —
+   tranh băng thông với chính trang đang mở, làm chậm lần hiện hình đầu tiên
+   của mọi người chơi, kể cả người không bao giờ mở Gõ Chữ.
+   Nay tách ra: cài đặt xong trước, kho từ ngấm ngầm tải sau khi trang đã chạy.
+   Kết quả offline y hệt, chỉ khác THỜI ĐIỂM. */
+const DEFERRED_ASSETS = [
+  './assets/data/english-vocabulary.json',
 ];
 
 function scopedUrl(relativePath) {
   return new URL(relativePath, self.registration.scope).href;
 }
 
-async function warmShellCache() {
+async function cacheAll(assets, requestCache) {
   const cache = await caches.open(CACHE_NAME);
-  await Promise.allSettled(CORE_ASSETS.map(async (asset) => {
+  await Promise.allSettled(assets.map(async (asset) => {
     const url = scopedUrl(asset);
     try {
-      const response = await fetch(new Request(url, { cache: 'reload' }));
+      const response = await fetch(new Request(url, { cache: requestCache }));
       if (response && response.ok) await cache.put(url, response);
     } catch (error) {
       // One optional/missing asset must not prevent the rest of the app installing.
     }
   }));
+}
+
+async function warmShellCache() {
+  await cacheAll(CORE_ASSETS, 'reload');
+}
+
+/* Chạy SAU khi service worker đã kích hoạt và trang đã cầm quyền điều khiển.
+   Không await trong `activate` — await ở đó thì lại chặn đúng như cũ.
+   Dùng 'default' chứ không 'reload': nếu trình duyệt đã có sẵn bản hợp lệ
+   trong HTTP cache thì dùng luôn, khỏi tải lại 4,6 MB lần nữa. */
+async function warmDeferredCache() {
+  const cache = await caches.open(CACHE_NAME);
+  const pending = [];
+  for (const asset of DEFERRED_ASSETS) {
+    const url = scopedUrl(asset);
+    if (await cache.match(url, { ignoreSearch: true })) continue;
+    pending.push(asset);
+  }
+  if (pending.length) await cacheAll(pending, 'default');
 }
 
 self.addEventListener('install', (event) => {
@@ -50,6 +79,8 @@ self.addEventListener('activate', (event) => {
       .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
       .map((name) => caches.delete(name)));
     await self.clients.claim();
+    /* Cố ý KHÔNG await: kích hoạt phải xong ngay, kho từ tự ngấm phía sau. */
+    warmDeferredCache().catch(() => undefined);
   })());
 });
 

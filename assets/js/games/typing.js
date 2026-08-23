@@ -389,6 +389,9 @@
   function stopRuntime() {
     sessionId += 1;
     if (state && state.raf) global.cancelAnimationFrame(state.raf);
+    global.removeEventListener('resize', onFieldResize);
+    global.removeEventListener('orientationchange', onFieldResize);
+    global.clearTimeout(resizeTimer);
     clearLocalTimers();
     const monsters = byId('typingMonsters');
     if (monsters) monsters.textContent = '';
@@ -634,6 +637,8 @@
     // Mỗi làn chỉ giữ một con: nhiều hơn số làn là chữ chắc chắn đè lên nhau.
     state.lanes = laneLayout();
     state.maxActive = Math.min(state.config.maxActive, state.lanes.length);
+    global.addEventListener('resize', onFieldResize);
+    global.addEventListener('orientationchange', onFieldResize);
     const pause = byId('typingPauseBtn');
     if (pause) {
       pause.disabled = false;
@@ -748,9 +753,66 @@
     const field = byId('typingField');
     const width = field ? field.clientWidth : 0;
     const height = field ? field.clientHeight : 0;
+    // Nhớ kích thước sân ngay tại lần đo này; castSpell dùng lại để quy % ra px
+    // mà không phải chạm DOM lần nữa.
+    if (state) { state.fieldW = width; state.fieldH = height; }
     if (width >= 520 && height >= 500) return LANE_TOP;   // 3 làn cách nhau 30% chiều cao
     if (height >= 380) return LANE_TOP_NARROW;            // 2 làn cách nhau 40%
     return LANE_TOP_SINGLE;
+  }
+
+  let resizeTimer = 0;
+  function onFieldResize() {
+    global.clearTimeout(resizeTimer);
+    resizeTimer = global.setTimeout(remeasureField, 150);   // gom cả loạt sự kiện kéo cửa sổ
+  }
+
+  /* Bảo đảm state.fieldW/fieldH có số thật trước khi ai đó quy % ra px. */
+  function ensureFieldMetrics() {
+    if (state && (!state.fieldW || !state.fieldH)) state.lanes = laneLayout();
+  }
+
+  /* Sân đổi kích thước (xoay máy, đổi cỡ cửa sổ) thì mọi số đo đã nhớ đều sai:
+     --monster-x tính bằng px, state.fieldH dùng cho đường bay của chưởng, và
+     cả số làn cũng có thể đổi. Đo lại một lượt rồi xếp lại toàn bộ quái. */
+  function remeasureField() {
+    if (!state || state.status !== 'running') return;
+    const field = byId('typingField');
+    if (!field || !field.clientWidth) return;
+    state.lanes = laneLayout();
+    state.maxActive = Math.min(state.config.maxActive, state.lanes.length);
+    state.monsters.forEach(monster => {
+      // Bớt làn thì dồn quái về làn cuối; keepLaneGap() sẽ giãn chúng ra ở khung kế.
+      monster.lane = Math.min(monster.lane, state.lanes.length - 1);
+      if (monster.element) monster.element.style.top = `${laneTop(monster.lane)}%`;
+      fitMonster(monster);
+    });
+  }
+
+  /* 8 bộ màu thay cho 8 emoji cũ. Cùng một hình quái, khác màu + sừng — nhận ra
+     ngay con nào là con nào mà không cần 8 bản vẽ. */
+  const BEAST_SKINS = [
+    { body:'#8d6bff', belly:'#e6dcff', horn:'#c3b0ff', horns:1 },
+    { body:'#4fc3e8', belly:'#d6f2fb', horn:'#a8e6f7', horns:0 },
+    { body:'#7ed07a', belly:'#e2f7dd', horn:'#b4e8ae', horns:0 },
+    { body:'#ff8f5a', belly:'#ffe3d2', horn:'#ffc199', horns:1 },
+    { body:'#e56aa8', belly:'#ffdcee', horn:'#ffaed4', horns:1 },
+    { body:'#c9a227', belly:'#fff2cc', horn:'#ffd966', horns:1 },
+    { body:'#6f7fd6', belly:'#dfe4ff', horn:'#aab6ff', horns:0 },
+    { body:'#3fb8b0', belly:'#d3f6f3', horn:'#7fe0d8', horns:1 },
+  ];
+  /* Boss của chặng: tối màu hơn, luôn có sừng, để phân biệt với quái thường. */
+  const BOSS_SKIN = { body:'#8a2f5f', belly:'#ffd6ea', horn:'#ff8dc0', horns:1 };
+
+  function buildBeast(skin) {
+    const tpl = document.getElementById('tplBeast');
+    if (!tpl) return null;                       // thiếu khuôn thì để gọi bên ngoài quay về emoji
+    const svg = tpl.content.firstElementChild.cloneNode(true);
+    svg.style.setProperty('--c-body', skin.body);
+    svg.style.setProperty('--c-belly', skin.belly);
+    svg.style.setProperty('--c-horn', skin.horn);
+    if (!skin.horns) svg.classList.add('no-horns');
+    return svg;
   }
 
   function laneTop(lane) {
@@ -789,6 +851,7 @@
       item,
       bonus: rollBonus(),
       emoji: randomItem(emojis),
+      skin: Math.floor(Math.random() * 8),   // chọn bộ màu cho hình SVG
       lane: emptiestLane(),
       x: START_X,
       speed: 0,
@@ -865,7 +928,9 @@
     const root = document.createElement('div');
     root.className = `typing-monster${monster.boss ? ' boss' : ''}`;
     root.dataset.monsterId = String(monster.id);
-    root.style.left = `${monster.x}%`;
+    // Vị trí ngang đi qua --monster-x (CSS dịch bằng transform); chỉ làn dọc dùng top.
+    monster.element = root;
+    setMonsterX(monster);
     root.style.top = `${laneTop(monster.lane)}%`;
     root.setAttribute('role', 'group');
 
@@ -878,7 +943,9 @@
 
     const emoji = document.createElement('span');
     emoji.className = 'monster-emoji';
-    emoji.textContent = monster.emoji;
+    const art = buildBeast(monster.boss ? BOSS_SKIN : BEAST_SKINS[monster.skin % BEAST_SKINS.length]);
+    if (art) emoji.appendChild(art);
+    else emoji.textContent = monster.emoji;      // khuôn không có thì vẫn còn emoji cũ
     root.appendChild(emoji);
 
     if (monster.bonus) {
@@ -906,7 +973,6 @@
       monster.hpElement = fill;
     }
 
-    monster.element = root;
     monster.wordElement = word;
     monster.meaningElement = meaning;
     refreshMonsterLabel(monster);
@@ -915,18 +981,28 @@
     fitMonster(monster);
   }
 
+  /* Luật chơi tính toạ độ theo % bề rộng sân, còn CSS dịch quái bằng transform và
+     transform chỉ hiểu % theo bề rộng CHÍNH PHẦN TỬ. Đây là chỗ duy nhất quy đổi. */
+  function setMonsterX(monster) {
+    if (!monster.element) return;
+    const width = state && state.fieldW ? state.fieldW : 0;
+    monster.element.style.setProperty('--monster-x', `${(monster.x / 100) * width}px`);
+  }
+
   /* Quái được canh giữa quanh toạ độ x, nên phải chừa đúng nửa bề rộng của nó
      ở hai đầu — nếu không bảng chữ bị mép khung cắt mất và bé không đọc được. */
   function fitMonster(monster) {
     const field = byId('typingField');
     if (!field || !monster.element) return;
-    const fieldWidth = field.clientWidth || 1;
+    const fieldWidth = field.clientWidth;
+    if (!fieldWidth) return;                // sân chưa hiện: đo bây giờ là đo sai
+    if (state) state.fieldW = fieldWidth;   // giữ số đo tươi kể cả sau khi xoay màn hình
     const halfPercent = Math.min(24, (monster.element.offsetWidth / 2 / fieldWidth) * 100);
     monster.half = halfPercent;
     monster.minX = GATE_X + halfPercent;
     monster.maxX = 100 - halfPercent - 1;
     monster.x = Math.min(monster.x, monster.maxX);
-    monster.element.style.left = `${monster.x}%`;
+    setMonsterX(monster);
   }
 
   function refreshMonsterLabel(monster) {
@@ -1019,7 +1095,7 @@
       if (!frozen) {
         monster.x -= monster.speed * delta / 1000;
         keepLaneGap(monster);
-        if (monster.element) monster.element.style.left = `${monster.x}%`;
+        setMonsterX(monster);
       }
       // Sắp tới cổng thì quái nhấp nháy đỏ để bé kịp ưu tiên gõ con đó.
       const near = monster.x <= gateAt + 14;
@@ -1311,27 +1387,33 @@
     const spell = document.createElement('span');
     spell.className = 'typing-spell';
     spell.textContent = state.combo >= 5 ? '🌟' : '⚡';
+    // Điểm xuất phát đặt bằng left/top một lần, phần bay do transform lo.
     spell.style.left = '8%';
     spell.style.top = '78%';
     field.appendChild(spell);
-    const targetLeft = `${monster.x}%`;
-    const targetTop = `${laneTop(monster.lane)}%`;
-    if (typeof spell.animate === 'function') {
-      const animation = spell.animate([
-        { left: '8%', top: '78%', transform: 'scale(.55) rotate(0deg)', opacity: 1 },
-        { left: targetLeft, top: targetTop, transform: 'scale(1.35) rotate(300deg)', opacity: 1 }
-      ], { duration: 280, easing: 'cubic-bezier(.2,.8,.25,1)', fill: 'forwards' });
-      animation.onfinish = () => {
-        if (token === sessionId) createImpact(monster.x, monster.lane, points);
-        spell.remove();
-      };
+    // Quy chênh lệch % ra px bằng kích thước sân đã nhớ ở laneLayout() — không đo lại DOM.
+    ensureFieldMetrics();
+    const dx = ((monster.x - 8) / 100) * (state.fieldW || 0);
+    const dy = ((laneTop(monster.lane) - 78) / 100) * (state.fieldH || 0);
+    const land = () => {
+      if (token === sessionId) createImpact(monster.x, monster.lane, points);
+      spell.remove();
+    };
+    // WAAPI không chịu ảnh hưởng của override prefers-reduced-motion trong CSS,
+    // nên phải tự kiểm tra: đặt thẳng chưởng vào đích rồi nổ, không bay.
+    const calm = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (calm) {
+      spell.style.transform = `translate(${dx}px,${dy}px) scale(1.35)`;
+      later(land, 60, token);
+    } else if (typeof spell.animate === 'function') {
+      spell.animate([
+        { transform: 'translate(0,0) scale(.55) rotate(0deg)' },
+        { transform: `translate(${dx}px,${dy}px) scale(1.35) rotate(300deg)` }
+      ], { duration: 280, easing: 'cubic-bezier(.2,.8,.25,1)', fill: 'forwards' })
+        .onfinish = land;
     } else {
-      spell.style.left = targetLeft;
-      spell.style.top = targetTop;
-      later(() => {
-        createImpact(monster.x, monster.lane, points);
-        spell.remove();
-      }, 280, token);
+      spell.style.transform = `translate(${dx}px,${dy}px) scale(1.35) rotate(300deg)`;
+      later(land, 280, token);
     }
   }
 
