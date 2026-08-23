@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v10';
+const CACHE_VERSION = 'v11';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [

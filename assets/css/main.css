@@ -394,10 +394,12 @@
   .badge{font-family:var(--font-display);font-weight:700;font-size:calc(var(--qF) * .5);background:var(--ink);color:#fff;border-radius:var(--r-pill);padding:5px 14px}
   .badge.type{background:var(--purple-ink);animation:badgePop .4s var(--ease-pop)}
   @keyframes badgePop{from{transform:scale(.5)}60%{transform:scale(1.15)}to{transform:scale(1)}}
-  .streak{font-family:var(--font-display);font-weight:800;font-size:calc(var(--qF) * .55);color:var(--orange-ink)}
+  .streak,.crit{font-family:var(--font-display);font-weight:800;border-radius:var(--r-pill);padding:5px 14px;color:#fff}
+  .streak:empty,.crit:empty{display:none}
+  .streak{font-size:calc(var(--qF) * .55);background:var(--orange-ink)}
   .streak.hot{animation:fireWig .5s infinite}
   @keyframes fireWig{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.15)}}
-  .crit{font-family:var(--font-display);font-weight:800;font-size:calc(var(--qF) * .5);color:var(--purple-ink);animation:blink .7s infinite}
+  .crit{font-size:calc(var(--qF) * .5);background:var(--purple-ink);animation:blink .7s infinite}
 
   .arena{
     position:relative;
@@ -608,6 +610,12 @@
   .big-emoji{font-size:clamp(72px,7vw,110px);margin:6px 0;display:inline-block;line-height:1}
   .bounce{animation:bounce 1s ease infinite}
   @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  /* Vầng sáng sau lưng boss ở màn giới thiệu — hé lộ tông màu đấu trường sắp
+     vào (đêm/dung nham/băng giá) trước khi bấm VÀO TRẬN. Chỉ tô nền quanh
+     nhân vật, không chạm chữ, nên không ảnh hưởng tương phản của thẻ. */
+  #introEmoji.arena-night{background:radial-gradient(circle,rgba(90,63,128,.4) 0%,transparent 68%)}
+  #introEmoji.arena-lava{background:radial-gradient(circle,rgba(255,140,70,.4) 0%,transparent 68%)}
+  #introEmoji.arena-ice{background:radial-gradient(circle,rgba(140,210,240,.45) 0%,transparent 68%)}
   .stats{display:flex;justify-content:center;gap:14px;margin:14px 0;flex-wrap:wrap}
   /* Baloo 2 có chữ số rộng KHÔNG đều (đo được 7,88–12,13px ở cỡ 20px), nên mọi
      con số thay đổi liên tục phải dùng chữ số đều bề ngang, nếu không ô sẽ co giãn
@@ -617,6 +625,13 @@
   .stat{flex:1 1 112px;max-width:190px;background:#fff;border:var(--bd-2) solid var(--ink);border-radius:var(--r-2);padding:11px 20px;min-width:112px}
   .stat .num{font-family:var(--font-display);font-weight:800;font-size:clamp(28px,2vw,42px)}
   .stat .lbl{font-size:clamp(14px,.75vw,14px);font-weight:900;color:var(--ink-3)}
+  /* victory/defeat/scoreEnd trước đây dùng chung một ô trắng trung tính dù cảm
+     xúc khác hẳn nhau. Thắng thì tô ấm để ăn mừng; thua thì tô DỊU chứ không
+     dùng đỏ — số câu sai không nên trông như một lời trách trẻ. scoreEnd (hết
+     giờ luyện tập) giữ trung tính vì không phải thắng hay thua. */
+  #victory .stat{background:#eaffef;border-color:var(--green-ink)}
+  #victory .stat .num{color:var(--green-ink)}
+  #defeat .stat{background:#f4f1fb;border-color:#8a7eb0}
 
   .bossintro{background:#fff;border:var(--bd-2) solid var(--ink);border-radius:var(--r-2);padding:16px;margin:16px auto;font-weight:700;font-size:clamp(14.5px,1.05vw,21px);line-height:1.8;max-width:min(780px,92vw)}
   .bossintro b{color:var(--boss)}

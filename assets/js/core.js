@@ -378,6 +378,11 @@ function showIntro(){
      hai nhân vật cho cùng một boss. Nay dựng đúng con quái ấy với đúng bảng màu. */
   if(!fillArt(ie,'tplBeast'))ie.textContent=b.emoji;
   else applySkin(ie.firstElementChild,bossArt(b));
+  /* Vầng sáng sau lưng boss hé lộ tông màu đấu trường (đêm/dung nham/băng giá)
+     TRƯỚC khi vào trận — trước đây màn giới thiệu luôn là panel kem trung tính,
+     chỉ tới lúc bắt đầu đấu mới thấy nền đấu trường đổi màu. */
+  ie.classList.remove('arena-night','arena-lava','arena-ice');
+  if(b.arena)ie.classList.add('arena-'+b.arena);
   ie.classList.remove('introZoom');void ie.offsetWidth;ie.classList.add('introZoom');
   $('introName').textContent=b.name.toUpperCase();
   /* Câu giới thiệu tính cách đứng TRƯỚC bảng chỉ số: trẻ vừa nhìn thấy con quái xong,
@@ -638,22 +643,39 @@ function closeShop(){
   else if(shopMode==='defeat')showScreen('defeat');
   else showIntro();
 }
+/* Trước đây 12 vật phẩm nằm chung MỘT lưới, chỉ phân biệt bằng dòng chữ nhỏ
+   "suốt hành trình"/"mang vào trận" trong từng thẻ — dữ liệu SHOP đã chia rõ
+   qua `kind` nhưng bố cục không cho thấy điều đó. Nay tách thành hai nhóm có
+   tiêu đề riêng (tái dùng style .maplbl của bản đồ chiến dịch). */
+const SHOP_GROUPS=[
+  {kind:'perk',label:'🗺️ NÂNG CẤP HÀNH TRÌNH — mua càng nhiều càng đắt, giữ suốt hành trình'},
+  {kind:'inv', label:'🎒 VẬT PHẨM MANG VÀO TRẬN — bấm để dùng khi cần'},
+];
 function renderShop(){
   $('shopCoins').textContent=G.coins+' 💰';
-  const grid=$('shopGrid');grid.innerHTML='';
-  SHOP.forEach(it=>{
-    const price=itemPrice(it),owned=itemOwned(it);
-    const maxed=it.max&&owned>=it.max;
-    const cant=G.coins<price||maxed;
-    const d=document.createElement('button');
-    d.className='shopitem'+(cant?' cant':'');
-    const tag=it.kind==='perk'?'🗺️ suốt hành trình':'🎒 mang vào trận';
-    d.innerHTML=`<span class="si">${it.icon}</span>
-      <span style="flex:1"><span class="sn">${it.name}</span>${owned?` <span class="own">(có ${owned})</span>`:''}<br>
-      <span class="sd">${it.desc}</span><br><span class="sd" style="color:var(--purple-ink)">${tag}</span></span>
-      <span class="sp">${maxed?'ĐỦ':price+' 💰'}</span>`;
-    d.onclick=()=>buyItem(it);
-    grid.appendChild(d);
+  const wrap=$('shopGrid');wrap.innerHTML='';
+  SHOP_GROUPS.forEach(group=>{
+    const items=SHOP.filter(it=>it.kind===group.kind);
+    if(!items.length)return;
+    const h=document.createElement('h3');
+    h.className='maplbl';h.textContent=group.label;
+    wrap.appendChild(h);
+    const grid=document.createElement('div');
+    grid.className='shopgrid';
+    items.forEach(it=>{
+      const price=itemPrice(it),owned=itemOwned(it);
+      const maxed=it.max&&owned>=it.max;
+      const cant=G.coins<price||maxed;
+      const d=document.createElement('button');
+      d.className='shopitem'+(cant?' cant':'');
+      d.innerHTML=`<span class="si">${it.icon}</span>
+        <span style="flex:1"><span class="sn">${it.name}</span>${owned?` <span class="own">(có ${owned})</span>`:''}<br>
+        <span class="sd">${it.desc}</span></span>
+        <span class="sp">${maxed?'ĐỦ':price+' 💰'}</span>`;
+      d.onclick=()=>buyItem(it);
+      grid.appendChild(d);
+    });
+    wrap.appendChild(grid);
   });
 }
 

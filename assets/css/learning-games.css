@@ -39,7 +39,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 @keyframes worldFloat{50%{transform:translateY(-7px) rotate(4deg)}}
 
 .answer-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:#645b82;font-size:14px;font-weight:900}
-.answer-toolbar select,.select-row select{border:var(--bd-1) solid #8a7eb0;border-radius:var(--r-1);background:#fff;padding:7px 9px;color:var(--ink);font:800 14.5px var(--font-body)}
+.answer-toolbar select,.select-row select{
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  border:var(--bd-1) solid #8a7eb0;border-radius:var(--r-1);
+  padding:7px 30px 7px 9px;background-color:#fff;color:var(--ink);font:800 14.5px var(--font-body);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 15px) center,calc(100% - 9px) center;
+  background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+.answer-toolbar select:hover,.select-row select:hover{background-color:#f3effc}
+.answer-toolbar select option,.select-row select option{background:#fff;color:var(--ink)}
 #answerModeHint{font-size:14px;opacity:.8}
 .answer-entry{display:grid;grid-template-columns:1fr auto;gap:9px}
 .answer-entry[hidden]{display:none}
@@ -69,6 +77,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .typing-setup h2{font:900 clamp(22px,2vw,34px) var(--font-display)}.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
 .option-card{position:relative;cursor:pointer}.option-card input{position:absolute;opacity:0}.option-card span{height:100%;display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;padding:14px;border:var(--bd-2) solid rgba(255,255,255,.22);border-radius:var(--r-2);background:rgba(20,18,60,.35);font-size:34px;text-align:left;transition:all var(--dur-2) var(--ease-snap)}.option-card b,.option-card small{display:block;font-size:16px}.option-card small{grid-column:2;color:var(--on-dark-dim);font-size:14px}.option-card input:checked+span{border-color:#60e2ff;background:rgba(54,200,222,.25);box-shadow:0 0 0 4px rgba(80,220,244,.16)}
 .typing-dictionary-status{margin:8px 0 2px;color:#d9d5f6;font-size:14px;font-weight:900}.typing-dictionary-status[data-tone="loading"]{color:#ffe16b}.typing-dictionary-status[data-tone="ready"]{color:var(--on-dark-ok)}.typing-dictionary-status[data-tone="warning"]{color:var(--on-dark-warn)}.typing-source{margin:0 0 12px;color:var(--on-dark-dim);font-size:14px}.typing-source a{color:#8fe8ff;text-decoration:underline}
+/* Kho từ 4,6MB tải xong trong vài giây trên mạng chậm — trước đây chỉ có một
+   dòng chữ đổi màu, màn hình đứng im không nói % nào. */
+.dict-progress{height:6px;margin:2px 0 8px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
+.dict-progress[hidden]{display:none}
+.dict-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#41c9e2,#8d6bff);transition:width .15s linear}
 .select-row,.check-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:13px 0;color:#e5e2fa;font-weight:900}
 /* Bảng chọn/ô tick trong màn Gõ Chữ nằm trên panel TỐI, nhưng mặc định của trình
    duyệt là nền trắng + mũi tên hệ thống nên trông như dán nhầm từ trang khác.

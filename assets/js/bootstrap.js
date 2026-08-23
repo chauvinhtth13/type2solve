@@ -20,7 +20,16 @@
     const data=storage?.load?.()||{};
     const records=data.records||{};
     const typingBest=Number(records.typing?.bestScore)||0;
-    if($('profileStars'))$('profileStars').textContent=Number(data.profile?.stars)||0;
+    const stars=Number(data.profile?.stars)||0;
+    if($('profileStars'))$('profileStars').textContent=stars;
+    // Ô hero trang chủ giống hệt nhau dù là lượt chơi đầu hay lượt 50 — cho
+    // icon đổi theo tổng sao (đã tính sẵn cho #profileStars) để người chơi
+    // quay lại thấy ngay hành trình của mình, không cần đọc số.
+    if($('homeBigEmoji')){
+      const rank=stars>=60?['👑','Bậc Thầy Tư Duy']:stars>=30?['🔥','Cao Thủ']:stars>=10?['⚡','Chiến Binh']:['🧠','Tân Binh'];
+      $('homeBigEmoji').textContent=rank[0];
+      $('homeBigEmoji').title=`${rank[1]} · ${stars} ⭐`;
+    }
     if($('profileTyping'))$('profileTyping').textContent=typingBest;
     if($('profileSudoku'))$('profileSudoku').textContent=Number(records.sudoku?.wins)||0;
     // Ô "Phiêu lưu" chiếm hai hàng trong lưới bento nên phải có nội dung xứng chỗ:

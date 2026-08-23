@@ -4,7 +4,9 @@ import { createServer } from 'node:http';
 import { dirname, extname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const projectRoot = process.env.DTTD_ROOT
+  ? resolve(process.env.DTTD_ROOT)
+  : resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const requestedPort = Number(process.env.DTTD_PORT);
 const port = Number.isInteger(requestedPort) && requestedPort > 0 ? requestedPort : 4173;
 const host = '127.0.0.1';

@@ -167,6 +167,44 @@
     status.dataset.tone = tone || '';
   }
 
+  // Kho từ nặng ~4,6MB nên trước đây chỉ đổi màu một câu chữ trong lúc tải —
+  // với người mạng chậm, màn hình đứng im không nói gì suốt vài giây. Thanh
+  // này cho biết % thật (percent=null thì ẩn đi khi xong hoặc khi trình
+  // duyệt không hỗ trợ đo tiến trình).
+  function setDictionaryProgress(percent) {
+    const wrap = byId('typingDictProgress');
+    const fill = byId('typingDictProgressFill');
+    if (!wrap || !fill) return;
+    if (percent == null) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    fill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+  }
+
+  // response.json() không cho biết đã tải được bao nhiêu byte. Đọc tay qua
+  // getReader() để có % thật theo Content-Length; nếu trình duyệt/response
+  // không hỗ trợ (thiếu body stream hoặc thiếu header) thì lùi về .json()
+  // như cũ, không có thanh tiến trình nhưng vẫn tải được bình thường.
+  async function fetchDictionaryPayload(url) {
+    const response = await global.fetch(url, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const total = Number(response.headers.get('Content-Length')) || 0;
+    if (!response.body || !total) return response.json();
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+      setDictionaryProgress(received / total * 100);
+    }
+    const buffer = new Uint8Array(received);
+    let offset = 0;
+    chunks.forEach(chunk => { buffer.set(chunk, offset); offset += chunk.length; });
+    return JSON.parse(new TextDecoder('utf-8').decode(buffer));
+  }
+
   function setLaunchLoading(loading) {
     document.querySelectorAll('#typingSetup .typing-launch button').forEach(button => {
       button.disabled = loading;
@@ -182,11 +220,8 @@
     if (!content || !descriptor || content.dictionaryLoaded) return true;
     if (dictionaryPromise) return dictionaryPromise;
     setDictionaryStatus('⏳ Đang nạp kho từ điển Anh–Việt mở…', 'loading');
-    dictionaryPromise = global.fetch(descriptor.url, { cache: 'force-cache' })
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
+    setDictionaryProgress(0);
+    dictionaryPromise = fetchDictionaryPayload(descriptor.url)
       .then(payload => {
         if (!payload || !Array.isArray(payload.levels) || payload.levels.length !== 3) {
           throw new Error('Dữ liệu từ điển không đúng định dạng');
@@ -216,11 +251,13 @@
         content.dictionaryCount = content.en.length;
         content.dictionarySource = payload.source || null;
         setDictionaryStatus(`✅ Sẵn sàng ${content.dictionaryCount.toLocaleString('vi-VN')} từ Anh–Việt`, 'ready');
+        setDictionaryProgress(null);
         return true;
       })
       .catch(() => {
         dictionaryPromise = null;
         setDictionaryStatus(`⚠️ Đang dùng ${content.en.length} từ cơ bản vì chưa tải được kho mở rộng.`, 'warning');
+        setDictionaryProgress(null);
         return false;
       });
     return dictionaryPromise;

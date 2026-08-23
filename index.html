@@ -230,7 +230,7 @@
 
         <header class="tile tile-hero">
           <button class="tile-sound" id="sndBtnHome" onclick="toggleSound()" aria-pressed="true" aria-label="Bật hoặc tắt âm thanh">🔊</button>
-          <div class="big-emoji bounce" aria-hidden="true">🧠</div>
+          <div class="big-emoji bounce" id="homeBigEmoji" aria-hidden="true">🧠</div>
           <h1 id="homeTitle">ĐẤU TRƯỜNG <span class="hl">TƯ DUY</span></h1>
           <p class="sub">Một học viện phiêu lưu: đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku! ✨</p>
         </header>
@@ -398,6 +398,9 @@
       <div class="big-emoji bounce">🎁</div>
       <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
       <p class="sub" id="bossWinSub"></p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="bossWinStars">0</div><div class="lbl">⭐ SAO VỪA NHẬN</div></div>
+      </div>
       <div style="margin-top:20px;max-width:520px;margin-left:auto;margin-right:auto">
         <button class="btn big" onclick="SFX.open();openShop('next')">🛒 VÀO CỬA HÀNG MUA SẮM</button>
       </div>
@@ -411,7 +414,7 @@
       <h1>CỬA HÀNG VẬT PHẨM</h1>
       <p class="sub">Trả lời đúng để kiếm xu 💰 — mua vật phẩm để mạnh hơn!<br>
       Xu của em: <b id="shopCoins" style="font-size:22px;color:var(--gold-ink)">0 💰</b></p>
-      <div class="shopgrid" id="shopGrid"></div>
+      <div id="shopGrid"></div>
       <div style="margin-top:18px;max-width:520px;margin-left:auto;margin-right:auto">
         <button class="btn big green" id="shopDoneBtn" onclick="SFX.click();closeShop()">⚔️ VÀO TRẬN!</button>
       </div>
@@ -493,6 +496,7 @@
           <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>Tiếng Việt</b><small>Luyện dấu, cụm từ và chính tả</small></span></label>
         </div>
         <p class="typing-dictionary-status" id="typingDictionaryStatus" aria-live="polite">📚 Kho từ mở sẽ tự nạp khi vào trò chơi.</p>
+        <div class="dict-progress" id="typingDictProgress" hidden><i id="typingDictProgressFill"></i></div>
         <p class="typing-source">Dữ liệu: <a href="https://vi.wiktionary.org/" target="_blank" rel="noopener">Wiktionary tiếng Việt</a> qua <a href="https://kaikki.org/viwiktionary/" target="_blank" rel="noopener">Kaikki</a> · CC BY-SA 4.0</p>
         <label class="select-row">Độ khó
           <select id="typingDifficulty"><option value="superslow">🐢 Siêu chậm — chỉ 1 quái, từ dễ nhất</option><option value="easy">Dễ — quái chậm</option><option value="normal" selected>Vừa — cân bằng</option><option value="hard">Khó — quái nhanh</option><option value="superfast">🚀 Siêu nhanh — quái dồn dập, điểm ×2</option></select>

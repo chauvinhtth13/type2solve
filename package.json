@@ -4,6 +4,7 @@
   "private": true,
   "description": "Game học tập tương tác: đấu toán, luyện gõ Anh–Việt và Sudoku 6 cấp độ.",
   "scripts": {
+    "build": "node tools/build.mjs",
     "build:dictionary": "node tools/build-english-vocabulary.mjs",
     "serve": "node tools/serve.mjs",
     "test": "node tools/smoke-test.mjs",
@@ -14,5 +15,8 @@
     "game",
     "vietnamese",
     "pwa"
-  ]
+  ],
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }

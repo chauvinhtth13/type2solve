@@ -776,6 +776,7 @@ function bossDefeated(){
       const reward=50+BOSSES[G.bossIndex].tier*20;
       G.coins+=reward;
       saveAdventureProgress();
+      $('bossWinStars').textContent=newlyCleared?2+BOSSES[G.bossIndex].tier:0;
       $('bossWinTitle').textContent='HẠ GỤC '+BOSSES[G.bossIndex].name.toUpperCase()+'!';
       $('bossWinSub').innerHTML='🎉 Nhận thưởng <b>+'+reward+' 💰</b> (em đang có <b>'+G.coins+' 💰</b>)<br>Boss tiếp theo: <b>'+BOSSES[G.bossIndex+1].name+'</b> ('+RANKS[BOSSES[G.bossIndex+1].tier]+')';
       showScreen('bossWin');
