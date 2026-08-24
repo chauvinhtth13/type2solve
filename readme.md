@@ -4,10 +4,6 @@ Một game học tập chạy hoàn toàn trên trình duyệt, được tách t
 
 Sản phẩm được sáng tạo và phát triển bởi **Châu Vinh**.
 
-Ngân hàng toán có thêm 19 mẫu “Thử thách mới” trải đều 5 cấp: quy luật hiệu lẻ, số liên tiếp, que diêm, lập số, đường đi trên lưới, bao hàm–loại trừ, số dư, đếm ước, năng suất chung, nghiệm nguyên và giai thừa. Mỗi câu vẫn sinh dữ kiện mới, đáp án nhiễu và lời giải từng bước.
-
-Nhóm **Singapore lớp 3** bổ sung thêm 18 dạng: quy luật/que diêm, lịch với số ngày lớn và qua năm nhuận, trồng cây trên đoạn thẳng/đường tròn, khối lập phương, diện tích theo tỉ lệ, tính ngược tiền góp, chữ số tận cùng và hai câu bẫy mật mã số. Danh mục chuyên đề được tham khảo từ [MathX – Toán tư duy Singapore lớp 3](https://mathx.vn/khoa-hoc/toan-tu-duy-singapore-lop-3.html); câu hỏi trong game được biên soạn từ nội dung người dùng cung cấp hoặc tạo biến thể mới và tự kiểm chứng, không đóng gói video/phần luyện tập bị giới hạn truy cập của MathX.
-
 ## Chạy project
 
 Yêu cầu duy nhất để dùng công cụ đi kèm là Node.js 18 trở lên. Project không có dependency và không cần bước build.
