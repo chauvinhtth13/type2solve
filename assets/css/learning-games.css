@@ -592,7 +592,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
   .game-topbar{gap:clamp(15px,1vw,34px);padding-bottom:clamp(15px,1vw,30px)}
   .game-topbar h1{font-size:clamp(42px,1.9vw,74px)}
   .eyebrow{font-size:clamp(14px,.62vw,24px)}
-  .icon-btn{width:clamp(48px,2.5vw,92px);height:clamp(48px,2.5vw,92px);font-size:clamp(23px,1.2vw,44px)}
+  /* :not(.home-btn) là BẮT BUỘC — nút "🏠 Trang chủ" có CHỮ bên trong nên phải
+     rộng theo nội dung (`.home-btn{width:auto}` ở trên). Ép nó về ô vuông cố
+     định như các nút icon khác thì chữ tràn ra ngoài khung và đè lên tiêu đề.
+     Đây đúng là lỗi đã xảy ra khi khối 4K này mới thêm: ở 2560px trở lên nút
+     rộng 64px trong khi nội dung cần 136px. */
+  .icon-btn:not(.home-btn){width:clamp(48px,2.5vw,92px);height:clamp(48px,2.5vw,92px);font-size:clamp(23px,1.2vw,44px)}
+  .home-btn{height:clamp(48px,2.5vw,92px);padding:0 clamp(14px,.85vw,30px);gap:clamp(8px,.5vw,18px);font-size:clamp(23px,1.2vw,44px)}
+  .home-btn span{font-size:clamp(15px,.72vw,28px)}
   .typing-hud span,.sudoku-hud span{font-size:clamp(14.5px,.72vw,28px);padding:clamp(7px,.4vw,14px) clamp(11px,.6vw,22px)}
   .game-result h2{font-size:clamp(37px,1.7vw,64px)}
   .game-result p{font-size:clamp(16px,.8vw,30px)}

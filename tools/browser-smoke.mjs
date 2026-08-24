@@ -856,6 +856,32 @@ try {
     ? `Lỗi độ phân giải: ${loiPhanGiai.join(' | ')}`
     : `Bố cục dùng tốt cả 4 mốc FHD/QHD/4K/8K (không tràn, khung lấp ≥50% bề ngang)`);
 
+  /* LỖI THẬT (người dùng báo): nút "🏠 Trang chủ" có CHỮ bên trong nhưng bị quy
+     tắc .icon-btn ép về ô vuông cố định ở màn ≥2400px ⇒ chữ tràn khỏi nút và đè
+     lên tiêu đề. Đo scrollWidth > clientWidth (nội dung rộng hơn khung) và mép
+     phải của nút so với mép trái tiêu đề — cả 4 màn học tập, 5 mốc phân giải. */
+  const loiTopbar = [];
+  for (const [tenRes, w, h] of [['HD',1366,768],['FHD',1920,1080],['QHD',2560,1440],['4K',3840,2160],['8K',7680,4320]]) {
+    await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    for (const [tenMan, moMan] of [['Gõ Chữ', `openTypingGame()`], ['Sudoku', `openSudokuGame()`],
+      ['Đối Kháng', `openDuelGame()`], ['Nim', `openNimGame()`]]) {
+      await evaluate(`goHome();${moMan}`); await sleep(320);
+      const d = await evaluate(`(()=>{
+        const bar=document.querySelector('.screen.active .game-topbar');
+        const btn=bar.querySelector('.home-btn'), title=bar.querySelector('h1');
+        const b=btn.getBoundingClientRect(), t=title.getBoundingClientRect();
+        return {tranChu:btn.scrollWidth>btn.clientWidth+1, deLen:Math.round(b.right)>Math.round(t.left)};
+      })()`);
+      if (d.tranChu) loiTopbar.push(`${tenRes}/${tenMan}: chữ tràn khỏi nút Trang chủ`);
+      if (d.deLen) loiTopbar.push(`${tenRes}/${tenMan}: nút Trang chủ đè lên tiêu đề`);
+    }
+  }
+  await send('Emulation.clearDeviceMetricsOverride');
+  await evaluate(`goHome()`); await sleep(300);
+  assert(loiTopbar.length === 0, loiTopbar.length
+    ? `Lỗi thanh tiêu đề: ${loiTopbar.join(' | ')}`
+    : 'Nút Trang chủ không tràn chữ / không đè tiêu đề ở cả 4 màn × 5 mốc phân giải');
+
   /* Bộ câu đố kinh điển mới: mọi dạng phải có đáp án nằm TRONG danh sách lựa
      chọn và không có lựa chọn trùng nhau — sai một trong hai là câu hỏi không
      thể trả lời đúng được. */
