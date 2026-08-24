@@ -61,13 +61,22 @@
   window.addEventListener('game-storage:change',refreshProfileSummary);
   window.addEventListener('storage',refreshProfileSummary);
 
+  /* Chỉ một modal mở tại một thời điểm trong app này, nên "modal đang mở" tra
+     được bằng một selector chung — thêm modal thứ 3 trở đi không phải sửa gì
+     ở đây, chỉ cần class="modal" + observeModal() bên dưới. */
+  function activeModal(){ return document.querySelector('.modal.on'); }
+
   document.addEventListener('keydown',event=>{
     if(event.isComposing)return;
     const tag=document.activeElement?.tagName;
     const isWriting=tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT';
-    if($('restartModal').classList.contains('on')){
-      if(event.key==='Escape'){event.preventDefault();closeRestart();}
-      if(event.key==='Tab')trapModalFocus(event);
+    const modal=activeModal();
+    if(modal){
+      if(event.key==='Escape'){
+        event.preventDefault();
+        if(modal.id==='restartModal')closeRestart();else modal.classList.remove('on');
+      }
+      if(event.key==='Tab')trapModalFocus(event,modal);
       return;
     }
     if(event.key==='Escape'&&$('battle').classList.contains('active')){
@@ -79,8 +88,9 @@
     }
   });
 
-  function trapModalFocus(event){
-    const modal=$('restartModal');
+  function trapModalFocus(event,modal){
+    modal=modal||activeModal();
+    if(!modal)return;
     const items=[...modal.querySelectorAll('button,[href],input,select,[tabindex]:not([tabindex="-1"])')].filter(el=>!el.disabled);
     if(!items.length)return;
     const first=items[0],last=items[items.length-1];
@@ -88,13 +98,17 @@
     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
   }
 
-  const modalObserver=new MutationObserver(()=>{
-    const modal=$('restartModal'),open=modal.classList.contains('on');
-    modal.setAttribute('aria-hidden',String(!open));
-    if(open){lastModalFocus=document.activeElement;requestAnimationFrame(()=>modal.querySelector('.modalbox')?.focus());}
-    else if(lastModalFocus?.isConnected){lastModalFocus.focus();lastModalFocus=null;}
-  });
-  modalObserver.observe($('restartModal'),{attributes:true,attributeFilter:['class']});
+  function observeModal(modal){
+    if(!modal)return;
+    new MutationObserver(()=>{
+      const open=modal.classList.contains('on');
+      modal.setAttribute('aria-hidden',String(!open));
+      if(open){lastModalFocus=document.activeElement;requestAnimationFrame(()=>modal.querySelector('.modalbox')?.focus());}
+      else if(lastModalFocus?.isConnected){lastModalFocus.focus();lastModalFocus=null;}
+    }).observe(modal,{attributes:true,attributeFilter:['class']});
+  }
+  observeModal($('restartModal'));
+  observeModal($('infoModal'));
 
   document.addEventListener('visibilitychange',()=>{
     document.body.classList.toggle('fx-quiet',document.hidden||BUSY_SCREENS.some(id=>$(id)?.classList.contains('active')));

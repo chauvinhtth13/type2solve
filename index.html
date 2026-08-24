@@ -28,6 +28,8 @@
   <script defer src="assets/js/data/typing-content.js"></script>
   <script defer src="assets/js/games/typing.js"></script>
   <script defer src="assets/js/games/sudoku.js"></script>
+  <script defer src="assets/js/games/duel.js"></script>
+  <script defer src="assets/js/games/nim.js"></script>
   <script defer src="assets/js/bootstrap.js"></script>
 </head>
 <body>
@@ -277,6 +279,20 @@
           </button>
         </div>
 
+        <h2 class="sr-only">Đấu với bạn bè</h2>
+        <div class="tile-more">
+          <button class="learning-mode duel-mode tile" onclick="SFX.click();openDuelGame()">
+            <span class="world-icon" aria-hidden="true">⚔️</span>
+            <span><b>ĐẤU ĐỐI KHÁNG</b><small>2 người thay phiên trả lời, tung chưởng hạ gục đối thủ</small></span>
+            <span class="world-tag">2 người</span>
+          </button>
+          <button class="learning-mode nim-mode tile" onclick="SFX.click();openNimGame()">
+            <span class="world-icon" aria-hidden="true">🪨</span>
+            <span><b>NIM MISÈRE</b><small>Bốc sỏi từng đống — ai bốc viên cuối cùng sẽ THUA</small></span>
+            <span class="world-tag">2 người</span>
+          </button>
+        </div>
+
         <footer class="tile tile-credit">
           <p class="credit-line">
             <span class="credit-work">Đấu Trường Tư Duy</span>
@@ -284,6 +300,7 @@
             <span class="credit-role">Thiết kế &amp; phát triển</span>
             <strong class="credit-name">Châu Vinh</strong>
           </p>
+          <button class="credit-info-btn" onclick="SFX.click();openInfoModal()">💛 Ủng hộ &amp; Góp ý</button>
         </footer>
 
       </div>
@@ -649,6 +666,158 @@
     </div>
   </div>
 
+  <!-- ĐẤU ĐỐI KHÁNG (2 người) -->
+  <div class="screen learning-screen" id="duelGame">
+    <div class="card game-card duel-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveDuelGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">2 NGƯỜI CHƠI CÙNG MÁY</span><h1>Đấu Đối Kháng</h1></div>
+      </div>
+
+      <section class="duel-setup" id="duelSetup">
+        <p class="sub">Mỗi người thay phiên trả lời câu hỏi để tung chưởng — ai hết máu trước sẽ thua!</p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName1">Tên người chơi 1</label>
+            <input id="duelName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+          </div>
+          <div class="duel-vs" aria-hidden="true">⚔️</div>
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName2">Tên người chơi 2</label>
+            <input id="duelName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+          </div>
+        </div>
+        <label class="select-row">Độ khó câu hỏi
+          <select id="duelTier">
+            <option value="1">⭐ Khởi Động</option>
+            <option value="2" selected>⭐⭐ Thử Thách</option>
+            <option value="3">⭐⭐⭐ Cao Thủ</option>
+            <option value="4">⭐⭐⭐⭐ Huyền Thoại</option>
+            <option value="5">⭐⭐⭐⭐⭐ Bậc Thầy</option>
+          </select>
+        </label>
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startDuel()">⚔️ BẮT ĐẦU ĐẤU!</button></div>
+      </section>
+
+      <section class="duel-play" id="duelPlay" hidden>
+        <div class="arena" id="duelArena">
+          <div class="ground"></div>
+          <div class="hprow">
+            <div class="hpwrap">
+              <div class="hpname" id="duelHpName1"></div>
+              <div class="hpbar"><div class="hpfill" id="duelHp1" style="width:100%"></div></div>
+            </div>
+            <div class="hpwrap">
+              <div class="hpname" id="duelHpName2"></div>
+              <div class="hpbar"><div class="hpfill" id="duelHp2" style="width:100%"></div></div>
+            </div>
+          </div>
+          <div class="fighter" id="duelP1Box">
+            <div style="position:relative;display:inline-block">
+              <div class="shadowPad"></div>
+              <svg class="sprite" id="duelSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            </div>
+          </div>
+          <div class="fighter" id="duelP2Box">
+            <div style="position:relative;display:inline-block">
+              <div class="shadowPad"></div>
+              <svg class="sprite" id="duelSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            </div>
+          </div>
+        </div>
+        <p class="duel-turn" id="duelTurnTxt" aria-live="polite"></p>
+        <div class="qbox" id="duelQbox">
+          <div class="qtext" id="duelQuestionTxt"></div>
+        </div>
+        <div class="answers" id="duelAnswers"></div>
+        <div class="feedback" id="duelFeedback" aria-live="polite"></div>
+      </section>
+
+      <section class="game-result duel-result" id="duelResult" hidden aria-live="polite">
+        <div class="result-icon" id="duelResultIcon">🏆</div>
+        <h2 id="duelResultTitle"></h2>
+        <p id="duelResultText"></p>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchDuel()">🔁 Đấu lại</button>
+          <button class="btn" type="button" onclick="leaveDuelGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- NIM MISÈRE (2 người) -->
+  <div class="screen learning-screen" id="nimGame">
+    <div class="card game-card nim-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveNimGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">2 NGƯỜI CHƠI CÙNG MÁY</span><h1>Nim Misère</h1></div>
+      </div>
+
+      <section class="nim-setup" id="nimSetup">
+        <p class="sub">⚠️ Luật NGƯỢC với Nim thường: <b>ai bốc viên sỏi cuối cùng sẽ THUA!</b></p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName1">Tên người chơi 1</label>
+            <input id="nimName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+          </div>
+          <div class="duel-vs" aria-hidden="true">🪨</div>
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName2">Tên người chơi 2</label>
+            <input id="nimName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+          </div>
+        </div>
+        <label class="select-row">Kích thước ván
+          <select id="nimPreset">
+            <option value="small">Nhỏ — 3 đống, 1–5 viên</option>
+            <option value="medium" selected>Vừa — 4 đống, 1–7 viên</option>
+            <option value="large">Lớn — 5 đống, 1–9 viên</option>
+          </select>
+        </label>
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>
+      </section>
+
+      <section class="nim-play" id="nimPlay" hidden>
+        <p class="nim-warning">⚠️ Ai bốc viên sỏi cuối cùng sẽ THUA!</p>
+        <p class="duel-turn" id="nimTurnTxt" aria-live="polite"></p>
+        <div class="nim-board" id="nimBoard"></div>
+        <p class="nim-feedback" id="nimFeedback" aria-live="polite"></p>
+      </section>
+
+      <section class="game-result nim-result" id="nimResult" hidden aria-live="polite">
+        <div class="result-icon" id="nimResultIcon">🏆</div>
+        <h2 id="nimResultTitle"></h2>
+        <p id="nimResultText"></p>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchNim()">🔁 Chơi lại</button>
+          <button class="btn" type="button" onclick="leaveNimGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
 
 </main>
 
@@ -661,6 +830,34 @@
       <button class="btn big green" onclick="closeRestart()">▶️ TIẾP TỤC CHƠI</button>
       <button class="btn big" onclick="doRestart()">🔄 CHƠI LẠI TỪ ĐẦU</button>
       <button class="btn big" onclick="goHomeFromPause()">🏠 VỀ TRANG CHỦ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" aria-hidden="true">
+  <div class="modalbox info-modalbox" tabindex="-1">
+    <button class="modal-close" onclick="closeInfoModal()" aria-label="Đóng">✕</button>
+    <h1 id="infoModalTitle" class="info-title">💛 Ủng hộ &amp; Góp ý</h1>
+    <p class="info-subtitle">Vài cách nhỏ để ủng hộ hoặc góp ý cho Đấu Trường Tư Duy — không cái nào bắt buộc để chơi game.</p>
+
+    <div class="info-sections">
+      <section class="info-section">
+        <h2>☕ Ủng hộ dự án</h2>
+        <p>Nếu Đấu Trường Tư Duy giúp ích cho con em bạn, một tách cà phê nhỏ sẽ tiếp thêm động lực để mình làm thêm nội dung mới. Quét mã QR bên dưới nếu muốn ủng hộ — hoàn toàn tuỳ tâm.</p>
+        <img class="info-qr" src="assets/images/donate-qr.jpg" alt="Mã QR ủng hộ cho Châu Vinh" loading="lazy" width="220" height="360">
+      </section>
+
+      <section class="info-section">
+        <h2>✉️ Góp ý cho phụ huynh &amp; học sinh</h2>
+        <p>Phát hiện lỗi, câu hỏi sai, hoặc muốn đề xuất tính năng mới? Gửi email trực tiếp:</p>
+        <a class="info-link" href="mailto:chauvinhtth13@gmail.com"><span class="info-link-icon">✉️</span><span>chauvinhtth13@gmail.com</span></a>
+      </section>
+
+      <section class="info-section">
+        <h2>💻 Mã nguồn mở</h2>
+        <p>Toàn bộ mã nguồn được công khai — xem, tải về hoặc đóng góp trên GitHub:</p>
+        <a class="info-link" href="https://github.com/chauvinhtth13/type2solve" target="_blank" rel="noopener"><span class="info-link-icon">💻</span><span>github.com/chauvinhtth13/type2solve</span></a>
+      </section>
     </div>
   </div>
 </div>

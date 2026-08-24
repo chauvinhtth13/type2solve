@@ -119,11 +119,11 @@ try {
   const home = await evaluate(`({
     active: document.querySelector('#home.active') !== null,
     modes: document.querySelectorAll('.learning-mode').length,
-    api: ['openTypingGame','startTypingCampaign','resetTypingCampaign','openSudokuGame','startSudoku','checkSudoku','setAnswerMode'].every(name => typeof window[name] === 'function'),
+    api: ['openTypingGame','startTypingCampaign','resetTypingCampaign','openSudokuGame','startSudoku','checkSudoku','setAnswerMode','openDuelGame','startDuel','openNimGame','startNim'].every(name => typeof window[name] === 'function'),
     schema: GameStorage.load().version
   })`);
   assert(home.active, 'Trang chủ mở thành công');
-  assert(home.modes === 2, 'Khu học tập có Gõ Chữ Diệt Quái và Sudoku');
+  assert(home.modes === 4, 'Khu học tập có Gõ Chữ Diệt Quái, Sudoku, Đấu Đối Kháng và Nim');
   assert(home.api, 'API các game đã được nạp');
   assert(home.schema === 1, 'Hồ sơ localStorage có schema hợp lệ');
   const normalizers = await evaluate(`({
@@ -549,12 +549,131 @@ try {
     `Màn giới thiệu vẽ đúng con quái sắp gặp (${gioiThieu.mau})`);
   await evaluate(`goHome()`); await sleep(300);
 
+  /* ===== MODAL ỦNG HỘ & GÓP Ý ===== */
+
+  // Mở/đóng đúng, có QR thật, và Escape dùng chung (bootstrap.js) không đụng tới
+  // hành vi đặc thù của restartModal (giữ nguyên: Escape ở đó gọi closeRestart()).
+  await evaluate(`goHome();openInfoModal()`); await sleep(200);
+  const infoOpen = await evaluate(`(()=>{
+    const m=document.getElementById('infoModal');
+    const qr=m.querySelector('.info-qr');
+    return {on:m.classList.contains('on'), ariaHidden:m.getAttribute('aria-hidden'), hasQr:Boolean(qr), qrSrc:qr?.getAttribute('src')};
+  })()`);
+  assert(infoOpen.on && infoOpen.ariaHidden === 'false' && infoOpen.hasQr && infoOpen.qrSrc.includes('donate-qr.jpg'),
+    `Modal Ủng hộ mở đúng, có mã QR (${infoOpen.qrSrc})`);
+  await evaluate(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))`); await sleep(150);
+  const infoClosed = await evaluate(`(()=>{const m=document.getElementById('infoModal');
+    return {on:m.classList.contains('on'), ariaHidden:m.getAttribute('aria-hidden')};
+  })()`);
+  assert(!infoClosed.on && infoClosed.ariaHidden === 'true', 'Escape đóng modal Ủng hộ (dùng chung cơ chế modal)');
+
+  // LỖI THẬT: <a class="btn"> là inline; email/URL đủ dài để xuống dòng ở màn hẹp,
+  // và Chrome vẽ RỜI border/box-shadow theo từng đoạn dòng cho phần tử inline đa
+  // dòng (icon trông như trôi ra ngoài khung). .info-link phải là flex/block nên
+  // luôn có ĐÚNG 1 hộp bao quanh dù chữ có xuống mấy dòng.
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+  await evaluate(`openInfoModal()`); await sleep(200);
+  const linkFragments = await evaluate(`[...document.querySelectorAll('.info-link')].map(a => a.getClientRects().length)`);
+  await evaluate(`closeInfoModal()`);
+  await send('Emulation.clearDeviceMetricsOverride');
+  assert(linkFragments.length === 2 && linkFragments.every(n => n === 1),
+    `Nút email/GitHub trong modal Ủng hộ không bị vỡ khung khi chữ xuống dòng (${linkFragments.join(',')} mảnh)`);
+
+  await evaluate(`startAdventure();beginBattle();askRestart()`); await sleep(300);
+  await evaluate(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))`); await sleep(150);
+  const restartClosed = await evaluate(`!document.getElementById('restartModal').classList.contains('on')`);
+  assert(restartClosed, 'Escape vẫn đóng đúng restartModal (hành vi riêng closeRestart giữ nguyên sau khi tổng quát hoá modal)');
+  await evaluate(`goHome()`); await sleep(200);
+
+  /* ===== ĐẤU ĐỐI KHÁNG & NIM MISÈRE (2 người cùng máy) ===== */
+
+  // Custom nhân vật: nút ◀▶ phải thực sự đổi màu qua applySkin(), không chỉ bấm cho vui.
+  await evaluate(`goHome();openDuelGame()`); await sleep(300);
+  const duelSkin = await evaluate(`(()=>{
+    const svg=document.getElementById('duelSkinPreview1');
+    const before=svg.style.getPropertyValue('--c-body');
+    cycleDuelSkin(1,1);
+    return {before, after:svg.style.getPropertyValue('--c-body')};
+  })()`);
+  assert(Boolean(duelSkin.before) && Boolean(duelSkin.after) && duelSkin.before !== duelSkin.after,
+    `Đổi nhân vật Đấu Đối Kháng thực sự đổi màu (${duelSkin.before} → ${duelSkin.after})`);
+
+  // Hết máu thì đúng người thắng được xướng tên. Tier 5 + luôn trả lời đúng cho cả
+  // hai lượt ⇒ người chơi 2 (bị đánh ở lượt CHẴN, tính từ lượt 0) luôn hết máu
+  // trước người chơi 1 một lượt — kết quả xác định, không phải may rủi.
+  await evaluate(`goHome();openDuelGame();
+    document.getElementById('duelName1').value='Rồng';
+    document.getElementById('duelName2').value='Hổ';
+    document.getElementById('duelTier').value='5';
+    startDuel();`);
+  await sleep(300);
+  let duelDone = false;
+  for (let round = 0; round < 8 && !duelDone; round++) {
+    await evaluate(`(()=>{
+      const ans=DuelGame.currentAnswer();
+      const btn=[...document.querySelectorAll('#duelAnswers .ans')].find(b=>isCorrectAnswer(b.textContent, ans));
+      if(btn)btn.click();
+    })()`);
+    await sleep(1500);
+    duelDone = await evaluate(`!document.getElementById('duelResult').hidden`);
+  }
+  const duelResult = await evaluate(`({
+    done: !document.getElementById('duelResult').hidden,
+    title: document.getElementById('duelResultTitle').textContent,
+  })`);
+  assert(duelResult.done && duelResult.title.includes('Rồng') && !duelResult.title.includes('Hổ'),
+    `Đấu Đối Kháng: hết máu thì đúng người thắng được xướng tên (${duelResult.title})`);
+  await evaluate(`goHome()`); await sleep(300);
+
+  // LUẬT MISÈRE, không phải Nim thường: dồn bàn về còn đúng 1 viên rồi để người
+  // đang tới lượt bấm lấy nó — người VỪA BẤM phải thua, đối thủ phải thắng. Nếu lỡ
+  // cài ngược thành Nim thường thì assertion này đỏ ngay (đối chứng âm rõ ràng).
+  await evaluate(`goHome();openNimGame();
+    document.getElementById('nimName1').value='An';
+    document.getElementById('nimName2').value='Bình';
+    document.getElementById('nimPreset').value='small';
+    startNim();`);
+  await sleep(300);
+  const nimReduce = await evaluate(`(()=>{
+    function piles(){return [...document.querySelectorAll('.nim-pile')];}
+    function stonesOf(pile){return pile.querySelectorAll('.nim-stone');}
+    piles().forEach((_, idx)=>{
+      let guard=0;
+      while(stonesOf(document.querySelectorAll('.nim-pile')[idx]).length>1 && guard<20){
+        const s=stonesOf(document.querySelectorAll('.nim-pile')[idx]);
+        s[s.length-1].click();
+        guard+=1;
+      }
+    });
+    let guard2=0;
+    while(document.querySelectorAll('.nim-stone').length>1 && guard2<20){
+      const onePile=piles().find(p=>stonesOf(p).length===1);
+      if(!onePile)break;
+      stonesOf(onePile)[0].click();
+      guard2+=1;
+    }
+    const lastStone=document.querySelector('.nim-stone.last-stone');
+    const turnBefore=document.getElementById('nimTurnTxt').textContent;
+    const total=document.querySelectorAll('.nim-stone').length;
+    if(!lastStone||total!==1)return {ok:false,total,turnBefore};
+    lastStone.click();
+    return {ok:true, turnBefore, resultTitle:document.getElementById('nimResultTitle').textContent};
+  })()`);
+  const nimActor = nimReduce.ok && nimReduce.turnBefore.includes('An') ? 'An' : 'Bình';
+  const nimExpectedWinner = nimActor === 'An' ? 'Bình' : 'An';
+  assert(nimReduce.ok && nimReduce.resultTitle.includes(nimExpectedWinner) && !nimReduce.resultTitle.includes(nimActor),
+    nimReduce.ok
+      ? `Nim Misère: ${nimActor} bấm viên cuối phải thua, ${nimExpectedWinner} phải thắng (kết quả: ${nimReduce.resultTitle})`
+      : `Nim: không dựng được trạng thái còn 1 viên để kiểm tra (total=${nimReduce.total})`);
+  await evaluate(`goHome()`); await sleep(300);
+
   // Game desktop: mọi màn gói trong MỘT khung, khung ngoài không bao giờ cuộn.
   await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
   await evaluate(`goHome()`); await sleep(400);
   const manHinh = [['Trang chủ', `showScreen('home')`], ['Đấu trường', `startAdventure();beginBattle()`],
     ['Cửa hàng', `openShop('intro')`], ['Gõ chữ', `goHome();openTypingGame()`],
-    ['Sudoku', `goHome();openSudokuGame();startSudoku('beginner')`]];
+    ['Sudoku', `goHome();openSudokuGame();startSudoku('beginner')`],
+    ['Đấu Đối Kháng', `goHome();openDuelGame()`], ['Nim Misère', `goHome();openNimGame()`]];
   const tran = [];
   for (const [ten, setup] of manHinh) {
     await evaluate(setup); await sleep(500);
@@ -564,7 +683,7 @@ try {
       return {trang:Math.max(0,sh-innerHeight), the:c?Math.max(0,c.scrollHeight-c.clientHeight):0}})()`);
     if (d.trang > 1 || d.the > 1) tran.push(`${ten}(trang ${d.trang}px, thẻ ${d.the}px)`);
   }
-  assert(tran.length === 0, tran.length ? `Có màn phải cuộn: ${tran.join(', ')}` : 'Cả 5 màn gói gọn trong một khung 1366×768');
+  assert(tran.length === 0, tran.length ? `Có màn phải cuộn: ${tran.join(', ')}` : `Cả ${manHinh.length} màn gói gọn trong một khung 1366×768`);
   await send('Emulation.clearDeviceMetricsOverride');
   await evaluate(`goHome()`); await sleep(300);
 

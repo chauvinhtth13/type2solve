@@ -429,6 +429,8 @@ function goHome(){
   G.thinkUntil=0;
   if(typeof cleanupTypingGame==='function')cleanupTypingGame();
   if(typeof cleanupSudokuGame==='function')cleanupSudokuGame();
+  if(typeof cleanupDuelGame==='function')cleanupDuelGame();
+  if(typeof cleanupNimGame==='function')cleanupNimGame();
   document.querySelectorAll('.proj,.trail,.beam,.ambient,.spark,.boom,.typing-spell,.typing-impact').forEach(el=>el.remove());
   $('restartModal').classList.remove('on');
   G.locked=true;G.mode=null;
@@ -582,6 +584,11 @@ function goHomeFromPause(){
   goHome();
 }
 function quickHome(){ SFX.click(); goHome(); }
+/* Modal thông tin/ủng hộ: không đụng gì tới trạng thái ván đấu (khác hẳn
+   restartModal), nên mở/đóng chỉ cần bật/tắt class .on — bootstrap.js lo phần
+   focus trap + Escape dùng chung cho mọi .modal. */
+function openInfoModal(){ $('infoModal').classList.add('on'); }
+function closeInfoModal(){ SFX.click(); $('infoModal').classList.remove('on'); }
 function doRestart(){
   SFX.click();
   $('restartModal').classList.remove('on');
@@ -595,7 +602,7 @@ function doRestart(){
   G={bossIndex:0,cleared:-1};   // xoá sạch tiến độ, xu, vật phẩm
   startAdventure();
 }
-const BUSY_SCREENS=['battle','typingGame','sudokuGame'];
+const BUSY_SCREENS=['battle','typingGame','sudokuGame','duelGame','nimGame'];
 /* Hỏi lại mỗi lần thay vì nhớ một lần: người dùng có thể đổi cài đặt hệ điều hành
    giữa chừng mà không tải lại trang. */
 function REDUCED_MOTION(){return window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches}

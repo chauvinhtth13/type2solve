@@ -295,7 +295,7 @@
      phần dư (1fr), hero và dòng ghi công giữ nguyên cỡ (auto). */
   .home-bento{flex:1;min-height:0}
   .home-bento{display:grid;gap:var(--gap);grid-template-areas:
-      "hero" "stats" "adv" "blitz" "surv" "typing" "sudoku" "credit"}
+      "hero" "stats" "adv" "blitz" "surv" "typing" "sudoku" "more" "credit"}
   .modes,.learning-modes{display:contents}
   .tile-hero{grid-area:hero}
   .tile-stats{grid-area:stats}
@@ -304,25 +304,31 @@
   .mode.surv{grid-area:surv}
   .typing-mode{grid-area:typing}
   .sudoku-mode{grid-area:sudoku}
+  /* Hàng "sinh động" phụ (Đấu Đối Kháng/Nim) — cao auto, KHÔNG phải 1fr, để không
+     tranh chỗ với 3 hàng chế độ chính đã cân chiều cao vừa khít khung màn hình. */
+  .tile-more{grid-area:more;display:flex;gap:var(--gap)}
+  .tile-more>.tile{flex:1;min-width:0}
   .tile-credit{grid-area:credit}
 
   @container home (width >= 640px){
     .home-bento{grid-template-columns:1fr 1fr;
-      grid-template-rows:auto repeat(3,minmax(0,1fr)) auto;
+      grid-template-rows:auto repeat(3,minmax(0,1fr)) auto auto;
       grid-template-areas:
         "hero   stats"
         "adv    blitz"
         "adv    surv"
         "typing sudoku"
+        "more   more"
         "credit credit"}
   }
   @container home (width >= 1000px){
     .home-bento{grid-template-columns:1.15fr 1fr 1fr;
-      grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) auto;
+      grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) auto auto;
       grid-template-areas:
         "hero   hero   stats"
         "adv    blitz  surv"
         "adv    typing sudoku"
+        "more   more   more"
         "credit credit credit"}
   }
 
@@ -440,6 +446,8 @@
   @keyframes idleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   @keyframes idleFloatB{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   #heroBox{left:3%} #bossBox{right:3%}
+  #duelP1Box{left:3%} #duelP2Box{right:3%}
+  .fighter.turn-active .sprite{filter:drop-shadow(0 0 10px var(--gold-ink))}
   .mech{font-size:calc(var(--hpH) * .72);font-weight:900;background:#fff;border:var(--bd-1) solid var(--ink);border-radius:var(--r-pill);padding:2px 8px;display:inline-block;margin-top:3px;position:relative;z-index:3}
 
   .aura{
@@ -821,6 +829,44 @@
   .modal.on{display:flex;animation:pop .25s var(--ease-pop)}
   .modalbox{background:var(--panel);border:var(--bd-3) solid var(--ink);border-radius:var(--r-3);
     padding:24px 20px;max-width:400px;text-align:center;box-shadow:var(--elev-3-dark)}
+  .info-modalbox{max-width:480px;max-height:88vh;overflow-y:auto;text-align:left;position:relative;padding:26px 22px}
+  .modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:var(--bd-2) solid var(--ink);
+    border-radius:50%;background:#fff;font-size:16px;cursor:pointer;box-shadow:var(--elev-1);z-index:1}
+  /* Chừa chỗ cho nút đóng tròn ở góc, không để chữ tiêu đề đè lên nó. */
+  .info-title{font-size:24px;margin:0 44px 8px 0;line-height:1.3}
+  .info-subtitle{margin:0 0 4px;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+  /* gap trên flex thay cho margin/border-top cộng dồn: mỗi thẻ luôn cách đều
+     nhau đúng 16px, không phụ thuộc thẻ trước có tồn tại hay không. */
+  .info-sections{display:flex;flex-direction:column;gap:16px;margin-top:20px}
+  .info-section{
+    border:var(--bd-2) solid var(--ink);border-radius:var(--r-2);background:#fff;
+    box-shadow:var(--elev-1);padding:16px 18px;
+  }
+  .info-section h2{font-size:16.5px;margin:0 0 8px;font-family:var(--font-display)}
+  .info-section p{margin:0 0 14px;font-size:14.5px;color:var(--ink-2);line-height:1.55}
+  .info-section p:last-child{margin-bottom:0}
+  .info-qr{display:block;width:220px;max-width:100%;height:auto;margin:0 auto;border:var(--bd-2) solid var(--ink);border-radius:var(--r-2)}
+  /* display:flex CHỨ KHÔNG inline: .btn thường chỉ ôm nhãn ngắn 1 dòng; email/URL
+     ở đây đủ dài để XUỐNG DÒNG, và một thẻ <a> inline có border+box-shadow bị
+     Chrome vẽ RỜI từng đoạn theo từng dòng chữ khi ngắt dòng (viền/bóng gãy vụn,
+     icon như trôi ra ngoài khung) — lỗi thật đã thấy khi test ở màn hẹp 390px. */
+  .info-link{
+    display:flex;align-items:center;gap:10px;width:100%;
+    border:var(--bd-2) solid var(--ink);border-radius:var(--r-2);
+    padding:12px 16px;background:var(--gold);color:var(--ink);
+    font-family:var(--font-display);font-weight:700;font-size:15px;
+    text-decoration:none;box-shadow:var(--elev-2);
+    transition:transform var(--dur-1) var(--ease-snap),box-shadow var(--dur-1) var(--ease-snap);
+  }
+  .info-link:hover{filter:brightness(1.05)}
+  .info-link:active{transform:translateY(4px);box-shadow:var(--sh-1) var(--ink)}
+  .info-link-icon{flex:0 0 auto;font-size:18px}
+  .info-link span:last-child{overflow-wrap:anywhere;word-break:break-word}
+  @media (max-width:480px){
+    .info-modalbox{padding:20px 16px}
+    .info-section{padding:14px 15px}
+    .info-title{font-size:21px;margin-right:40px}
+  }
 
   .confetti{position:fixed;top:-20px;z-index:50;pointer-events:none;font-size:20px;animation:confFall linear forwards}
   @keyframes confFall{to{transform:translateY(110vh) rotate(720deg)}}

@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v13';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -19,6 +19,8 @@ const CORE_ASSETS = [
   './assets/js/data/typing-content.js',
   './assets/js/games/typing.js',
   './assets/js/games/sudoku.js',
+  './assets/js/games/duel.js',
+  './assets/js/games/nim.js',
   './assets/js/bootstrap.js',
 ];
 
@@ -30,6 +32,7 @@ const CORE_ASSETS = [
    Kết quả offline y hệt, chỉ khác THỜI ĐIỂM. */
 const DEFERRED_ASSETS = [
   './assets/data/english-vocabulary.json',
+  './assets/images/donate-qr.jpg',
 ];
 
 function scopedUrl(relativePath) {
