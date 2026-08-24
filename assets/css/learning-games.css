@@ -464,6 +464,56 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 
 .duel-turn{text-align:center;font-family:var(--font-display);font-weight:800;font-size:clamp(16px,1.6vw,22px);margin:10px 0}
 #duelQbox{margin:0 auto 10px;max-width:640px}
+.duel-rule-hint{text-align:center;font-size:clamp(13px,.85vw,17px);color:var(--ink-2);margin:12px auto 0;max-width:640px;line-height:1.5}
+.duel-skill{margin-top:2px;width:100%;max-width:220px}
+
+/* ===== HUY HIỆU KỸ NĂNG + COMBO =====
+   Kỹ năng hiện THƯỜNG TRỰC cạnh thanh máu: trẻ không phải nhớ mình chọn gì từ
+   màn setup, và nhìn được cả kỹ năng của đối thủ để đoán trước chuyện gì xảy ra. */
+.duel-skill-badge{margin-left:6px;padding:1px 7px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.85);border:1px solid rgba(43,35,80,.25);
+  font-size:.78em;font-weight:900;white-space:nowrap}
+.duel-combo{margin-left:6px;font-size:.82em;font-weight:900;color:#c2410c}
+.duel-combo.ready{color:#b91c1c;animation:duelComboReady .6s ease-in-out infinite}
+@keyframes duelComboReady{50%{transform:scale(1.22)}}
+.duel-crit-flag{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:var(--r-pill);
+  background:var(--gold);border:var(--bd-1) solid var(--ink);font-size:.78em;
+  animation:duelComboReady .6s ease-in-out infinite}
+
+/* Vệt máu vừa mất: chạy chậm hơn thanh chính nên mắt kịp thấy "vừa tụt bao nhiêu". */
+.hpbar{position:relative}
+.hpghost{position:absolute;left:0;top:0;bottom:0;background:#ff9db4;border-radius:var(--r-pill);
+  transition:width .75s var(--ease-settle) .18s}
+#duelHp1,#duelHp2{position:relative;z-index:1}
+
+/* Số sát thương bay lên — kênh phản hồi rõ nhất: biết CHÍNH XÁC mất bao nhiêu. */
+.dmgfloat{position:absolute;z-index:6;transform:translate(-50%,-50%);pointer-events:none;
+  font-family:var(--font-display);font-weight:900;-webkit-text-stroke:2px var(--ink);
+  paint-order:stroke fill;animation:dmgFloat 1.05s var(--ease-settle) forwards}
+.dmgfloat.hit{color:#ff5d73;font-size:calc(var(--spriteF) * .42)}
+.dmgfloat.crit{color:var(--gold);font-size:calc(var(--spriteF) * .62)}
+.dmgfloat.heal{color:#3ddc97;font-size:calc(var(--spriteF) * .4)}
+@keyframes dmgFloat{
+  0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}
+  25%{opacity:1;transform:translate(-50%,-70%) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-190%) scale(1)}
+}
+/* Nhân vật trúng đòn thì giật nảy + loé trắng — biết AI vừa ăn đòn, không phải
+   dò xem thanh máu nào vừa đổi. */
+.duel-hurt{animation:duelHurt .45s var(--ease-snap)}
+@keyframes duelHurt{
+  0%,100%{transform:translateX(0);filter:none}
+  20%{transform:translateX(-9px) rotate(-5deg);filter:brightness(2.4)}
+  55%{transform:translateX(7px) rotate(4deg);filter:brightness(1.5)}
+}
+.duel-crit-bolt{filter:drop-shadow(0 0 14px var(--gold)) drop-shadow(0 0 26px #ff8a3d)}
+
+@media (prefers-reduced-motion:reduce){
+  .duel-combo.ready,.duel-crit-flag{animation:none}
+  .duel-hurt{animation:none}
+  .dmgfloat{animation:dmgFloatStill 1s linear forwards}
+  @keyframes dmgFloatStill{0%,80%{opacity:1}100%{opacity:0}}
+}
 
 .nim-warning{text-align:center;font-weight:900;color:#a8371f;background:#ffe4d6;border:var(--bd-1) solid #e59a7c;border-radius:var(--r-pill);padding:8px 14px;margin:0 auto 10px;max-width:560px}
 

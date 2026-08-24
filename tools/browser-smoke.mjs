@@ -682,9 +682,50 @@ try {
   // Hết máu thì đúng người thắng được xướng tên. Tier 5 + luôn trả lời đúng cho cả
   // hai lượt ⇒ người chơi 2 (bị đánh ở lượt CHẴN, tính từ lượt 0) luôn hết máu
   // trước người chơi 1 một lượt — kết quả xác định, không phải may rủi.
+
+  /* ===== LUẬT KỸ NĂNG: số học phải ĐÚNG CHÍNH XÁC =====
+     Sát thương gốc tier 2 = 20 + 2×3 = 26. Giáp nhận 70% ⇒ 18. Hút máu hồi nửa
+     sát thương vừa gây. Sai thì KHÔNG mất máu và mất combo.
+     LỖI THẬT đã bắt được bằng bài này: renderHp() từng chạy TRƯỚC lúc cộng máu
+     hút/hồi, nên thanh máu không bao giờ nhích lên dù dòng chữ khoe "+18 máu". */
+  const danhMotDon = `(()=>{
+    const ans=DuelGame.currentAnswer();
+    const b=[...document.querySelectorAll('#duelAnswers .ans')].find(x=>isCorrectAnswer(x.textContent,ans));
+    if(b)b.click(); return Boolean(b);
+  })()`;
+  await evaluate(`goHome();openDuelGame();
+    document.getElementById('duelSkill1').value='drain';
+    document.getElementById('duelSkill2').value='armor';
+    document.getElementById('duelTier').value='2';
+    startDuel();`);
+  await sleep(300);
+  await evaluate(danhMotDon); await sleep(1700);          // P1 (hút máu) đánh P2 (giáp)
+  const donGiap = await evaluate(`+document.getElementById('duelHpTxt2').textContent`);
+  await evaluate(danhMotDon); await sleep(1700);          // P2 đánh P1 — P1 không có giáp
+  const donThuong = await evaluate(`+document.getElementById('duelHpTxt1').textContent`);
+  await evaluate(danhMotDon); await sleep(1700);          // P1 đánh tiếp → phải HÚT được máu
+  const sauHutMau = await evaluate(`+document.getElementById('duelHpTxt1').textContent`);
+  assert(donGiap === 82 && donThuong === 74 && sauHutMau > donThuong,
+    `Kỹ năng đúng số học: giáp chặn 26→18 (còn ${donGiap}/100), không giáp ăn đủ 26 (còn ${donThuong}/100), hút máu hồi được (${donThuong}→${sauHutMau})`);
+
+  // Trả lời SAI: không mất máu, và combo của người vừa sai bị xoá.
+  const truocSai = await evaluate(`+document.getElementById('duelHpTxt1').textContent`);
+  await evaluate(`(()=>{
+    const ans=DuelGame.currentAnswer();
+    const b=[...document.querySelectorAll('#duelAnswers .ans')].find(x=>!isCorrectAnswer(x.textContent,ans));
+    if(b)b.click();
+  })()`);
+  await sleep(1500);
+  const sauSai = await evaluate(`({hp1:+document.getElementById('duelHpTxt1').textContent,
+    combo2:document.getElementById('duelCombo2').textContent.trim()})`);
+  assert(sauSai.hp1 === truocSai && sauSai.combo2 === '',
+    `Trả lời sai thì không mất máu (${truocSai}→${sauSai.hp1}) và mất combo (combo2="${sauSai.combo2}")`);
+
   await evaluate(`goHome();openDuelGame();
     document.getElementById('duelName1').value='Rồng';
     document.getElementById('duelName2').value='Hổ';
+    document.getElementById('duelSkill1').value='drain';
+    document.getElementById('duelSkill2').value='drain';
     document.getElementById('duelTier').value='5';
     startDuel();`);
   await sleep(300);
@@ -723,14 +764,13 @@ try {
   assert(!nimSectionVis.setup && nimSectionVis.play && !nimSectionVis.result,
     `Chỉ #nimPlay thật sự hiển thị sau startNim() (đo bằng bounding rect, không phải thuộc tính hidden): ${JSON.stringify(nimSectionVis)}`);
   const nimReduce = await evaluate(`(()=>{
-    // renderBoard() sắp lại đống theo kích cỡ và BỎ HẲN đống đã rỗng khỏi DOM (hiệu
-    // ứng kim tự tháp thu nhỏ dần) — nên không thể giữ chỉ số cố định vào
-    // .nim-pile qua nhiều lần bấm. Luôn thao tác trên "đống đầu tiên hiện có trong
-    // DOM" (luôn là đống nhỏ nhất còn lại) và bấm đúng 1 viên (viên cuối của đống
-    // đó) mỗi lần — an toàn dù thứ tự/độ dài DOM đổi liên tục.
+    // Hàng đã hết vẫn nằm lại trong DOM (giữ chỗ cho bố cục đứng yên), nên
+    // .nim-pile đầu tiên có thể RỖNG — không lấy nó làm mốc được. Bấm viên sỏi
+    // CUỐI CÙNG trong toàn bộ tài liệu: nó luôn là viên cuối của một hàng còn
+    // sỏi, và bấm viên cuối hàng thì chỉ lấy đúng 1 viên ⇒ giảm dần chắc chắn.
     let guard=0;
-    while(document.querySelectorAll('.nim-stone').length>1 && guard<40){
-      const stones=document.querySelector('.nim-pile').querySelectorAll('.nim-stone');
+    while(document.querySelectorAll('.nim-stone').length>1 && guard<60){
+      const stones=document.querySelectorAll('.nim-stone');
       stones[stones.length-1].click();
       guard+=1;
     }
