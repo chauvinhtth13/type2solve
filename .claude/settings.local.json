@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(node \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\playtest.mjs\" \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots2\")",
+      "Bash(npm run *)",
+      "Bash(rm -rf \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots4\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots4\")",
+      "Bash(node \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\playtest.mjs\" \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots4\")",
+      "Bash(node \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\res-matrix.mjs\" \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\res\")"
     ]
   }
 }

@@ -248,6 +248,8 @@
     setSections('setup');
     paintPreview(1);
     paintPreview(2);
+    safeShowScreen('duelGame');
+    safeSound('open');
   }
 
   function cleanupDuelGame() {

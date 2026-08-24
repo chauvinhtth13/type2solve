@@ -587,8 +587,44 @@ try {
 
   /* ===== ĐẤU ĐỐI KHÁNG & NIM MISÈRE (2 người cùng máy) ===== */
 
+  // LỖI THẬT (báo bởi người dùng): openDuelGame()/openNimGame() dựng sẵn màn setup
+  // (setSections('setup')) nhưng QUÊN gọi safeShowScreen(...) — hàm chạy không lỗi,
+  // #duelSetup/#nimSetup hết hidden, nhưng `.screen.active` VẪN LÀ #home nên người
+  // chơi bấm vào tile không thấy gì xảy ra. Mọi assertion trước đó chỉ gọi thẳng hàm
+  // qua evaluate() và đọc trạng thái/DOM (querySelector thấy được cả phần tử trong
+  // màn KHÔNG active), nên không phát hiện được lỗi này — phải bấm CHUỘT THẬT vào
+  // đúng tile trên trang chủ như người dùng thật mới lộ ra.
+  await evaluate(`goHome()`); await sleep(200);
+  for (const [tileClass, wantScreen] of [['duel-mode', 'duelGame'], ['nim-mode', 'nimGame']]) {
+    const point = await evaluate(`(()=>{
+      const r=document.querySelector('.${tileClass}').getBoundingClientRect();
+      return {x:r.left+r.width/2, y:r.top+r.height/2};
+    })()`);
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 });
+    await sleep(300);
+    const activeScreen = await evaluate(`document.querySelector('.screen.active')?.id`);
+    assert(activeScreen === wantScreen,
+      `Bấm chuột thật vào tile "${tileClass}" trên trang chủ mở đúng màn (được: ${activeScreen})`);
+    await evaluate(`goHome()`); await sleep(200);
+  }
+
   // Custom nhân vật: nút ◀▶ phải thực sự đổi màu qua applySkin(), không chỉ bấm cho vui.
   await evaluate(`goHome();openDuelGame()`); await sleep(300);
+  assert(await evaluate(`document.querySelector('.screen.active')?.id`) === 'duelGame',
+    'openDuelGame() chuyển đúng sang màn #duelGame (không chỉ dựng nội dung ngầm)');
+  // LỖI THẬT: thuộc tính `hidden` vẫn đúng (kiểm bằng .hidden luôn xanh) trong khi
+  // CSS khác đã âm thầm đè display:none của nó, khiến 2 section HIỆN CHỒNG LÊN
+  // NHAU. Phải đo bằng getBoundingClientRect (kết quả CSS thật sự vẽ ra), không
+  // phải đọc lại chính thuộc tính vừa đặt.
+  const duelSectionVis = await evaluate(`({
+    setup: document.getElementById('duelSetup').getBoundingClientRect().height > 0,
+    play: document.getElementById('duelPlay').getBoundingClientRect().height > 0,
+    result: document.getElementById('duelResult').getBoundingClientRect().height > 0,
+  })`);
+  assert(duelSectionVis.setup && !duelSectionVis.play && !duelSectionVis.result,
+    `Chỉ #duelSetup thật sự hiển thị lúc mở màn (đo bằng bounding rect, không phải thuộc tính hidden): ${JSON.stringify(duelSectionVis)}`);
   const duelSkin = await evaluate(`(()=>{
     const svg=document.getElementById('duelSkinPreview1');
     const before=svg.style.getPropertyValue('--c-body');
@@ -597,6 +633,51 @@ try {
   })()`);
   assert(Boolean(duelSkin.before) && Boolean(duelSkin.after) && duelSkin.before !== duelSkin.after,
     `Đổi nhân vật Đấu Đối Kháng thực sự đổi màu (${duelSkin.before} → ${duelSkin.after})`);
+
+  // LỖI THẬT: mặc định flex-shrink:1 từng cho phép #duelQbox bị NÉN THẤP HƠN nội
+  // dung của nó khi câu hỏi dài 3 dòng — chữ tràn ra ngoài khung, đè lên "Đến lượt
+  // X" phía trên và 4 nút đáp án phía dưới. Ép một câu hỏi dài để dựng lại đúng
+  // tình huống đó, rồi khẳng định chữ câu hỏi luôn nằm TRỌN trong khung của nó.
+  await evaluate(`startDuel();document.getElementById('duelQuestionTxt').textContent=
+    'Một hồ tròn có chu vi 120 m. Cứ cách 6 m trồng 1 cây liễu; giữa hai cây liễu liên tiếp trồng 2 cây hoa hồng. Có tất cả bao nhiêu cây hoa hồng?';`);
+  await sleep(200);
+  const qboxFit = await evaluate(`(()=>{
+    const box=document.getElementById('duelQbox').getBoundingClientRect();
+    const txt=document.getElementById('duelQuestionTxt').getBoundingClientRect();
+    return {top: txt.top>=box.top-1, bottom: txt.bottom<=box.bottom+1};
+  })()`);
+  assert(qboxFit.top && qboxFit.bottom,
+    `Câu hỏi dài không tràn ra ngoài khung #duelQbox (${JSON.stringify(qboxFit)})`);
+
+  // LỖI THẬT (báo bởi người dùng): xếp đấu trường+câu hỏi+4 đáp án CHỒNG DỌC một
+  // cột từng đẩy nút đáp án cuối xuống DƯỚI mép 768px — về mặt DOM/logic hoàn
+  // toàn bình thường (mọi assertion gọi .click() trực tiếp qua JS vẫn xanh), chỉ
+  // lộ ra khi bấm CHUỘT THẬT vào đúng toạ độ trên màn 1366×768. Kiểm tra bằng
+  // elementFromPoint (đúng cách trình duyệt tra "cái gì nằm ở điểm này") rồi mới
+  // bấm — không phải gọi .click() bỏ qua hoàn toàn bước tra toạ độ.
+  await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+  await evaluate(`goHome();openDuelGame();startDuel();`); await sleep(300);
+  const clickCheck = await evaluate(`(()=>{
+    const btns=[...document.querySelectorAll('#duelAnswers .ans')];
+    return btns.map(b=>{
+      const r=b.getBoundingClientRect();
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      return {cy, insideViewport: cy>0 && cy<innerHeight, atPoint: document.elementFromPoint(cx,cy)===b};
+    });
+  })()`);
+  assert(clickCheck.every((c) => c.insideViewport && c.atPoint),
+    `Cả 4 nút đáp án Đấu Đối Kháng nằm trong khung nhìn 1366×768 và bấm trúng đúng nút (${JSON.stringify(clickCheck)})`);
+  const firstBtn = await evaluate(`(()=>{const r=document.querySelector('#duelAnswers .ans').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};})()`);
+  const qBefore = await evaluate(`document.getElementById('duelQuestionTxt').textContent`);
+  await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: firstBtn.x, y: firstBtn.y });
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: firstBtn.x, y: firstBtn.y, button: 'left', clickCount: 1 });
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: firstBtn.x, y: firstBtn.y, button: 'left', clickCount: 1 });
+  await sleep(1600);
+  const qAfter = await evaluate(`document.getElementById('duelQuestionTxt').textContent`);
+  assert(qAfter && qAfter !== qBefore,
+    `Bấm chuột thật vào đáp án Đấu Đối Kháng chuyển sang câu hỏi kế tiếp (trước: "${qBefore.slice(0, 30)}…", sau: "${qAfter.slice(0, 30)}…")`);
+  await send('Emulation.clearDeviceMetricsOverride');
+  await evaluate(`goHome()`); await sleep(200);
 
   // Hết máu thì đúng người thắng được xướng tên. Tier 5 + luôn trả lời đúng cho cả
   // hai lượt ⇒ người chơi 2 (bị đánh ở lượt CHẴN, tính từ lượt 0) luôn hết máu
@@ -634,23 +715,24 @@ try {
     document.getElementById('nimPreset').value='small';
     startNim();`);
   await sleep(300);
+  const nimSectionVis = await evaluate(`({
+    setup: document.getElementById('nimSetup').getBoundingClientRect().height > 0,
+    play: document.getElementById('nimPlay').getBoundingClientRect().height > 0,
+    result: document.getElementById('nimResult').getBoundingClientRect().height > 0,
+  })`);
+  assert(!nimSectionVis.setup && nimSectionVis.play && !nimSectionVis.result,
+    `Chỉ #nimPlay thật sự hiển thị sau startNim() (đo bằng bounding rect, không phải thuộc tính hidden): ${JSON.stringify(nimSectionVis)}`);
   const nimReduce = await evaluate(`(()=>{
-    function piles(){return [...document.querySelectorAll('.nim-pile')];}
-    function stonesOf(pile){return pile.querySelectorAll('.nim-stone');}
-    piles().forEach((_, idx)=>{
-      let guard=0;
-      while(stonesOf(document.querySelectorAll('.nim-pile')[idx]).length>1 && guard<20){
-        const s=stonesOf(document.querySelectorAll('.nim-pile')[idx]);
-        s[s.length-1].click();
-        guard+=1;
-      }
-    });
-    let guard2=0;
-    while(document.querySelectorAll('.nim-stone').length>1 && guard2<20){
-      const onePile=piles().find(p=>stonesOf(p).length===1);
-      if(!onePile)break;
-      stonesOf(onePile)[0].click();
-      guard2+=1;
+    // renderBoard() sắp lại đống theo kích cỡ và BỎ HẲN đống đã rỗng khỏi DOM (hiệu
+    // ứng kim tự tháp thu nhỏ dần) — nên không thể giữ chỉ số cố định vào
+    // .nim-pile qua nhiều lần bấm. Luôn thao tác trên "đống đầu tiên hiện có trong
+    // DOM" (luôn là đống nhỏ nhất còn lại) và bấm đúng 1 viên (viên cuối của đống
+    // đó) mỗi lần — an toàn dù thứ tự/độ dài DOM đổi liên tục.
+    let guard=0;
+    while(document.querySelectorAll('.nim-stone').length>1 && guard<40){
+      const stones=document.querySelector('.nim-pile').querySelectorAll('.nim-stone');
+      stones[stones.length-1].click();
+      guard+=1;
     }
     const lastStone=document.querySelector('.nim-stone.last-stone');
     const turnBefore=document.getElementById('nimTurnTxt').textContent;
@@ -673,7 +755,12 @@ try {
   const manHinh = [['Trang chủ', `showScreen('home')`], ['Đấu trường', `startAdventure();beginBattle()`],
     ['Cửa hàng', `openShop('intro')`], ['Gõ chữ', `goHome();openTypingGame()`],
     ['Sudoku', `goHome();openSudokuGame();startSudoku('beginner')`],
-    ['Đấu Đối Kháng', `goHome();openDuelGame()`], ['Nim Misère', `goHome();openNimGame()`]];
+    ['Đấu Đối Kháng (setup)', `goHome();openDuelGame()`],
+    /* Màn setup gọn, ít nội dung — không phải màn từng vỡ (đấu trường+câu hỏi+4
+       đáp án chồng dọc tràn khỏi 768px). Phải kiểm màn PLAY thật sự mới bắt được. */
+    ['Đấu Đối Kháng (play)', `goHome();openDuelGame();startDuel()`],
+    ['Nim Misère (setup)', `goHome();openNimGame()`],
+    ['Nim Misère (play)', `goHome();openNimGame();startNim()`]];
   const tran = [];
   for (const [ten, setup] of manHinh) {
     await evaluate(setup); await sleep(500);
@@ -686,6 +773,69 @@ try {
   assert(tran.length === 0, tran.length ? `Có màn phải cuộn: ${tran.join(', ')}` : `Cả ${manHinh.length} màn gói gọn trong một khung 1366×768`);
   await send('Emulation.clearDeviceMetricsOverride');
   await evaluate(`goHome()`); await sleep(300);
+
+  /* ===== ĐỘ PHÂN GIẢI HD → 8K =====
+     LỖI THẬT: mọi bề ngang ≥2400px từng dùng chung MỘT bộ giá trị cố định, nên
+     trên 4K khung game chỉ chiếm 37% bề ngang, trên 8K còn 18% — không assertion
+     nào phát hiện vì trang vẫn "không phải cuộn". Ở đây kiểm CẢ HAI chiều: không
+     tràn/không cuộn, VÀ khung phải thực sự lấp được phần lớn bề ngang. */
+  const doPhanGiai = [['FHD',1920,1080],['QHD',2560,1440],['4K',3840,2160],['8K',7680,4320]];
+  const loiPhanGiai = [];
+  for (const [ten, w, h] of doPhanGiai) {
+    await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    for (const [manTen, setup] of [['trang chủ', `goHome()`],
+      ['đối kháng', `goHome();openDuelGame();startDuel()`],
+      ['nim', `goHome();openNimGame();startNim()`]]) {
+      await evaluate(setup); await sleep(420);
+      const d = await evaluate(`(()=>{
+        const el=document.documentElement,b=document.body;
+        const c=document.querySelector('.screen.active>.card,.screen.active>.game-card');
+        const stones=[...document.querySelectorAll('.nim-stone')];
+        const ans=document.querySelector('.screen.active')?.id==='duelGame'
+          ? [...document.querySelectorAll('#duelAnswers .ans')] : [];
+        return {
+          tranNgang:Math.max(0,Math.max(el.scrollWidth,b.scrollWidth)-innerWidth),
+          cuonDoc:Math.max(0,Math.max(el.scrollHeight,b.scrollHeight)-innerHeight),
+          lapDay:c?Math.round(c.getBoundingClientRect().width/innerWidth*100):0,
+          soiTran:stones.some(s=>{const r=s.getBoundingClientRect();
+            return r.right>innerWidth+1||r.bottom>innerHeight+1||r.top<-1}),
+          dapAnLoi:ans.length?ans.some(a=>{const r=a.getBoundingClientRect();
+            const cx=r.left+r.width/2,cy=r.top+r.height/2;
+            return cy<=0||cy>=innerHeight||document.elementFromPoint(cx,cy)!==a}):false,
+        };
+      })()`);
+      if (d.tranNgang > 1 || d.cuonDoc > 1) loiPhanGiai.push(`${ten}/${manTen}: tràn ${d.tranNgang}px ngang, ${d.cuonDoc}px dọc`);
+      if (d.lapDay < 50) loiPhanGiai.push(`${ten}/${manTen}: khung chỉ lấp ${d.lapDay}% bề ngang`);
+      if (d.soiTran) loiPhanGiai.push(`${ten}/${manTen}: sỏi Nim tràn khỏi khung nhìn`);
+      if (d.dapAnLoi) loiPhanGiai.push(`${ten}/${manTen}: nút đáp án nằm ngoài khung hoặc bị che`);
+    }
+  }
+  await send('Emulation.clearDeviceMetricsOverride');
+  await evaluate(`goHome()`); await sleep(300);
+  assert(loiPhanGiai.length === 0, loiPhanGiai.length
+    ? `Lỗi độ phân giải: ${loiPhanGiai.join(' | ')}`
+    : `Bố cục dùng tốt cả 4 mốc FHD/QHD/4K/8K (không tràn, khung lấp ≥50% bề ngang)`);
+
+  /* Bộ câu đố kinh điển mới: mọi dạng phải có đáp án nằm TRONG danh sách lựa
+     chọn và không có lựa chọn trùng nhau — sai một trong hai là câu hỏi không
+     thể trả lời đúng được. */
+  const famous = await evaluate(`(()=>{
+    const kinds=new Set(); const loi=[];
+    for(let tier=1;tier<=5;tier++)for(let i=0;i<200;i++){
+      const q=genFamous(tier);
+      kinds.add(q.q.slice(0,30));
+      if(!Array.isArray(q.choices)||q.choices.length<3)loi.push('thiếu lựa chọn');
+      else{
+        if(!q.choices.map(String).includes(String(q.ans)))loi.push('đáp án không nằm trong lựa chọn: '+q.q.slice(0,30));
+        if(new Set(q.choices.map(String)).size!==q.choices.length)loi.push('lựa chọn trùng: '+q.q.slice(0,30));
+      }
+      if(!q.exp)loi.push('thiếu lời giải: '+q.q.slice(0,30));
+    }
+    return {soDang:kinds.size,loi:[...new Set(loi)]};
+  })()`);
+  assert(famous.loi.length === 0 && famous.soDang >= 12,
+    famous.loi.length ? `Câu đố kinh điển lỗi: ${famous.loi.join(' | ')}`
+      : `${famous.soDang} biến thể câu đố kinh điển đều có đáp án đúng trong lựa chọn`);
 
   await sleep(500);
   assert(runtimeErrors.length === 0, runtimeErrors.length ? `Không lỗi runtime: ${runtimeErrors.join(' | ')}` : 'Không có lỗi JavaScript runtime');

@@ -686,6 +686,13 @@
             </div>
             <label class="sr-only" for="duelName1">Tên người chơi 1</label>
             <input id="duelName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+            <label class="sr-only" for="duelSkill1">Kỹ năng người chơi 1</label>
+            <select id="duelSkill1" class="duel-skill">
+              <option value="drain" selected>🩸 Hút máu — hồi nửa sát thương</option>
+              <option value="heal">💚 Hồi máu — mỗi câu đúng +10 máu</option>
+              <option value="armor">🛡️ Giáp — chịu ít hơn 30% sát thương</option>
+              <option value="rage">😡 Cuồng nộ — càng combo càng mạnh</option>
+            </select>
           </div>
           <div class="duel-vs" aria-hidden="true">⚔️</div>
           <div class="duel-player-card">
@@ -697,8 +704,16 @@
             </div>
             <label class="sr-only" for="duelName2">Tên người chơi 2</label>
             <input id="duelName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+            <label class="sr-only" for="duelSkill2">Kỹ năng người chơi 2</label>
+            <select id="duelSkill2" class="duel-skill">
+              <option value="drain">🩸 Hút máu — hồi nửa sát thương</option>
+              <option value="heal">💚 Hồi máu — mỗi câu đúng +10 máu</option>
+              <option value="armor" selected>🛡️ Giáp — chịu ít hơn 30% sát thương</option>
+              <option value="rage">😡 Cuồng nộ — càng combo càng mạnh</option>
+            </select>
           </div>
         </div>
+        <p class="duel-rule-hint">⚡ Trả lời đúng <b>3 câu liên tiếp</b> thì đòn kế tiếp thành <b>CHÍ MẠNG ×2</b>. Trả lời sai sẽ mất combo!</p>
         <label class="select-row">Độ khó câu hỏi
           <select id="duelTier">
             <option value="1">⭐ Khởi Động</option>
@@ -712,37 +727,51 @@
       </section>
 
       <section class="duel-play" id="duelPlay" hidden>
-        <div class="arena" id="duelArena">
-          <div class="ground"></div>
-          <div class="hprow">
-            <div class="hpwrap">
-              <div class="hpname" id="duelHpName1"></div>
-              <div class="hpbar"><div class="hpfill" id="duelHp1" style="width:100%"></div></div>
+        <!-- LỖI THẬT: xếp đấu trường + câu hỏi + 4 đáp án CHỒNG DỌC một cột từng
+             khiến nút đáp án cuối trôi xuống DƯỚI mép 768px — bấm thật (toạ độ)
+             trúng khoảng trống ngoài viewport, document.elementFromPoint trả về
+             null. Màn Đấu Toán gốc tránh đúng lỗi này bằng .battlegrid 2 cột
+             (đấu trường trái, câu hỏi phải) ở màn ≥900px — dùng lại nguyên khuôn
+             đó thay vì tự nghĩ cách xếp dọc mới. -->
+        <div class="battlegrid">
+          <div class="colL">
+            <div class="arena" id="duelArena">
+              <div class="ground"></div>
+              <div class="hprow">
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName1"></span><span class="duel-skill-badge" id="duelSkillBadge1"></span><span class="duel-combo" id="duelCombo1"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost1"></i><div class="hpfill" id="duelHp1" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt1">100</div>
+                </div>
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName2"></span><span class="duel-skill-badge" id="duelSkillBadge2"></span><span class="duel-combo" id="duelCombo2"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost2"></i><div class="hpfill" id="duelHp2" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt2">100</div>
+                </div>
+              </div>
+              <div class="fighter" id="duelP1Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+                </div>
+              </div>
+              <div class="fighter" id="duelP2Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+                </div>
+              </div>
             </div>
-            <div class="hpwrap">
-              <div class="hpname" id="duelHpName2"></div>
-              <div class="hpbar"><div class="hpfill" id="duelHp2" style="width:100%"></div></div>
-            </div>
+            <p class="duel-turn" id="duelTurnTxt" aria-live="polite"></p>
           </div>
-          <div class="fighter" id="duelP1Box">
-            <div style="position:relative;display:inline-block">
-              <div class="shadowPad"></div>
-              <svg class="sprite" id="duelSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+          <div class="colR">
+            <div class="qbox" id="duelQbox">
+              <div class="qtext" id="duelQuestionTxt"></div>
             </div>
-          </div>
-          <div class="fighter" id="duelP2Box">
-            <div style="position:relative;display:inline-block">
-              <div class="shadowPad"></div>
-              <svg class="sprite" id="duelSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
-            </div>
+            <div class="answers" id="duelAnswers"></div>
+            <div class="feedback" id="duelFeedback" aria-live="polite"></div>
           </div>
         </div>
-        <p class="duel-turn" id="duelTurnTxt" aria-live="polite"></p>
-        <div class="qbox" id="duelQbox">
-          <div class="qtext" id="duelQuestionTxt"></div>
-        </div>
-        <div class="answers" id="duelAnswers"></div>
-        <div class="feedback" id="duelFeedback" aria-live="polite"></div>
       </section>
 
       <section class="game-result duel-result" id="duelResult" hidden aria-live="polite">
@@ -792,9 +821,9 @@
         </div>
         <label class="select-row">Kích thước ván
           <select id="nimPreset">
-            <option value="small">Nhỏ — 3 đống, 1–5 viên</option>
-            <option value="medium" selected>Vừa — 4 đống, 1–7 viên</option>
-            <option value="large">Lớn — 5 đống, 1–9 viên</option>
+            <option value="small" selected>Kinh điển — 3 hàng (3-5-7 viên)</option>
+            <option value="medium">Vừa — 4 hàng (3-5-7-9 viên)</option>
+            <option value="large">Lớn — 5 hàng (3-5-7-9-11 viên)</option>
           </select>
         </label>
         <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>

@@ -11,16 +11,16 @@ const TYPE_LABEL={arith:'🧮 Tính nhanh',missing:'❓ Tìm số',compare:'⚖�
   world:'🌍 Kinh điển',visual:'🎨 Nhìn hình',numsense:'🔟 Cảm nhận số',chance:'🎲 Xác suất',
   frac:'½ Phân số',dec:'🔢 Thập phân',pct:'💯 Phần trăm',geo5:'📐 Hình nâng cao',speed:'🚗 Vận tốc',
   unit:'📏 Đổi đơn vị',bar:'📊 Tổng-Tỉ/Hiệu-Tỉ',hsg:'🌟 Học sinh giỏi',brain:'💎 Thử thách mới',
-  singapore:'🇸🇬 Singapore lớp 3'};
+  singapore:'🇸🇬 Singapore lớp 3',famous:'🌟 Câu đố kinh điển'};
 
 function genQuestion(tier){
   const pool={
-    1:['arith','arith','compare','seq','geo','word','eq','count','logic','olymp','cycle','eng','sasmo','imas','amc','world','world','visual','visual','numsense','chance','brain','brain','singapore','singapore'],
-    2:['arith','missing','seq','word','geo','logic','eq','eq','count','back','calen','olymp','olymp','cycle','eng','eng','big','big','sasmo','sasmo','imas','imas','amc','amc','world','world','visual','visual','numsense','numsense','chance','unit','unit','brain','brain','singapore','singapore'],
-    3:['missing','word','geo','seq','logic','eq','magic','back','count','combi','calen','arith','olymp','olymp','cycle','eng','eng','big','big','big','sasmo','sasmo','sasmo','imas','imas','imas','amc','amc','amc','tdn','tdn','world','world','world','visual','visual','numsense','numsense','chance','chance','unit','unit','unit','bar','brain','brain','brain','singapore','singapore','singapore'],
-    4:['word','geo','logic','eq','eq','magic','back','back','count','combi','calen','seq','missing','olymp','olymp','olymp','cycle','eng','eng','big','big','big','sasmo','sasmo','sasmo','sasmo','imas','imas','imas','imas','amc','amc','amc','amc','tdn','tdn','tdn','world','world','world','world','visual','visual','visual','numsense','numsense','chance','chance','frac','frac','pct','geo5','unit','unit','unit','bar','bar','hsg','brain','brain','brain','singapore','singapore','singapore'],
+    1:['arith','arith','compare','seq','geo','word','eq','count','logic','olymp','cycle','eng','sasmo','imas','amc','world','world','visual','visual','numsense','chance','brain','brain','singapore','singapore','famous','famous'],
+    2:['arith','missing','seq','word','geo','logic','eq','eq','count','back','calen','olymp','olymp','cycle','eng','eng','big','big','sasmo','sasmo','imas','imas','amc','amc','world','world','visual','visual','numsense','numsense','chance','unit','unit','brain','brain','singapore','singapore','famous','famous'],
+    3:['missing','word','geo','seq','logic','eq','magic','back','count','combi','calen','arith','olymp','olymp','cycle','eng','eng','big','big','big','sasmo','sasmo','sasmo','imas','imas','imas','amc','amc','amc','tdn','tdn','world','world','world','visual','visual','numsense','numsense','chance','chance','unit','unit','unit','bar','brain','brain','brain','singapore','singapore','singapore','famous','famous'],
+    4:['word','geo','logic','eq','eq','magic','back','back','count','combi','calen','seq','missing','olymp','olymp','olymp','cycle','eng','eng','big','big','big','sasmo','sasmo','sasmo','sasmo','imas','imas','imas','imas','amc','amc','amc','amc','tdn','tdn','tdn','world','world','world','world','visual','visual','visual','numsense','numsense','chance','chance','frac','frac','pct','geo5','unit','unit','unit','bar','bar','hsg','brain','brain','brain','singapore','singapore','singapore','famous','famous'],
     5:['frac','frac','frac','dec','dec','dec','pct','pct','pct','geo5','geo5','geo5','speed','speed','speed',
-       'world','world','visual','numsense','chance','sasmo','sasmo','imas','imas','amc','amc','tdn','tdn','tdn','olymp','big','big','word','logic','magic','back','combi','unit','unit','bar','bar','bar','hsg','hsg','hsg','hsg','hsg','brain','brain','brain','brain','singapore','singapore','singapore','singapore'],
+       'world','world','visual','numsense','chance','sasmo','sasmo','imas','imas','amc','amc','tdn','tdn','tdn','olymp','big','big','word','logic','magic','back','combi','unit','unit','bar','bar','bar','hsg','hsg','hsg','hsg','hsg','brain','brain','brain','brain','singapore','singapore','singapore','singapore','famous','famous','famous'],
   }[tier];
   CHOICE_TIER=tier;
   const type=pick(pool);
@@ -29,7 +29,7 @@ function genQuestion(tier){
     count:genSmartCount,combi:genCombi,calen:genCalendar,
     olymp:genOlymp,cycle:genCycle,eng:genEnglish,big:genBigNum,
     sasmo:genSasmo,imas:genImas,amc:genAmc,tdn:genTDN,unit:genUnit,bar:genSumRatio,hsg:genHSG,brain:genBrainChallenge,
-    singapore:genSingapore3,
+    singapore:genSingapore3,famous:genFamous,
     world:genWorld,visual:genVisual,numsense:genNumSense,chance:genChance,
     frac:genFraction,dec:genDecimal,pct:genPercent,geo5:genGeo5,speed:genSpeed}[type];
   const qq=gen(tier);qq.type=type;return qq;
@@ -745,6 +745,86 @@ function genWorld(t){
   const total1=(n1-1)*sec, n2=pick([8,10,12]);
   return qs(`🔔 Một chiếc đồng hồ đánh ${n1} tiếng chuông hết ${total1} giây. Hỏi nó đánh ${n2} tiếng chuông thì hết bao nhiêu giây?`,(n2-1)*sec,4,
     `Bẫy ở chỗ phải đếm KHOẢNG NGHỈ giữa các tiếng chứ không phải số tiếng! ${n1} tiếng có ${n1-1} khoảng, hết ${total1} giây → mỗi khoảng ${total1} : ${n1-1} = ${sec} giây. ${n2} tiếng có ${n2-1} khoảng → ${n2-1} × ${sec} = ${(n2-1)*sec} giây.`);
+}
+
+/* ============================================================
+   🌟 CÂU ĐỐ KINH ĐIỂN THẾ GIỚI
+   Khác mọi hàm gen* còn lại ở một điểm: lời giải là một CHUỖI SUY LUẬN nhiều
+   bước, không phải một phép tính — nên phần đề được giữ gần nguyên bản gốc.
+   Bài nào đổi số được mà không hỏng mạch suy luận thì có tham số (bắt tay, bèo,
+   chiều cao bàn, ruồi & tàu); bài nào mạch suy luận GẮN CHẶT với con số cụ thể
+   (Cheryl, mũ tù nhân, 3 hộp trái cây, 17 lạc đà) thì giữ nguyên đề.
+============================================================ */
+function genFamous(t){
+  const easy=['lily','handshake','nine9'];
+  const mid=['flyTrains','hatSeller','tableHeight','camels'];
+  const hard=['cheryl','hats3','twoDoors','einstein','boxes3'];
+  const k=pick(t<=2?easy:t===3?[...easy,...mid]:[...mid,...hard]);
+
+  if(k==='lily'){ // Bèo phủ kín hồ — bẫy "gấp đôi" ngược
+    const full=pick([30,40,48,60]);
+    return qs(`🌿 Bèo trong hồ cứ mỗi ngày lại tăng GẤP ĐÔI diện tích. Đến ngày thứ ${full} thì bèo phủ KÍN mặt hồ. Hỏi ngày thứ mấy bèo phủ được đúng NỬA hồ?`,full-1,3,
+      `Đừng chia đôi ${full}! Vì mỗi ngày bèo tăng gấp đôi, hôm sau luôn gấp 2 lần hôm trước. Muốn ngày ${full} phủ kín cả hồ thì ngay hôm trước đó — ngày ${full-1} — bèo phải đang phủ đúng một NỬA, nhân đôi lên là vừa kín.`);
+  }
+  if(k==='handshake'){ // Bắt tay — tổ hợp chập 2
+    const n=ri(5,12),ans=n*(n-1)/2;
+    return qs(`🤝 Trong phòng họp có ${n} người, mỗi người bắt tay với TẤT CẢ những người còn lại đúng 1 lần. Hỏi có tất cả bao nhiêu cái bắt tay?`,ans,5,
+      `Người thứ nhất bắt tay ${n-1} người. Người thứ hai chỉ bắt thêm ${n-2} người mới (đã bắt với người thứ nhất rồi). Cứ thế: ${n-1} + ${n-2} + … + 1 = ${n} × ${n-1} : 2 = ${ans} cái bắt tay.`);
+  }
+  if(k==='nine9'){ // Bốn chữ số 9 tạo thành 100
+    const right='99 + 9 : 9';
+    return {q:`9️⃣ Dùng ĐÚNG bốn chữ số 9 cùng các phép +, −, ×, : để được kết quả bằng 100. Cách viết nào đúng?`,small:true,
+      ans:right,choices:shuffle([right,'99 + 9 − 9','9 × 9 + 9 + 9','99 − 9 : 9']),
+      exp:`99 + 9 : 9 = 99 + 1 = 100 ✓ (chia trước, cộng sau). Ba cách kia: 99 + 9 − 9 = 99; 9 × 9 + 9 + 9 = 99; 99 − 9 : 9 = 98. Mẹo là GHÉP hai chữ số 9 thành 99, rồi dùng 9 : 9 = 1 để cộng nốt.`};
+  }
+  if(k==='flyTrains'){ // Ruồi bay giữa hai đoàn tàu — bẫy "cộng vô hạn"
+    const [d,v,vf]=pick([[100,50,80],[120,60,90],[150,50,80],[200,50,60],[180,60,70]]);
+    const hours=d/(2*v),ans=vf*hours;
+    return qs(`🚂🪰 Hai đoàn tàu cách nhau ${d} km chạy NGƯỢC CHIỀU vào nhau, cùng vận tốc ${v} km/h. Một chú ruồi bay ${vf} km/h xuất phát từ mũi tàu này sang mũi tàu kia, chạm là quay đầu bay ngược lại, cứ thế cho tới khi hai tàu gặp nhau. Hỏi chú ruồi bay tổng cộng bao nhiêu km?`,ans,10,
+      `Đừng cộng từng chặng bay (vô số chặng)! Chỉ cần hỏi: hai tàu gặp nhau sau bao lâu? Chúng lại gần nhau ${v} + ${v} = ${2*v} km mỗi giờ, nên gặp nhau sau ${d} : ${2*v} = ${hours} giờ. Ruồi bay liên tục suốt ${hours} giờ với ${vf} km/h ⇒ ${vf} × ${hours} = ${ans} km.`);
+  }
+  if(k==='hatSeller'){ // Tiền giả — bẫy đếm trùng khoản lỗ
+    const [p,n]=pick([[20,50],[30,100],[40,100],[50,200]]);
+    return {q:`🎩 Chiếc mũ giá ${p} nghìn. Khách đưa tờ ${n} nghìn. Người bán chạy sang hàng xóm đổi tiền lẻ rồi trả khách chiếc mũ kèm ${n-p} nghìn tiền thừa. Lát sau hàng xóm phát hiện tờ ${n} nghìn là TIỀN GIẢ và đòi lại, người bán phải đền một tờ ${n} nghìn thật. Hỏi người bán lỗ tổng cộng bao nhiêu nghìn?`,small:true,
+      ans:n,choices:shuffle([n,n-p,p,n+p]),
+      exp:`Hàng xóm không lỗ đồng nào (đã được đền đủ ${n} nghìn thật). Người bán mất đúng những gì KHÁCH mang đi: chiếc mũ ${p} nghìn + ${n-p} nghìn tiền thừa = ${n} nghìn. Đừng cộng thêm ${n} nghìn đền hàng xóm nữa — khoản đó chính là tờ tiền giả khách đưa, đã tính rồi.`};
+  }
+  if(k==='tableHeight'){ // Mèo, rùa và chiếc bàn — cộng hai vế để triệt tiêu
+    const table=pick([100,120,150,180]),diff=pick([10,20,30,40]);
+    const c1=table+diff,c2=table-diff;
+    return qs(`🐱🐢 Mèo ngồi TRÊN bàn, rùa đứng DƯỚI sàn: khoảng cách từ đầu rùa lên tới tai mèo là ${c1} cm. Đổi chỗ — rùa TRÊN bàn, mèo DƯỚI sàn: khoảng cách từ đầu mèo lên tới đầu rùa là ${c2} cm. Hỏi chiếc bàn cao bao nhiêu cm?`,table,20,
+      `Trường hợp 1: bàn + mèo − rùa = ${c1}. Trường hợp 2: bàn + rùa − mèo = ${c2}. CỘNG hai vế lại thì phần mèo và phần rùa tự triệt tiêu nhau, chỉ còn: 2 × bàn = ${c1} + ${c2} = ${c1+c2} ⇒ bàn cao ${table} cm. Không cần biết mèo hay rùa cao bao nhiêu!`);
+  }
+  if(k==='camels'){ // Chia 17 con lạc đà — mượn 1 con
+    return qs(`🐫 Người cha để lại 17 con lạc đà cho 3 con trai: con cả được 1/2, con thứ được 1/3, con út được 1/9 — và không được xẻ thịt con nào. Nhà thông thái cho MƯỢN 1 con để thành 18 con rồi mới chia. Hỏi con CẢ nhận được mấy con lạc đà?`,9,3,
+      `Có 18 con: con cả 18 : 2 = 9 con, con thứ 18 : 3 = 6 con, con út 18 : 9 = 2 con. Tổng đã chia: 9 + 6 + 2 = 17 con — vừa đúng số lạc đà thật, nên TRẢ LẠI 1 con đã mượn. Mẹo nằm ở chỗ 1/2 + 1/3 + 1/9 = 17/18 chứ không phải trọn 1.`);
+  }
+  if(k==='cheryl'){ // Câu đố sinh nhật Cheryl (SASMO)
+    return {q:`🎂 Cheryl nói riêng THÁNG sinh cho Albert, nói riêng NGÀY sinh cho Bernard, và đưa 10 khả năng: 15/5, 16/5, 19/5, 17/6, 18/6, 14/7, 16/7, 14/8, 15/8, 17/8.<br>• Albert: "Tôi không biết, nhưng tôi CHẮC CHẮN Bernard cũng không biết."<br>• Bernard: "Ban đầu tôi không biết, nhưng giờ thì tôi biết rồi."<br>• Albert: "Vậy giờ tôi cũng biết."<br>Hỏi Cheryl sinh ngày nào?`,small:true,
+      ans:'16/7',choices:shuffle(['16/7','17/8','15/8','14/7','18/6']),
+      exp:`Bước 1 — Ngày 19 chỉ có ở tháng 5, ngày 18 chỉ có ở tháng 6; nếu rơi vào hai ngày đó Bernard đã biết ngay. Albert DÁM chắc Bernard không biết ⇒ tháng Albert cầm không phải 5 hay 6 ⇒ còn tháng 7 và 8.<br>Bước 2 — Bernard nghe xong liền biết ⇒ ngày của cậu không phải 14 (vì 14 có ở cả 7 và 8, vẫn còn lẫn lộn) ⇒ còn 16/7, 15/8, 17/8.<br>Bước 3 — Albert cũng biết ngay ⇒ tháng không thể là 8 (còn tận hai ngày 15 và 17) ⇒ tháng 7, tức <b>16/7</b>.`};
+  }
+  if(k==='hats3'){ // Ba chiếc mũ — suy luận từ câu "không biết"
+    return {q:`🎩 Ba bạn A, B, C đứng hàng dọc: C nhìn thấy cả B và A, B chỉ nhìn thấy A, A không thấy ai. Có 5 chiếc mũ (3 ĐEN, 2 TRẮNG), mỗi bạn được đội 1 chiếc, 2 chiếc còn lại giấu đi. Hỏi C: "Không biết". Hỏi B: "Không biết". Nghe xong, A nói đúng ngay màu mũ của mình. Hỏi A đội mũ màu gì?`,small:true,
+      ans:'Đen',choices:shuffle(['Đen','Trắng','Không thể xác định','Đen hoặc Trắng đều được']),
+      exp:`Chỉ có 2 mũ TRẮNG. Nếu A và B cùng đội trắng thì C nhìn thấy đủ 2 mũ trắng và biết ngay mũ mình phải là ĐEN. C nói "không biết" ⇒ A và B KHÔNG cùng trắng.<br>B nghe được điều đó. Nếu A đội TRẮNG thì B suy ra ngay mũ mình phải là đen (vì hai đứa không thể cùng trắng). B cũng nói "không biết" ⇒ A không đội trắng.<br>Vậy A đội mũ <b>ĐEN</b> — A suy ra được mà chẳng cần nhìn ai cả.`};
+  }
+  if(k==='twoDoors'){ // Thần nói thật – nói dối
+    const right='"Người kia sẽ chỉ cửa nào?" → chọn cửa NGƯỢC LẠI';
+    return {q:`🚪 Trước mặt em là 2 cánh cửa: một dẫn tới KHO BÁU, một dẫn tới NGUY HIỂM. Hai vệ sĩ đứng gác: một người LUÔN nói thật, một người LUÔN nói dối, và em không biết ai là ai. Em chỉ được hỏi ĐÚNG 1 câu với ĐÚNG 1 người. Nên hỏi thế nào?`,small:true,
+      ans:right,choices:shuffle([right,'"Cửa nào có kho báu?" → đi theo câu trả lời','"Anh có nói thật không?" → đi theo câu trả lời','"Cửa bên trái an toàn chứ?" → đi theo câu trả lời']),
+      exp:`Hỏi bất kỳ ai: "Nếu tôi hỏi người kia, người đó sẽ chỉ cửa nào?"<br>• Gặp người NÓI THẬT: anh ta thật thà thuật lại lời nói dối của bạn mình ⇒ chỉ vào cửa NGUY HIỂM.<br>• Gặp người NÓI DỐI: bạn anh ta sẽ chỉ đúng cửa kho báu, nhưng anh ta nói dối ⇒ cũng chỉ vào cửa NGUY HIỂM.<br>Cả hai đều chỉ cùng một cửa xấu, nên cứ chọn cửa NGƯỢC LẠI là chắc chắn trúng kho báu.`};
+  }
+  if(k==='einstein'){ // Einstein rút gọn 3 nhà — bản đã chỉnh cho nghiệm DUY NHẤT
+    return {q:`🏠 An, Bình, Cường ở 3 ngôi nhà màu ĐỎ, XANH, VÀNG; nuôi CHÓ, MÈO, CHIM; uống TRÀ, SỮA, NƯỚC CAM (mỗi thứ mỗi người một loại khác nhau).<br>• An ở nhà Đỏ.<br>• Bình nuôi Mèo.<br>• Người nuôi Chó thì uống Trà.<br>• Chủ nhà Xanh uống Sữa.<br>• Cường uống Trà.<br>Hỏi ai nuôi CHIM?`,small:true,
+      ans:'An',choices:shuffle(['An','Bình','Cường','Không đủ dữ kiện']),
+      exp:`Mỗi người uống một loại khác nhau, mà Cường uống TRÀ ⇒ chỉ mình Cường uống trà. Người nuôi Chó lại uống trà ⇒ người nuôi Chó chính là <b>Cường</b>.<br>Bình đã nuôi Mèo. Vậy con còn lại — CHIM — thuộc về <b>An</b>.<br>(Kiểm tra thêm: An ở nhà Đỏ nên An không phải chủ nhà Xanh ⇒ An không uống sữa, An uống nước cam; Bình ở nhà Xanh uống sữa. Mọi dữ kiện đều khớp.)`};
+  }
+  // boxes3 — Ba hộp trái cây dán nhầm nhãn
+  const right='Hộp dán nhãn "Táo & Cam"';
+  return {q:`🍎🍊 Ba hộp kín: một hộp toàn TÁO, một hộp toàn CAM, một hộp có CẢ HAI. Bên ngoài dán 3 nhãn "Táo", "Cam", "Táo & Cam" — nhưng CẢ BA nhãn đều dán SAI. Em chỉ được nhắm mắt thò tay bốc ĐÚNG 1 quả từ 1 hộp. Nên bốc từ hộp nào để dán lại đúng cả ba nhãn?`,small:true,
+    ans:right,choices:shuffle([right,'Hộp dán nhãn "Táo"','Hộp dán nhãn "Cam"','Hộp nào cũng được']),
+    exp:`Vì MỌI nhãn đều sai, hộp dán "Táo & Cam" chắc chắn không phải hộp trộn ⇒ nó chỉ chứa toàn táo hoặc toàn cam, nên bốc 1 quả là biết ngay nó là hộp gì.<br>Giả sử bốc ra quả TÁO ⇒ đó là hộp Táo. Khi ấy hộp dán "Cam" không thể là hộp Cam (nhãn sai) cũng không thể là hộp Táo (đã có rồi) ⇒ nó là hộp TRỘN; hộp dán "Táo" còn lại là hộp CAM.<br>Bốc ở hai hộp kia thì không chắc: ví dụ bốc hộp dán "Táo" ra quả cam, nó vẫn có thể là hộp Cam hoặc hộp trộn.`};
 }
 
 /* ============================================================

@@ -5,10 +5,16 @@
 (function createNimGame(global) {
   'use strict';
 
+  /* Bàn cờ chuẩn của Nim là 4 hàng 1-3-5-7. Bỏ hàng 1 viên (trơ trọi, và ở luật
+     Misère nó gần như quyết định luôn ván đấu) còn lại 3-5-7 — đúng bộ kinh điển
+     hay dùng nhất. Hai mức lớn hơn chỉ nối dài dãy lẻ: +9, +11.
+     Không random số viên nữa: dãy lẻ tăng dần cho silhouette KIM TỰ THÁP cân đối
+     (renderBoard vẽ từ đống nhỏ tới đống lớn, canh giữa), và giữ số hàng ≤5 để
+     sỏi còn đủ chỗ TO ở màn 768px — 7 hàng thì mỗi viên teo còn 30px. */
   const PRESETS = {
-    small: { piles: 3, max: 5 },
-    medium: { piles: 4, max: 7 },
-    large: { piles: 5, max: 9 },
+    small: { piles: 3 },   // 3-5-7   — bàn kinh điển
+    medium: { piles: 4 },  // 3-5-7-9
+    large: { piles: 5 },   // 3-5-7-9-11
   };
 
   function byId(id) { return document.getElementById(id); }
@@ -66,7 +72,7 @@
 
   function randomPiles(preset) {
     const cfg = PRESETS[preset] || PRESETS.medium;
-    return Array.from({ length: cfg.piles }, () => 1 + Math.floor(Math.random() * cfg.max));
+    return Array.from({ length: cfg.piles }, (_, i) => 3 + i * 2);
   }
 
   function totalStones() {
@@ -78,16 +84,26 @@
     if (turnTxt) turnTxt.textContent = `🪨 Đến lượt ${playerName(state.turn)}`;
   }
 
+  /* Kim tự tháp là hình dáng LÚC BÀY BÀN, không phải luật sắp xếp chạy suốt ván.
+     Các hàng giữ NGUYÊN thứ tự và NGUYÊN vị trí từ đầu tới cuối: bốc vơi một
+     hàng thì đúng hàng đó ngắn lại tại chỗ, không nhảy lên/xuống, không biến mất.
+     Sắp lại theo kích cỡ sau mỗi nước đi (bản trước) làm cả bàn cờ nhảy loạn —
+     người chơi mất dấu hàng mình vừa đụng vào, rất khó tính nước tiếp theo.
+     Hàng đã hết vẫn giữ chỗ (mờ đi, ghi "hết") để bố cục đứng yên tuyệt đối.
+     --nim-max/--nim-rows lấy theo bàn cờ BAN ĐẦU nên cỡ sỏi cũng không đổi giữa
+     chừng — mọi thứ cố định, chỉ số sỏi thay đổi. */
   function renderBoard() {
     const board = byId('nimBoard');
     board.innerHTML = '';
     const total = totalStones();
+    board.style.setProperty('--nim-max', String(state.maxPile));
+    board.style.setProperty('--nim-rows', String(state.piles.length));
     state.piles.forEach((count, pileIndex) => {
       const row = document.createElement('div');
-      row.className = 'nim-pile';
+      row.className = 'nim-pile' + (count === 0 ? ' empty' : '');
       const label = document.createElement('span');
       label.className = 'nim-pile-label';
-      label.textContent = `Đống ${pileIndex + 1}`;
+      label.textContent = count === 0 ? '✔ hết' : `${count} viên`;
       row.appendChild(label);
       const stones = document.createElement('div');
       stones.className = 'nim-stones';
@@ -97,8 +113,8 @@
         btn.className = 'nim-stone';
         btn.textContent = '🪨';
         const willTake = count - i;
-        btn.setAttribute('aria-label', `Lấy ${willTake} viên ở đống ${pileIndex + 1}`);
-        if (total === 1 && count === 1) btn.classList.add('last-stone');
+        btn.setAttribute('aria-label', `Lấy ${willTake} viên ở hàng ${pileIndex + 1}`);
+        if (total === 1) btn.classList.add('last-stone');
         btn.onclick = () => takeFrom(pileIndex, i);
         stones.appendChild(btn);
       }
@@ -114,7 +130,7 @@
     state.piles[pileIndex] = stoneIndex;
     const actor = state.turn;
     const total = totalStones();
-    byId('nimFeedback').textContent = `${playerName(actor)} lấy ${taken} viên ở đống ${pileIndex + 1}.`;
+    byId('nimFeedback').textContent = `${playerName(actor)} lấy ${taken} viên ở hàng ${pileIndex + 1} (còn ${stoneIndex} viên).`;
     safeSound('hit');
     if (total === 0) { endNim(1 - actor); return; }
     if (total === 1) safeSound('tick');
@@ -133,10 +149,12 @@
 
   function startNim() {
     const preset = byId('nimPreset').value || 'medium';
+    const piles = randomPiles(preset);
     state = {
       names: [byId('nimName1').value.trim(), byId('nimName2').value.trim()],
       preset,
-      piles: randomPiles(preset),
+      piles,
+      maxPile: Math.max(...piles),   // chốt lúc bày bàn → cỡ sỏi không đổi giữa ván
       turn: 0,
     };
     setSections('play');
@@ -151,6 +169,8 @@
     setSections('setup');
     paintPreview(1);
     paintPreview(2);
+    safeShowScreen('nimGame');
+    safeSound('open');
   }
 
   function cleanupNimGame() {

@@ -133,16 +133,10 @@
     :root{--wrapW:1720px;--arenaH:clamp(380px,43vh,520px);--spriteF:178px;--qF:44px;--ansF:38px;--ansP:28px;--cardP:40px;--gap:30px;--hpH:26px}
   }
 
-  /* --- Màn hình 4K / siêu rộng: phóng to hết cỡ cho dễ nhìn từ xa --- */
-  @media (min-width:2400px){
-    :root{--wrapW:2060px;--arenaH:clamp(500px,42vh,780px);--spriteF:232px;--qF:60px;--ansF:52px;
-           --ansP:40px;--gap:40px;--hpH:34px;--cardP:50px;--radius:36px}
-    #home .card,#shop .card{max-width:min(1900px,94vw)}
-    #intro .card,#bossWin .card,#victory .card,#defeat .card{max-width:1200px}
-    #home h1,#intro h1,#victory h1,#defeat h1,#bossWin h1{font-size:76px}
-    #home .sub,.bossintro{font-size:26px}
-    #home .sub,#victory .sub,#defeat .sub,#bossWin .sub{max-width:1200px}
-  }
+  /* Thang đo 4K → 8K nằm ở CUỐI FILE (tìm "4K → 8K"), không phải chỗ này:
+     @media không cộng thêm độ đặc hiệu, nên khai báo ở đây sẽ thua các quy tắc
+     không điều kiện viết phía dưới (vd `#home .card{max-width:min(1420px,96vw)}`)
+     và các block :root theo chiều cao. Đặt cuối file mới thắng. */
 
   /* --- Màn hình vừa rộng vừa cao: phóng to hết cỡ --- */
   @media (min-width:1600px) and (min-height:1000px){
@@ -448,6 +442,11 @@
   #heroBox{left:3%} #bossBox{right:3%}
   #duelP1Box{left:3%} #duelP2Box{right:3%}
   .fighter.turn-active .sprite{filter:drop-shadow(0 0 10px var(--gold-ink))}
+  /* LỖI THẬT: .hpfill không có màu nền mặc định — #heroHp/#bossHp có gradient
+     riêng, nhưng #duelHp1/#duelHp2 thì không, nên thanh máu Đấu Đối Kháng hiện
+     ra RỖNG TOÀN TRẮNG dù width đã đúng %. */
+  #duelHp1{background:linear-gradient(90deg,#37d0a0,#7ef2b8)}
+  #duelHp2{background:linear-gradient(90deg,#ff4d67,#ff9e6d)}
   .mech{font-size:calc(var(--hpH) * .72);font-weight:900;background:#fff;border:var(--bd-1) solid var(--ink);border-radius:var(--r-pill);padding:2px 8px;display:inline-block;margin-top:3px;position:relative;z-index:3}
 
   .aura{
@@ -1035,4 +1034,40 @@
       font-size:clamp(52px,6vw,104px);
       filter:drop-shadow(0 6px 10px rgb(var(--tint)/.28));
     }
+  }
+
+  /* =====================================================
+     MÀN HÌNH 4K → 8K — thang đo LIÊN TỤC
+     Trước đây mọi bề ngang ≥2400px dùng CHUNG một bộ giá trị CỐ ĐỊNH (khung
+     2060px, chữ 60px). Trên 4K khung chỉ chiếm 54% bề ngang, trên 8K (7680px)
+     còn 27% — game co cụm thành một hòn đảo nhỏ giữa biển nền.
+     clamp(min, vw, max): tại đúng 2400px khớp y hệt bộ cũ (nối liền, không nhảy
+     bậc), rồi giãn dần và DỪNG quanh mức 5K — to hơn nữa chỉ mỏi mắt, phần dư
+     để làm lề.
+     PHẢI ĐẶT CUỐI FILE: @media không cộng độ đặc hiệu, nên đặt ở khối breakpoint
+     phía trên thì thua `#home .card{max-width:min(1420px,96vw)}` và các block
+     :root theo chiều cao viết sau nó. Đây đúng là bẫy đã ghi trong progress.md. */
+  @media (min-width:2400px){
+    :root{
+      --wrapW:clamp(2060px,86vw,4400px);
+      --arenaH:clamp(500px,40vh,1100px);
+      --spriteF:clamp(232px,9.2vw,440px);
+      --qF:clamp(60px,2.4vw,92px);
+      --ansF:clamp(52px,2.1vw,80px);
+      --ansP:clamp(40px,1.6vw,60px);
+      --gap:clamp(40px,1.6vw,60px);
+      --hpH:clamp(34px,1.35vw,50px);
+      --cardP:clamp(50px,2vw,74px);
+      --radius:clamp(36px,1.4vw,52px);
+    }
+    #home .card,#shop .card{max-width:min(clamp(1900px,90vw,4300px),94vw)}
+    #intro .card,#bossWin .card,#victory .card,#defeat .card{max-width:clamp(1200px,50vw,2600px)}
+    #home h1,#intro h1,#victory h1,#defeat h1,#bossWin h1{font-size:clamp(76px,3vw,120px)}
+    #home .sub,.bossintro{font-size:clamp(26px,1.05vw,40px)}
+    #home .sub,#victory .sub,#defeat .sub,#bossWin .sub{max-width:clamp(1200px,50vw,2600px)}
+  }
+  /* Màn siêu lớn lại RẤT CAO (8K 4320px): chiều cao mới là thứ dư dả nhất, nên
+     đấu trường và nhân vật chuyển sang ăn theo vh để không bỏ phí nửa dưới. */
+  @media (min-width:2400px) and (min-height:1700px){
+    :root{--arenaH:clamp(600px,40vh,1500px);--spriteF:clamp(260px,10vh,560px)}
   }

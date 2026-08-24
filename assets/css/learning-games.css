@@ -395,9 +395,68 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .learning-mode.duel-mode{background:linear-gradient(140deg,#ffd3dc,#fff0f3)}
 .learning-mode.nim-mode{background:linear-gradient(140deg,#ffe6b8,#fffaf0)}
 
+/* LỖI THẬT: .card mặc định flex:1 để lấp đầy màn (đúng ý cho Đấu Toán/Sudoku, nơi
+   nội dung con cũng giãn theo), nhưng nội dung setup/play của Duel & Nim CAO CỐ
+   ĐỊNH — hệ quả là một khối to trống trơn phía dưới. Biến .duel-card/.nim-card
+   thành cột flex và canh GIỮA THEO CHIỀU DỌC phần đang hiển thị (setup/play/kết
+   quả — 2 cái kia luôn [hidden] nên không tham gia layout) thay vì để trôi lên đầu. */
+.duel-card,.nim-card{display:flex;flex-direction:column}
+.duel-card>section,.nim-card>section{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto}
+/* LỖI THẬT: quy tắc display:flex ở trên có độ đặc hiệu CAO HƠN luật [hidden]{display:none}
+   mặc định của trình duyệt (đến từ UA stylesheet, luôn thua author stylesheet dù
+   specificity thấp) — hệ quả là màn setup và play cùng hiện chồng lên nhau dù
+   thuộc tính hidden vẫn đúng. Phải tự khẳng định lại display:none cho [hidden]. */
+.duel-card>section[hidden],.nim-card>section[hidden]{display:none}
+/* Canh GIỮA riêng cho setup/kết quả — nội dung ngắn, luôn nhỏ hơn hẳn chiều cao
+   thẻ nên căn giữa mới hết cảnh trống trải phía dưới. KHÔNG áp cho màn chơi
+   (đấu trường + câu hỏi + 4 đáp án): nội dung đó gần lấp đầy hoặc cao hơn thẻ ở
+   màn thấp, căn giữa sẽ đẩy phần đầu (thanh máu) trồi lên trên mép, bị cắt. */
+#duelSetup,#duelResult,#nimSetup,#nimResult{justify-content:center}
+/* LỖI THẬT: mặc định flex-shrink:1 cho phép #duelQbox bị NÉN THẤP HƠN cả nội
+   dung của nó khi #duelPlay không đủ chỗ cho mọi con (câu hỏi dài 3 dòng) — chữ
+   tràn ra NGOÀI khung, đè lên "Đến lượt X" phía trên và 4 nút đáp án phía dưới.
+   flex-shrink:0 buộc mỗi khối giữ đúng kích thước tự nhiên; nếu tổng vẫn không
+   vừa thì #duelPlay/#nimPlay (đã có overflow-y:auto) cuộn, không đè chữ lên nhau. */
+#duelPlay>*,#nimPlay>*{flex-shrink:0}
+/* Cho lưới 2 cột ăn hết chiều cao còn lại của thẻ (giống .battlegrid ở màn Đấu
+   Toán), nếu không cả khối co về đúng chiều cao nội dung và để trống một mảng
+   lớn phía dưới. Đấu trường giãn theo cột trái; cột phải trải đều câu hỏi và
+   đáp án để không dồn cục lên đỉnh. */
+#duelPlay>.battlegrid{flex:1;min-height:0}
+/* Đấu trường giữ ĐÚNG chiều cao --arenaH, KHÔNG flex:1. Cho nó giãn hết cột thì
+   phần dư biến thành một mảng trời trống hoác phía trên hai nhân vật (chúng
+   đứng ở đáy), trông rỗng và lệch hẳn so với cột câu hỏi bên phải. Cả hai cột
+   cùng canh giữa theo chiều dọc nên nội dung hai bên ngang tầm mắt nhau. */
+#duelPlay .colL{justify-content:center}
+#duelPlay .colL .arena{flex:1 1 auto;min-height:var(--arenaH);max-height:50vh;margin-bottom:0}
+/* space-evenly: câu hỏi và 4 đáp án trải đều theo chiều dọc thay vì dồn cục vào
+   giữa cột — hai cột nhờ vậy cùng lấp đầy chiều cao thẻ, không để lại hai mảng
+   trống lớn trên/dưới. */
+#duelPlay .colR{justify-content:space-evenly;gap:calc(var(--gap) * .8)}
+
+/* ===== THANG ĐO RIÊNG CỦA MÀN ĐẤU ĐỐI KHÁNG =====
+   Màn Đấu Toán một mình chiếm cả thẻ nên nhân vật to là hợp lý; ở đây PHẢI nhét
+   vừa 2 nhân vật + 2 thanh máu + câu hỏi + 4 đáp án vào đúng một khung, nên cả
+   nhân vật lẫn chữ đều nhỏ hơn một bậc. Ghi đè THẲNG các token gốc (--spriteF,
+   --qF, --ansF…) thay vì viết lại từng quy tắc: mọi thứ ăn theo token nên chỉ
+   cần đổi ở đây một chỗ. Dùng clamp(px, vw, px) nên cùng lúc tự co giãn mượt từ
+   HD lên 8K, không phải khai báo lại ở từng breakpoint. */
+#duelGame{
+  --spriteF:clamp(50px,5vw,240px);
+  --arenaH:clamp(165px,23vh,460px);
+  --qF:clamp(18px,1.45vw,52px);
+  --ansF:clamp(17px,1.3vw,46px);
+  --ansP:clamp(10px,.8vw,30px);
+  --hpH:clamp(13px,1vw,30px);
+}
+
+/* .select-row vốn viết cho panel TỐI của Gõ Chữ (chữ #e5e2fa) — trên panel SÁNG
+   của Duel/Nim, chữ đó gần như vô hình. Ghi đè lại đúng ngữ cảnh nền sáng. */
+.duel-setup .select-row,.nim-setup .select-row{color:var(--ink)}
+
 .duel-setup-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin:16px 0}
 .duel-player-card{display:flex;flex-direction:column;align-items:center;gap:8px}
-.duel-skin-preview{width:88px;height:88px;overflow:visible}
+.duel-skin-preview{width:96px;height:96px;overflow:visible}
 .duel-skin-row{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px}
 .duel-skin-row .icon-btn{width:34px;height:34px;font-size:16px}
 .duel-vs{font-size:32px;text-align:center}
@@ -406,23 +465,96 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .duel-turn{text-align:center;font-family:var(--font-display);font-weight:800;font-size:clamp(16px,1.6vw,22px);margin:10px 0}
 #duelQbox{margin:0 auto 10px;max-width:640px}
 
-.nim-warning{text-align:center;font-weight:900;color:#a8371f;background:#ffe4d6;border:var(--bd-1) solid #e59a7c;border-radius:var(--r-pill);padding:8px 14px;margin:0 auto 6px;max-width:560px}
-.nim-board{display:flex;flex-direction:column;gap:14px;max-width:720px;margin:14px auto}
-.nim-pile{display:flex;align-items:center;gap:12px}
-.nim-pile-label{flex:0 0 72px;font-weight:900;color:#5f577d}
-.nim-stones{display:flex;flex-wrap:wrap;gap:6px}
-.nim-stone{width:36px;height:36px;font-size:22px;display:grid;place-items:center;border:var(--bd-1) solid #8a7eb0;border-radius:50%;background:#fff;cursor:pointer;transition:transform var(--dur-1) var(--ease-snap)}
-.nim-stone:hover{transform:translateY(-3px)}
+.nim-warning{text-align:center;font-weight:900;color:#a8371f;background:#ffe4d6;border:var(--bd-1) solid #e59a7c;border-radius:var(--r-pill);padding:8px 14px;margin:0 auto 10px;max-width:560px}
+
+/* Kim tự tháp: hàng ngắn ở trên, hàng dài ở dưới, mỗi hàng canh giữa — hình dáng
+   này do THỨ TỰ BÀY BÀN tạo ra (3-5-7…) chứ không phải do sắp xếp lại khi chơi.
+   container-type:size (không chỉ inline-size) để dùng được CẢ cqw lẫn cqh —
+   sỏi phải vừa cả hàng dài nhất THEO NGANG lẫn số hàng THEO DỌC.
+   Selector có #nimPlay để thắng `#nimPlay>*{flex-shrink:0}` phía trên: (1,1,0)
+   đè (1,0,0); viết `.nim-board` trơn sẽ thua và bàn cờ không giãn được. */
+#nimPlay .nim-board{flex:1 1 0;min-height:0;container-type:size;justify-content:center}
+.nim-board{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.2vh,24px);
+  margin:0 auto;padding:4px;width:100%}
+.nim-pile{display:flex;flex-direction:column;align-items:center;gap:6px;max-width:100%}
+/* Hàng đã bốc hết vẫn CHIẾM ĐÚNG CHỖ CŨ (mờ đi) — nếu bỏ hẳn khỏi bố cục thì các
+   hàng dưới nhảy lên, người chơi mất dấu hàng mình vừa đụng. */
+.nim-pile.empty{opacity:.35}
+.nim-pile.empty .nim-stones{min-height:var(--nim-size)}
+.nim-pile-label{font:800 clamp(12px,.75vw,20px) var(--font-body);letter-spacing:.03em;color:var(--ink-3);text-transform:uppercase}
+
+/* Cỡ sỏi = NHỎ NHẤT trong ba giá trị:
+   1. mức "to thoải mái" theo bề ngang màn hình — clamp(...vw...);
+   2. vừa khít hàng DÀI NHẤT theo ngang — (bề ngang bàn − khe hở) : số viên;
+   3. vừa đủ SỐ HÀNG theo dọc — (chiều cao bàn : số hàng) − chỗ cho nhãn.
+   `--nim-max`/`--nim-rows` do renderBoard() đặt theo bàn cờ BAN ĐẦU, nên cỡ sỏi
+   cố định suốt ván (bốc vơi không làm sỏi phình to, bố cục đứng yên).
+   Đặt trên .nim-stones (không phải .nim-stone) để hàng RỖNG cũng đọc được
+   --nim-size mà chừa đúng chiều cao cũ. */
+.nim-stones{
+  display:flex;justify-content:center;
+  --nim-gap:clamp(5px,.55vw,16px);gap:var(--nim-gap);
+  --nim-fit-w:calc((100cqw - (var(--nim-max,11) - 1) * var(--nim-gap)) / var(--nim-max,11));
+  /* Trừ ~40px mỗi hàng cho nhãn + khe hở. max(30px, …) chặn giá trị âm khi màn
+     quá thấp — min() gặp số âm sẽ cho sỏi biến mất. */
+  --nim-fit-h:max(30px,calc(100cqh / var(--nim-rows,5) - 40px));
+  --nim-size:min(clamp(40px,5.4vw,260px),var(--nim-fit-w),var(--nim-fit-h));
+}
+.nim-stone{
+  width:var(--nim-size);aspect-ratio:1;font-size:calc(var(--nim-size) * .56);
+  flex:0 0 auto;display:grid;place-items:center;
+  border:var(--bd-2) solid #6b6088;border-radius:46% 54% 52% 48%/52% 48% 54% 46%;
+  background:radial-gradient(circle at 32% 28%,#fff,#e4dff2 45%,#c9c2e0 100%);
+  box-shadow:var(--elev-2);cursor:pointer;
+  transition:transform var(--dur-1) var(--ease-snap),filter var(--dur-1) var(--ease-snap);
+}
+/* Xem trước sẽ lấy gì TRƯỚC khi bấm: hover một viên thì viên đó VÀ mọi viên sau
+   nó (đúng nhóm sẽ bị lấy nếu bấm) cùng nổi lên — không cần JS, chỉ combinator
+   ~ (anh chị em phía sau) là đủ diễn tả nguyên đúng luật "lấy từ đây tới hết". */
+.nim-stone:hover,.nim-stone:hover~.nim-stone{
+  transform:translateY(-8px) scale(1.06);
+  filter:brightness(.9) saturate(1.3);
+  border-color:#dc3754;
+}
 .nim-stone.last-stone{border-color:#dc3754;animation:nimWarnPulse .7s ease-in-out infinite}
-@keyframes nimWarnPulse{50%{box-shadow:0 0 0 6px rgba(220,55,84,.3)}}
-.nim-feedback{text-align:center;min-height:22px;font-weight:800;color:#5f577d}
+@keyframes nimWarnPulse{50%{box-shadow:0 0 0 8px rgba(220,55,84,.3)}}
+.nim-feedback{text-align:center;min-height:22px;font-weight:800;color:#5f577d;margin-top:8px}
 
 @media (prefers-reduced-motion:reduce){
   .nim-stone.last-stone{animation:none}
+  .nim-stone:hover,.nim-stone:hover~.nim-stone{transform:none}
 }
 
 @media (max-width:580px){
   .duel-setup-grid{grid-template-columns:1fr;gap:10px}
   .duel-vs{order:2}
-  .nim-pile-label{flex-basis:56px;font-size:14px}
+}
+
+/* =====================================================
+   MÀN 4K → 8K CHO CÁC MÀN HỌC TẬP
+   main.css đã nới thang token cho màn Đấu Toán, nhưng phần "khung" của các màn
+   học tập (tiêu đề, eyebrow, nhãn HUD, nút tròn) lại có clamp() CHẶN TRÊN rất
+   sớm — vd tiêu đề dừng ở 42px, eyebrow dừng ở 14px. Trên 4K/8K chúng teo lại
+   thành hàng chữ li ti trong một khung mênh mông. Nới trần ở đây, cuối file để
+   chắc chắn thắng các quy tắc phía trên (@media không cộng độ đặc hiệu).
+===================================================== */
+@media (min-width:2400px){
+  .game-topbar{gap:clamp(15px,1vw,34px);padding-bottom:clamp(15px,1vw,30px)}
+  .game-topbar h1{font-size:clamp(42px,1.9vw,74px)}
+  .eyebrow{font-size:clamp(14px,.62vw,24px)}
+  .icon-btn{width:clamp(48px,2.5vw,92px);height:clamp(48px,2.5vw,92px);font-size:clamp(23px,1.2vw,44px)}
+  .typing-hud span,.sudoku-hud span{font-size:clamp(14.5px,.72vw,28px);padding:clamp(7px,.4vw,14px) clamp(11px,.6vw,22px)}
+  .game-result h2{font-size:clamp(37px,1.7vw,64px)}
+  .game-result p{font-size:clamp(16px,.8vw,30px)}
+  .result-icon{font-size:clamp(84px,3.6vw,150px)}
+  .nim-warning{font-size:clamp(16px,.85vw,32px);padding:clamp(8px,.5vw,18px) clamp(14px,.9vw,32px);max-width:clamp(560px,32vw,1200px)}
+  .duel-turn{font-size:clamp(22px,1.1vw,42px)}
+  .nim-pile-label{font-size:clamp(13px,.6vw,24px)}
+  .duel-player-card input{max-width:clamp(220px,13vw,520px);font-size:clamp(16px,.85vw,32px);padding:clamp(9px,.55vw,20px) clamp(11px,.7vw,26px)}
+  .duel-skin-preview{width:clamp(96px,5.4vw,240px);height:clamp(96px,5.4vw,240px)}
+  .duel-skin-row{font-size:clamp(14px,.72vw,28px);gap:clamp(8px,.5vw,18px)}
+  .duel-skin-row .icon-btn{width:clamp(34px,1.8vw,66px);height:clamp(34px,1.8vw,66px);font-size:clamp(16px,.85vw,32px)}
+  .duel-vs{font-size:clamp(32px,1.7vw,64px)}
+  .select-row,.check-row{font-size:clamp(16px,.85vw,32px)}
+  .answer-toolbar select,.select-row select{font-size:clamp(14.5px,.8vw,30px);padding:clamp(7px,.45vw,16px) clamp(30px,1.7vw,58px) clamp(7px,.45vw,16px) clamp(9px,.55vw,20px)}
 }
