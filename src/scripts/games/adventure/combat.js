@@ -1,4 +1,4 @@
-﻿let currentQ=null,isGolden=false;
+let currentQ=null,isGolden=false;
 let answerMode=window.GameStorage?.load?.().settings?.answerMode||'mixed';
 let answerComposition=false;
 const recentSig=[];let lastType='';
@@ -189,11 +189,11 @@ function answer(btn,val){
     if(G.streak>0&&G.streak%3===0)G.crit=true;
     let coin=7+(fast?4:0)+(isGolden?12:0)+Math.min(G.streak-1,3)*2;
     G.coins+=coin;
-    let msg=isGolden?`💛 CÂU VÀNG! Sát thương nhân đôi: ${dmg}!`
-           :critNow?`💥 ĐÒN CHÍ MẠNG! Gây ${dmg} sát thương!`
-           :`🎯 Chính xác! Tung chưởng gây ${dmg} sát thương!`;
+    let msg=isGolden?`💛 HÀO QUANG CÂU VÀNG! Sát thương nhân đôi: ${dmg}!`
+           :critNow?`💥 BỘC PHÁ CHÍ MẠNG! Tung chưởng gây ${dmg} sát thương!`
+           :`🎯 TUYỆT VỜI! Đòn phép tư duy gây ${dmg} sát thương!`;
     msg+=` +${coin}💰`;
-    if(fast)msg+=' ⚡nhanh!';
+    if(fast)msg+=' ⚡tốc độ!';
     if(capped)msg+=' (đòn tối đa!)';
     if(critNow||isGolden)screenFlash();
     addEnergy(isGolden?ENERGY_GOLD:ENERGY_GAIN);
@@ -212,9 +212,9 @@ function answer(btn,val){
     G.wrong++;G.streak=0;G.crit=false;
     const lose=Math.min(G.coins,5);G.coins-=lose; // bấm bừa là mất xu!
     let dmg=bossDamage(b);
-    let msg=dmg===0?`💥 Sai rồi! Đáp án đúng là ${currentQ.ans}. 🛡️ Khiên đã CHẶN TRỌN đòn của boss!`
-                   :`💥 Sai rồi! Đáp án đúng là ${currentQ.ans}. Boss phản chưởng −${dmg}!`;
-    if(b.mech==='heal'){const hl=b.tier>=5?10:8;G.bossHp=Math.min(G.bossMaxHp,G.bossHp+hl);msg+=` 💚Boss hồi ${hl} máu!`;}
+    let msg=dmg===0?`💥 Chưa chính xác! Đáp án là ${currentQ.ans}. 🛡️ Khiên Aegis đã CHẶN TRỌN đòn của Vệ Binh!`
+                   :`💥 Chưa chính xác! Đáp án đúng là ${currentQ.ans}. Vệ Binh phản chưởng −${dmg}!`;
+    if(b.mech==='heal'){const hl=b.tier>=5?10:8;G.bossHp=Math.min(G.bossMaxHp,G.bossHp+hl);msg+=` 💚Vệ Binh hồi ${hl} sinh lực!`;}
     if(lose>0)msg+=` −${lose}💰`;
     fb.textContent=msg;fb.classList.add('bad');
     showExplain();updateHUD();

@@ -117,7 +117,8 @@ npm run test:dist
 ```
 
 Deploy nội dung của `dist/`. Tất cả URL runtime là tương đối nên hoạt động dưới subpath
-GitHub Pages. Với Netlify hoặc Vercel, dùng build command `npm run build` và output
+GitHub Pages. `netlify.toml` đã khai báo sẵn build command, thư mục publish và Node 22 nên chỉ cần
+kết nối repo trên Netlify. Với Vercel, dùng build command `npm run build` và output
 directory `dist`.
 
 Không chỉnh tay `dist/`. Build tự tạo cache version từ nội dung core và deferred

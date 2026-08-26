@@ -112,6 +112,46 @@
       { text: 'nuôi dưỡng trí tưởng tượng', meaning: 'Ý tưởng mới bắt đầu từ tò mò.', level: 3, topic: 'Sáng tạo' }
     ],
 
+    code: [
+      { text: 'console.log("Hello World");', meaning: 'In thông điệp ra console trong JS', level: 1, topic: 'JavaScript' },
+      { text: 'const wpm = 100;', meaning: 'Khai báo hằng số tốc độ gõ', level: 1, topic: 'JavaScript' },
+      { text: 'let score = 0;', meaning: 'Khai báo biến điểm số', level: 1, topic: 'JavaScript' },
+      { text: 'print("Hello Python")', meaning: 'In chuỗi ký tự trong Python', level: 1, topic: 'Python' },
+      { text: 'def solve():', meaning: 'Định nghĩa hàm trong Python', level: 1, topic: 'Python' },
+      { text: 'div.container { display: flex; }', meaning: 'Căn chỉnh bố cục Flexbox CSS', level: 1, topic: 'CSS' },
+      { text: 'color: #00ffcc;', meaning: 'Màu neon cyan trong CSS', level: 1, topic: 'CSS' },
+      { text: 'function checkWpm(speed) { return speed > 60; }', meaning: 'Hàm kiểm tra tốc độ gõ', level: 2, topic: 'JavaScript' },
+      { text: 'document.querySelector("#app").innerHTML = "Ready!";', meaning: 'Cập nhật nội dung HTML qua DOM', level: 2, topic: 'JavaScript' },
+      { text: 'numbers = [i for i in range(10)]', meaning: 'Tạo list comprehension trong Python', level: 2, topic: 'Python' },
+      { text: 'if __name__ == "__main__":', meaning: 'Khối thực thi chính trong Python', level: 2, topic: 'Python' },
+      { text: 'async function fetchData(url) { return await fetch(url); }', meaning: 'Gọi API bất đồng bộ với Async/Await', level: 3, topic: 'JavaScript' },
+      { text: 'const [state, setState] = useState(initialValue);', meaning: 'Hook lưu trữ trạng thái React JS', level: 3, topic: 'React' },
+      { text: 'import { useEffect, useCallback } from "react";', meaning: 'Import hooks quản lý side-effects', level: 3, topic: 'React' }
+    ],
+
+    riddle: [
+      { text: 'Cái gì càng rửa càng bẩn?', meaning: 'Đáp án: Nước', level: 1, topic: 'Đố mẹo' },
+      { text: 'Con gì có cánh mà không biết bay?', meaning: 'Đáp án: Con chim cánh cụt', level: 1, topic: 'Đố vui' },
+      { text: 'Nắng lửa mưa dầu tôi đâu có sợ', meaning: 'Đáp án: Cái ô / Cái dù', level: 1, topic: 'Đố dân gian' },
+      { text: 'Lịch nào dài nhất?', meaning: 'Đáp án: Lịch sử', level: 1, topic: 'Đố chữ' },
+      { text: 'Bệnh gì bác sĩ bó tay?', meaning: 'Đáp án: Bệnh gãy tay', level: 2, topic: 'Đố mẹo' },
+      { text: 'Cái gì không ăn được mà vẫn chín?', meaning: 'Đáp án: Quả trứng / Trứng chín (hoặc suy nghĩ chín)', level: 2, topic: 'Đố mẹo' },
+      { text: 'Quần rộng nhất là quần gì?', meaning: 'Đáp án: Quần đảo', level: 2, topic: 'Đố chữ' },
+      { text: 'Con đường ngắn nhất đến trái tim là gì?', meaning: 'Đáp án: Đường truyền Internet siêu tốc!', level: 3, topic: 'Đố vui modern' },
+      { text: 'Vật gì có mặt nhưng không có miệng?', meaning: 'Đáp án: Đồng hồ hoặc con tem', level: 3, topic: 'Đố dân gian' }
+    ],
+
+    science: [
+      { text: 'Trái Đất quay quanh Mặt Trời', meaning: 'Chu kỳ quỹ đạo 365,25 ngày', level: 1, topic: 'Thiên văn' },
+      { text: 'Nước sôi ở 100 độ C', meaning: 'Nhiệt độ sôi ở áp suất tiêu chuẩn', level: 1, topic: 'Vật lý' },
+      { text: 'Oxy duy trì sự sống', meaning: 'Khí chiếm 21% bầu khí quyển', level: 1, topic: 'Sinh học' },
+      { text: 'Ánh sáng truyền nhanh nhất', meaning: 'Tốc độ xấp xỉ 300.000 km/s', level: 2, topic: 'Vật lý' },
+      { text: 'Quang hợp tạo ra O2', meaning: 'Cây xanh hấp thụ CO2 và nhả Oxy', level: 2, topic: 'Sinh học' },
+      { text: 'Lực hấp dẫn của Trái Đất', meaning: 'Giữ bầu khí quyển và mọi vật trên mặt đất', level: 2, topic: 'Vật lý' },
+      { text: 'DNA chứa mã di truyền', meaning: 'Cấu trúc xoắn đôi mang thông tin di truyền', level: 3, topic: 'Sinh học' },
+      { text: 'Thần kinh trung ương', meaning: 'Gồm não bộ và tủy sống điều khiển hành vi', level: 3, topic: 'Y học' }
+    ],
+
     bosses: {
       en: {
         easy: {
@@ -188,25 +228,25 @@
      * engine tự đọc theo và không cần đổi dòng code nào.
      */
     campaign: [
-      { emoji: '🐛', name: 'Sâu Chữ Cái',      desc: 'Con sâu non bò trên khúc thân cuộn, hai cái râu ngoe nguẩy dò từng chữ cái. Chậm rì — chặng để em làm quen bàn phím.',
+      { emoji: '🐛', name: 'Sâu Tri Thức Arcane',    desc: 'Linh vật phát sáng ma thuật bò qua dãy phím ngọc. Nhịp chuyển động chậm rãi — khởi đầu lý tưởng để em làm quen vị trí ngón tay.',
         waves: 3,  perWave: CAMPAIGN_PER_WAVE, gap: 2600, speed: 2.6, level: 1, armor: 2 },
-      { emoji: '👻', name: 'Ma Gõ Nhầm',       desc: 'Không chân, tà áo bay lửng lơ, chuyên rình lúc em gõ vội mà bấm nhầm phím bên cạnh.',
+      { emoji: '👻', name: 'Bóng Ma Ảo Ảnh Starlight', desc: 'Lạc lối trong dải ngân hà, rình rập lúc em nhập phím vội vã để biến hóa từ ngữ.',
         waves: 5,  perWave: CAMPAIGN_PER_WAVE, gap: 2450, speed: 3.0, level: 1, armor: 2 },
-      { emoji: '🦇', name: 'Dơi Lạc Phím',     desc: 'Đôi tai dỏng lên nghe tiếng gõ, cánh đập loạn xạ làm em lạc mất hàng phím giữa.',
+      { emoji: '🦇', name: 'Dơi Âm Thanh Tinh Tú',   desc: 'Đôi cánh ma thuật đập sóng âm vũ trụ, làm rung chuyển nhịp gõ của em.',
         waves: 7,  perWave: CAMPAIGN_PER_WAVE, gap: 2300, speed: 3.4, level: 1, armor: 3 },
-      { emoji: '🐍', name: 'Rắn Chính Tả',     desc: 'Trườn trên khúc thân cuộn tròn, nanh nhọn chờ đúng một chữ viết sai là đớp.',
+      { emoji: '🐍', name: 'Xà Thần Ngôn Ngữ',       desc: 'Thần xà ngọc bích trườn qua ký tự rune, kiểm tra độ chính xác của từng dấu thanh.',
         waves: 9,  perWave: CAMPAIGN_PER_WAVE, gap: 2150, speed: 3.8, level: 2, armor: 3 },
-      { emoji: '🦂', name: 'Bọ Cạp Dấu Thanh', desc: 'Hai càng kẹp chặt, cái ngòi cong ngược lên lưng chực chích đúng chỗ em quên bỏ dấu.',
+      { emoji: '🦂', name: 'Bọ Cạp Khắc Dấu Hào Quang', desc: 'Càng vàng rực rỡ và ngòi bộc phát hào quang, thử thách bản lĩnh gõ đúng chính tả.',
         waves: 11, perWave: CAMPAIGN_PER_WAVE, gap: 2000, speed: 4.2, level: 2, armor: 3 },
-      { emoji: '🦑', name: 'Mực Ngữ Pháp',     desc: 'Xúc tu quấn lấy cả câu, tách rời chủ ngữ khỏi vị ngữ cho em rối tinh lên.',
+      { emoji: '🦑', name: 'Mực Thần Cổ Đại',         desc: 'Xúc tu ma thuật ngọc bích quấn quanh cú pháp, thử thách tư duy sắp xếp từ ngữ.',
         waves: 13, perWave: CAMPAIGN_PER_WAVE, gap: 1850, speed: 4.6, level: 2, armor: 4 },
-      { emoji: '🐲', name: 'Rồng Con Từ Vựng', desc: 'Rồng mới mọc sừng, cánh còn nhỏ nhưng đuôi đã quật rất rát. Nó canh giữ kho từ khó.',
+      { emoji: '🐲', name: 'Hỏa Long Từ Vựng',       desc: 'Long tinh rực lửa bảo hộ kho tàng từ vựng cao cấp. Múa cánh bộc phá hào quang!',
         waves: 15, perWave: CAMPAIGN_PER_WAVE, gap: 1700, speed: 5.0, level: 3, armor: 4 },
-      { emoji: '👹', name: 'Quỷ Tốc Độ',       desc: 'Sừng đỏ, nanh nhe, vảy lưng dày. Nó ép em gõ nhanh tới mức quên mất phải gõ cho đúng.',
+      { emoji: '👹', name: 'Quỷ Thần Tốc Độ Sol',    desc: 'Bộc phát năng lượng mặt trời, thách thức em đạt tốc độ gõ kỷ lục mà vẫn giữ vững độ chính xác.',
         waves: 17, perWave: CAMPAIGN_PER_WAVE, gap: 1550, speed: 5.4, level: 3, armor: 4 },
-      { emoji: '🐉', name: 'Rồng Ngôn Ngữ',    desc: 'Rồng trưởng thành: đủ cánh, đủ đuôi, đủ vảy, đủ nanh. Mỗi lớp giáp là một câu dài phải gõ trọn vẹn.',
+      { emoji: '🐉', name: 'Thần Long Thái Dương',   desc: 'Thần long vũ trụ uy nghi. Mỗi lớp giáp rune là một thử thách gõ câu trường kỳ trọn vẹn.',
         waves: 19, perWave: CAMPAIGN_PER_WAVE, gap: 1400, speed: 5.8, level: 3, armor: 5 },
-      { emoji: '🌌', name: 'Chúa Tể Bàn Phím', desc: 'Vương miện và áo choàng của kẻ cai trị cả chín chặng trước. Hạ được nó nghĩa là em đã làm chủ bàn phím.',
+      { emoji: '🌌', name: 'Chúa Tể Bàn Phím Vũ Trụ', desc: 'Kẻ trị vì vương quốc tư duy ngôn ngữ. Hạ gục hắn để khẳng định ngôi vị Huyền Thoại Bàn Phím!',
         waves: 21, perWave: CAMPAIGN_PER_WAVE, gap: 1300, speed: 6.3, level: 3, armor: 5 }
     ]
   };

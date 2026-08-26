@@ -16,50 +16,42 @@
    ===================================================================== */
 
 :root{
-  /* --- 1. Bầu trời đêm sâu. Nền cũ là gradient xanh–tím sáng, đúng cái
-     "AI gradient" ai cũng dùng; HD-2D cần nền gần như đen để đèn ấm nổi. */
-  --sky:#0a0c1e; --sky2:#161233;
-  --tint:6 8 26;                 /* bóng ăn theo sắc nền, không dùng đen thuần */
+  /* --- 1. Bầu trời Vũ Trụ & Huyền Hoặc (Vibrant Fantasy Sky) --- */
+  --sky:#080b26; --sky2:#16113c;
+  --tint:14 18 48;                 /* bóng mờ đa sắc ma thuật */
 
-  /* --- 2. Góc pixel. Không để 0: viền đang dày 3–4px, góc 0 sẽ nhọn hoắt.
-     2–6px = đúng một "điểm ảnh phóng to", vẫn bo nhẹ cho mắt trẻ con. */
-  --r-1:2px; --r-2:3px; --r-3:5px; --r-pill:5px; --radius:6px;
-  --px:3px;                      /* cạnh 1 điểm ảnh của giao diện */
+  /* --- 2. Bo góc mượt mà & mềm mại (Stylized Fantasy Curves) --- */
+  --r-1:6px; --r-2:10px; --r-3:14px; --r-pill:20px; --radius:16px;
+  --px:2px;
 
-  /* --- 3. Đèn sân khấu. HD-2D luôn là ẤM đối chọi LẠNH. */
-  --lamp-warm:255 178 87;
-  --lamp-cool:99 228 255;
-  --lamp-magenta:255 93 162;
+  /* --- 3. Đèn ma thuật & Hào quang thần thoại (Magical Bloom & Mana Glow) --- */
+  --lamp-warm:255 215 0;          /* Celestial Gold */
+  --lamp-cool:0 242 254;          /* Arcane Cyan */
+  --lamp-magenta:155 81 224;      /* Astral Violet */
 
-  /* --- 4. Vật liệu: bậc cứng (pixel) + quầng nhòe ăn màu đèn (HD-2D).
-     Hai vệt inset trên/dưới = mặt vát của khối pixel, thẻ dày lên thật. */
+  /* --- 4. Tầng hiển thị Glassmorphism & Viền ánh kim (Gold Foil & Glass) --- */
   --elev-1:
-    0 2px 0 var(--ink),
-    0 3px 0 -1px rgb(var(--tint)/.55),
-    inset 0 var(--px) 0 rgb(255 255 255/.4);
+    0 4px 15px rgba(0, 0, 0, 0.35),
+    0 0 12px rgba(0, 242, 254, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
   --elev-2:
-    0 4px 0 var(--ink),
-    0 6px 0 -2px rgb(var(--tint)/.55),
-    0 10px 20px -6px rgb(0 0 0/.5),
-    inset 0 var(--px) 0 rgb(255 255 255/.5),
-    inset 0 calc(var(--px) * -1) 0 rgb(var(--tint)/.10);
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(255, 215, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(155, 81, 224, 0.3);
   --elev-3:
-    0 6px 0 var(--ink),
-    0 9px 0 -3px rgb(var(--tint)/.55),
-    0 18px 34px -10px rgb(0 0 0/.55),
-    inset 0 var(--px) 0 rgb(255 255 255/.55),
-    inset 0 calc(var(--px) * -1) 0 rgb(var(--tint)/.12);
+    0 12px 36px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(155, 81, 224, 0.35),
+    inset 0 2px 2px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 242, 254, 0.3);
   --elev-3-dark:
-    0 6px 0 rgb(0 0 0/.55),
-    0 22px 44px -12px rgb(0 0 0/.7),
-    0 0 60px -12px rgb(var(--lamp-warm)/.28),
-    inset 0 var(--px) 0 rgb(255 255 255/.6);
+    0 10px 30px rgba(0, 0, 0, 0.7),
+    0 0 45px rgba(255, 215, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
   --elev-lift:
-    0 8px 0 var(--ink),
-    0 12px 0 -4px rgb(var(--tint)/.5),
-    0 26px 46px -12px rgb(0 0 0/.6),
-    0 0 34px -6px rgb(var(--lamp-warm)/.35),
-    inset 0 var(--px) 0 rgb(255 255 255/.65);
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.5),
+    inset 0 2px 2px rgba(255, 255, 255, 0.7);
 }
 
 /* =====================================================================
@@ -317,6 +309,84 @@ button.tile:hover{background:linear-gradient(180deg,#fff,#fff6e6)}
    Cả hai phải dừng được mọi thứ mới thêm ở file này.
    ===================================================================== */
 body.fx-quiet .tile-hero .big-emoji{animation-play-state:paused}
+   .tile ở trên không đụng tới; ở đây chỉ thêm ÁNH SÁNG chứ không đổi màu. */
+.mode{position:relative;overflow:hidden;isolation:isolate}
+.mode::after{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgb(255 255 255/.4), transparent 60%),
+    radial-gradient(60% 40% at 50% 100%, rgb(var(--tint)/.16), transparent 70%);
+}
+/* Ô chủ lực cao gấp đôi nên bỏ trống hẳn một mảng giữa. Trải cho nó một sàn
+   phối cảnh y như sàn đấu — mảng trống thành CHIỀU SÂU chứ không còn là lỗ hổng. */
+.mode.adv::before{
+  content:'';position:absolute;left:-30%;right:-30%;bottom:0;height:58%;
+  z-index:0;pointer-events:none;
+  transform:perspective(190px) rotateX(66deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 40px,rgb(var(--tint)/.16) 40px 42px),
+    repeating-linear-gradient(180deg,transparent 0 26px,rgb(var(--tint)/.12) 26px 28px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);
+}
+.mode.adv>*{position:relative;z-index:1}
+/* KHÔNG pixel hoá .mi: nó chỉ cỡ 30–46px, mà ô lưới 5px thì ♾️ (nét mảnh)
+   biến thành một cục vuông không đọc ra hình gì. Chỉ đổ bóng cứng cho nó. */
+.mode .mi{filter:drop-shadow(0 4px 0 rgb(var(--tint)/.25))}
+
+/* --- Ô tiêu đề trang chủ = TẤM BIỂN SÂN KHẤU. Đây là ô duy nhất trên
+   trang chủ lật sang nền tối, và nó có bộ màu chữ riêng ngay bên dưới nên
+   không ăn theo mấy giá trị --ink-* vốn đo cho nền kem. */
+.tile-hero{
+  background:
+    radial-gradient(80% 120% at 50% -20%, rgb(var(--lamp-warm)/.3), transparent 62%),
+    radial-gradient(70% 100% at 50% 120%, rgb(var(--lamp-cool)/.22), transparent 60%),
+    linear-gradient(180deg,#161c3f,#0c1029);
+  /* Chỉ canh giữa bằng text-align. `align-items:center` sẽ lôi cả nút loa
+     (một flex item) vào giữa tấm biển thay vì nằm yên ở góc. */
+  color:#fff;overflow:hidden;text-align:center;
+}
+.tile-hero h1{color:#fff;text-shadow:0 var(--px) 0 rgb(var(--tint)/.9),0 0 26px rgb(var(--lamp-warm)/.5)}
+.tile-hero h1 .hl{color:#ffd166;text-shadow:0 var(--px) 0 rgb(var(--tint)/.9),0 0 22px rgb(var(--lamp-warm)/.85)}
+.tile-hero .sub{color:#d3d8f5}
+/* Lưới sàn chạy dưới chân tấm biển — nối tiếp cái sàn của cả trang. */
+.tile-hero::after{
+  content:'';position:absolute;left:-30%;right:-30%;bottom:0;height:52%;
+  pointer-events:none;
+  transform:perspective(180px) rotateX(66deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 44px,rgb(var(--lamp-cool)/.2) 44px 46px),
+    repeating-linear-gradient(180deg,transparent 0 28px,rgb(var(--lamp-cool)/.14) 28px 30px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+}
+.tile-hero .big-emoji{position:relative;z-index:1;animation:hd2dBob 2.8s ease-in-out infinite}
+.tile-hero h1,.tile-hero .sub{position:relative;z-index:1}
+/* Nút loa CHỈ nâng z-index. Đặt `position:relative` cho nó là hỏng: nó vốn
+   absolute ở góc phải, đổi sang relative là nó rơi vào dòng flex và nhảy ra
+   giữa tấm biển, đè lên emoji. */
+.tile-hero .tile-sound{z-index:2}
+@keyframes hd2dBob{50%{transform:translateY(-7px)}}
+
+/* --- Nút: khối pixel bấm lún hẳn xuống. Giữ nguyên màu nền/chữ cũ. */
+.btn:hover{filter:brightness(1.08) saturate(1.06)}
+.btn:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+
+/* --- Số liệu: canh cột đều nhau. Ở bảng điểm mà chữ số nhảy bề ngang thì
+   nhìn như đang giật, dù giá trị chẳng đổi. */
+.badge,.hptext,.timernum,.streak,.crit,.tile-progress{font-variant-numeric:tabular-nums}
+
+/* --- Thanh máu / năng lượng / giờ: đèn neon trong phòng tối. */
+.hpbar,.timerbar,.energybar{background:rgb(var(--tint)/.55);box-shadow:inset 0 2px 0 rgb(0 0 0/.35)}
+.hpfill,.timerfill,.energyfill{box-shadow:inset 0 var(--px) 0 rgb(255 255 255/.45),0 0 12px currentColor}
+.arena .hpname,.arena .hptext{color:#fff;text-shadow:0 2px 0 rgb(0 0 0/.75)}
+
+/* =====================================================================
+   CHUYỂN ĐỘNG — GIỮ ĐÚNG GIAO KÈO TRỢ NĂNG
+   fx-quiet: bootstrap.js bật khi rời tab. reduced-motion: người dùng chọn.
+   Cả hai phải dừng được mọi thứ mới thêm ở file này.
+   ===================================================================== */
+body.fx-quiet .tile-hero .big-emoji{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){
   .tile-hero .big-emoji{animation:none}
   body::after{opacity:.35}
@@ -325,3 +395,383 @@ body.fx-quiet .tile-hero .big-emoji{animation-play-state:paused}
 /* 4K trở lên: điểm ảnh giao diện phải to theo, không thì hiệu ứng pixel /
    quét dòng biến mất vì mỗi "điểm ảnh" chỉ còn bằng sợi tóc. */
 @media (min-width:2400px){:root{--px:4px;--r-3:7px;--radius:8px}}
+
+/* =====================================================================
+   TYPE2SOLVE 2026: BENTO GRID UI & MASCOT SPEECH BUBBLE LOGIC
+   ===================================================================== */
+
+.bento-typing-card {
+  padding: 6px 12px !important;
+  max-width: 1280px !important;
+  margin: 0 auto;
+}
+
+.bento-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 6px;
+}
+
+.topbar-title-wrap h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-hd2d {
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: #080e26;
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+}
+
+.quick-settings-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-settings-bar .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-settings-bar .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* RETRO CRT SCANLINE FILTER */
+body.crt-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+}
+
+/* BENTO GRID LAYOUT */
+.typing-bento-grid {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .typing-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bento-panel {
+  background: rgba(10, 14, 38, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: var(--elev-2);
+}
+
+.bento-panel h2 {
+  font-size: 1.05rem;
+  margin: 0 0 4px 0;
+}
+
+/* MASCOT PANEL & SPEECH BUBBLE */
+.mascot-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mascot-avatar-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 95px;
+  margin-bottom: 4px;
+}
+
+.mascot-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid #ffc93c;
+  box-shadow: 0 0 10px rgba(255, 201, 60, 0.3);
+  image-rendering: auto;
+  transition: transform 0.3s ease;
+}
+
+.speech-bubble {
+  position: relative;
+  background: #ffffff;
+  color: #1a1e38;
+  padding: 5px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-weight: 700;
+  font-size: 0.76rem;
+  line-height: 1.15;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid #1a1e38;
+}
+
+.speech-bubble::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+.speech-bubble p {
+  margin: 0;
+}
+
+.mascot-identity h3 {
+  margin: 3px 0 1px 0;
+  font-size: 0.88rem;
+  color: #ffc93c;
+}
+
+.mascot-role {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* TOPIC GRID */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.topic-grid .option-card span {
+  padding: 4px 6px;
+  font-size: 18px;
+}
+
+.topic-grid .option-card b {
+  font-size: 12px;
+}
+
+.topic-grid .option-card small {
+  font-size: 10px;
+}
+
+.setup-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.typing-launch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.typing-launch .btn {
+  padding: 5px 10px;
+  font-size: 0.82rem;
+}
+
+.typing-campaign-status {
+  margin: 2px 0 4px;
+  font-size: 12px;
+}
+
+.campaign-map-wrap {
+  margin-top: 4px;
+}
+
+.campaign-map-wrap .maplbl {
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
+.campaign-map-wrap .typing-map {
+  max-height: 105px;
+  overflow-y: auto;
+  gap: 4px;
+}
+
+.typing-map .mapnode {
+  padding: 3px 2px !important;
+  font-size: 11px !important;
+}
+
+.typing-map .mapnode .em {
+  font-size: 18px !important;
+}
+
+.typing-map .mapnode .tierlbl {
+  font-size: 10px !important;
+}
+
+/* GAMING HUD BAR */
+.bento-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  gap: 10px;
+  background: rgba(15, 20, 50, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.hud-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  image-rendering: auto;
+}
+
+/* REALTIME PLAY MASCOT REACTION BUBBLE */
+.mascot-play-bubble {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 14, 38, 0.85);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 2px solid #ffc93c;
+  box-shadow: 0 0 12px rgba(255, 201, 60, 0.4);
+}
+
+.mascot-play-bubble img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  image-rendering: auto;
+}
+
+.play-speech {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffe600;
+}
+
+/* VICTORY RESULT MODAL & RANK BADGE */
+.result-card-inner {
+  background: rgba(12, 16, 42, 0.95);
+  border: 3px solid #ffc93c;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 0 30px rgba(255, 201, 60, 0.4);
+}
+
+.result-trophy-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  image-rendering: auto;
+  margin-bottom: 10px;
+}
+
+.rank-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin: 8px 0 14px 0;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.share-btn {
+  background: linear-gradient(135deg, #00c6ff, #0072ff) !important;
+  color: #fff !important;
+}
+
+.hero-art-banner-wrap {
+  width: 100%;
+  max-height: 140px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.hero-hd2d-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+/* HD-2D PIXEL ART AVATARS FOR CHARACTERS */
+.sprite, .duel-skin-preview, .beast-art, .hero-art {
+  border-radius: 8px;
+  image-rendering: auto;
+  filter: drop-shadow(0 0 8px rgba(100, 200, 255, 0.4));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.sprite:hover, .duel-skin-preview:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 14px rgba(255, 201, 60, 0.6));
+}
+
+.hd2d-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  image-rendering: auto;
+}

@@ -74,10 +74,97 @@
   let selectedStage = 0;
   let dictionaryPromise = null;
   let launchId = 0;
+  let lastRunResult = null;
+  let tabKeyPressed = false;
   const pendingTimers = runtime.createTimerRegistry();
+
+  const MASCOT_SPRITES = {
+    idle: 'assets/images/hd2d/mascot_idle.jpg',
+    combo: 'assets/images/hd2d/mascot_combo.jpg',
+    urgent: 'assets/images/hd2d/mascot_urgent.jpg',
+    gameover: 'assets/images/hd2d/mascot_gameover.jpg'
+  };
+
+  const MASCOT_QUOTES = {
+    idle: [
+      'Bật mode tập trung, vào việc nào! 🚀',
+      'Não khởi động, tay sẵn sàng chưa? 🔥',
+      'Hôm nay gõ bao nhiêu WPM đây ta? 🤓'
+    ],
+    combo: [
+      'Tốc độ ánh sáng! ⚡',
+      'Tư duy mượt như lụa! ✨',
+      'Trí tuệ 10 điểm không có nhưng! 💯',
+      'Bàn phím cháy máy rồi bạn ơi! 🔥'
+    ],
+    urgent: [
+      'Sai một ly, gõ lại đi! 😅',
+      'Bình tĩnh hít sâu, lấy lại nhịp nào! 🧘‍♂️',
+      'Quái áp sát rồi, thần tốc lên! ⏰'
+    ],
+    victory: [
+      'Đỉnh nóc kịch trần! 👑',
+      'Kỷ lục mới - Tư duy siêu đỉnh! 🏆',
+      'Phù thủy bàn phím chính là bạn! 🧙‍♂️'
+    ],
+    gameover: [
+      'Thua keo này ta bày keo khác! 🥊',
+      'Bàn phím hơi trơn chút thôi, làm lại nào! 🎮'
+    ]
+  };
 
   const { byId, safeShowScreen } = runtime;
   const now = () => (global.performance && performance.now ? performance.now() : Date.now());
+
+  function updateMascotReaction(type, customText) {
+    const sprite = MASCOT_SPRITES[type] || MASCOT_SPRITES.idle;
+    const quotes = MASCOT_QUOTES[type] || MASCOT_QUOTES.idle;
+    const text = customText || quotes[Math.floor(Math.random() * quotes.length)];
+
+    const mainImg = byId('typingMascotImg');
+    const mainText = byId('mascotSpeechText');
+    if (mainImg) mainImg.src = sprite;
+    if (mainText) mainText.textContent = `"${text}"`;
+
+    const playImg = byId('playMascotImg');
+    const playText = byId('playSpeechText');
+    if (playImg) playImg.src = sprite;
+    if (playText) playText.textContent = text;
+  }
+
+  function getRankTitle(wpm) {
+    if (wpm >= 80) return '🧙‍♂️ Phù Thủy Bàn Phím Tối Thượng';
+    if (wpm >= 50) return '⚔️ Cao Thủ Bàn Phím';
+    if (wpm >= 30) return '⚡ Tay Phím Thần Tốc';
+    return '🐣 Tập Sự Phím Gõ';
+  }
+
+  function toggleCrtFilter() {
+    document.body.classList.toggle('crt-active');
+    const active = document.body.classList.contains('crt-active');
+    const btn = byId('typingCrtBtn');
+    if (btn) btn.classList.toggle('active', active);
+    playSound('click');
+  }
+
+  function copyShareCard() {
+    if (!lastRunResult) return;
+    const rankTitle = getRankTitle(lastRunResult.wpm);
+    const cardText = `🎮 TYPE2SOLVE: GÕ NHANH - GIẢI CHẤT 🚀\n`
+      + `🏆 Điểm: ${lastRunResult.score} | ⌨️ WPM: ${lastRunResult.wpm} | 🎯 Độ chính xác: ${lastRunResult.accuracy}%\n`
+      + `🔥 Combo cao nhất: ${lastRunResult.combo} | 🧙‍♂️ Danh hiệu: ${rankTitle}\n`
+      + `✨ Thách đấu bàn phím & tư duy ngay tại Type2Solve!`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cardText).then(() => {
+        showLearnToast('📋 Đã sao chép Card Kết quả vào Clipboard!', 'success');
+      }).catch(() => {
+        showLearnToast('📋 Đã chuẩn bị Card Kết quả!', 'warning');
+      });
+    } else {
+      showLearnToast('📋 Đã tạo Card Kết quả!', 'success');
+    }
+  }
   const playSound = runtime.safeSound;
 
   function later(callback, delay, token) {
@@ -466,7 +553,7 @@
     const selected = document.querySelector('input[name="typingLanguage"]:checked');
     const difficultyInput = byId('typingDifficulty');
     const assist = byId('typingAccentAssist');
-    const lang = selected && selected.value === 'vi' ? 'vi' : 'en';
+    const lang = selected ? selected.value : 'en';
     const difficulty = difficultyInput && DIFFICULTIES[difficultyInput.value]
       ? difficultyInput.value : 'normal';
     return {
@@ -610,6 +697,7 @@
         : 'Gõ chữ đầu để khóa quái. Hãy gõ đúng cả dấu và khoảng trắng.')
       : 'Type the first letter to lock a monster. Finish the word to cast automatically.');
     updateHud(true);
+    updateMascotReaction('idle');
     beginWave(0);
     safeFocusInput();
     state.lastFrame = now();
@@ -1094,6 +1182,9 @@
       field.classList.toggle('alert', alarm && !frozen);
       field.classList.toggle('frozen', frozen);
     }
+    if (alarm && !frozen && state.combo < 5) {
+      updateMascotReaction('urgent');
+    }
   }
 
   function monsterReachedGate(monster) {
@@ -1297,6 +1388,7 @@
     state.score += points;
     castSpell(monster, points);
     playSound(state.combo > 0 && state.combo % 5 === 0 ? 'crit' : 'right');
+    if (state.combo >= 5) updateMascotReaction('combo');
     if (monster.bonus) applyBonus(monster.bonus);
     else showLearnToast(state.lang === 'en'
       ? `📘 ${itemJustTyped.text} = ${itemJustTyped.meaning} · +${points} điểm`

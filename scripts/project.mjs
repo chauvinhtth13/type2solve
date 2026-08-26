@@ -11,6 +11,18 @@ export const serviceWorkerEntry = resolve(sourceDir, 'sw.js');
 export const deferredAssets = Object.freeze([
   'assets/data/english-vocabulary.json',
   'assets/images/donate-qr.jpg',
+  'assets/images/hd2d/key_art_header.jpg',
+  'assets/images/hd2d/mascot_idle.jpg',
+  'assets/images/hd2d/mascot_combo.jpg',
+  'assets/images/hd2d/mascot_urgent.jpg',
+  'assets/images/hd2d/mascot_gameover.jpg',
+  'assets/images/hd2d/ui_icon_wpm.jpg',
+  'assets/images/hd2d/ui_icon_accuracy.jpg',
+  'assets/images/hd2d/ui_icon_trophy.jpg',
+  'assets/images/hd2d/ui_icon_timer.jpg',
+  'assets/images/hd2d/hero_wizard.jpg',
+  'assets/images/hd2d/boss_dragon.jpg',
+  'assets/images/hd2d/player_tiger.jpg',
 ]);
 
 export function fromSource(relativePath) {
