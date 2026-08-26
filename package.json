@@ -1,14 +1,18 @@
 {
   "name": "dau-truong-tu-duy",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Game học tập tương tác: đấu toán, luyện gõ Anh–Việt và Sudoku 6 cấp độ.",
+  "description": "PWA game học tập: đấu toán, luyện gõ Anh–Việt, Sudoku, Duel, Nim và Tháp Hà Nội.",
   "scripts": {
-    "build": "node tools/build.mjs",
-    "build:dictionary": "node tools/build-english-vocabulary.mjs",
-    "serve": "node tools/serve.mjs",
-    "test": "node tools/smoke-test.mjs",
-    "test:browser": "node tools/browser-smoke.mjs"
+    "build": "node scripts/build.mjs",
+    "build:dictionary": "node scripts/build-dictionary.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "npm run test:unit && npm run test:smoke",
+    "test:unit": "node tests/unit/index.mjs",
+    "test:smoke": "node tests/smoke.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test:dist": "node tests/dist.mjs",
+    "verify": "npm test && npm run build && npm run test:dist"
   },
   "keywords": [
     "education",
@@ -16,7 +20,10 @@
     "vietnamese",
     "pwa"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "0.28.2"
   }
 }

@@ -1,0 +1,327 @@
+/* =====================================================================
+   LỚP PHỦ "HD-2D + PIXEL ART"  —  nạp SAU app.css và games.css
+   ---------------------------------------------------------------------
+   Vì sao là một FILE PHỦ chứ không sửa thẳng app.css: mọi tỉ lệ tương
+   phản chữ/nền trong app.css đã được ĐO trên nền kem (--panel, #fff).
+   Đổi màu nền ở đó là phá hết số đo. Nên ở đây:
+     · KHÔNG chạm --panel, --ink, --ink-2/3/4, --*-ink  (giữ nguyên độ đọc)
+     · Chỉ đổi MÔI TRƯỜNG: bầu trời, sàn đấu, ánh sáng, chất liệu, góc cạnh
+   Đó cũng đúng công thức HD-2D: thế giới TỐI và sâu, còn bảng giao diện
+   thì SÁNG và phẳng, nổi lên trên như tấm bảng gỗ được rọi đèn.
+
+   Ba tầng của phong cách này, đừng trộn lẫn:
+     1. Sprite + giao diện = CẠNH CỨNG (pixel, góc vuông, bóng blur 0)
+     2. Môi trường        = ÁNH SÁNG MỀM (bloom, sương, xoá phông tilt-shift)
+     3. Toàn màn hình     = HẬU KỲ (vignette, quét dòng CRT, hạt nhiễu)
+   ===================================================================== */
+
+:root{
+  /* --- 1. Bầu trời đêm sâu. Nền cũ là gradient xanh–tím sáng, đúng cái
+     "AI gradient" ai cũng dùng; HD-2D cần nền gần như đen để đèn ấm nổi. */
+  --sky:#0a0c1e; --sky2:#161233;
+  --tint:6 8 26;                 /* bóng ăn theo sắc nền, không dùng đen thuần */
+
+  /* --- 2. Góc pixel. Không để 0: viền đang dày 3–4px, góc 0 sẽ nhọn hoắt.
+     2–6px = đúng một "điểm ảnh phóng to", vẫn bo nhẹ cho mắt trẻ con. */
+  --r-1:2px; --r-2:3px; --r-3:5px; --r-pill:5px; --radius:6px;
+  --px:3px;                      /* cạnh 1 điểm ảnh của giao diện */
+
+  /* --- 3. Đèn sân khấu. HD-2D luôn là ẤM đối chọi LẠNH. */
+  --lamp-warm:255 178 87;
+  --lamp-cool:99 228 255;
+  --lamp-magenta:255 93 162;
+
+  /* --- 4. Vật liệu: bậc cứng (pixel) + quầng nhòe ăn màu đèn (HD-2D).
+     Hai vệt inset trên/dưới = mặt vát của khối pixel, thẻ dày lên thật. */
+  --elev-1:
+    0 2px 0 var(--ink),
+    0 3px 0 -1px rgb(var(--tint)/.55),
+    inset 0 var(--px) 0 rgb(255 255 255/.4);
+  --elev-2:
+    0 4px 0 var(--ink),
+    0 6px 0 -2px rgb(var(--tint)/.55),
+    0 10px 20px -6px rgb(0 0 0/.5),
+    inset 0 var(--px) 0 rgb(255 255 255/.5),
+    inset 0 calc(var(--px) * -1) 0 rgb(var(--tint)/.10);
+  --elev-3:
+    0 6px 0 var(--ink),
+    0 9px 0 -3px rgb(var(--tint)/.55),
+    0 18px 34px -10px rgb(0 0 0/.55),
+    inset 0 var(--px) 0 rgb(255 255 255/.55),
+    inset 0 calc(var(--px) * -1) 0 rgb(var(--tint)/.12);
+  --elev-3-dark:
+    0 6px 0 rgb(0 0 0/.55),
+    0 22px 44px -12px rgb(0 0 0/.7),
+    0 0 60px -12px rgb(var(--lamp-warm)/.28),
+    inset 0 var(--px) 0 rgb(255 255 255/.6);
+  --elev-lift:
+    0 8px 0 var(--ink),
+    0 12px 0 -4px rgb(var(--tint)/.5),
+    0 26px 46px -12px rgb(0 0 0/.6),
+    0 0 34px -6px rgb(var(--lamp-warm)/.35),
+    inset 0 var(--px) 0 rgb(255 255 255/.65);
+}
+
+/* =====================================================================
+   MÔI TRƯỜNG — SÂN KHẤU DIORAMA
+   ===================================================================== */
+
+/* Bầu trời: một đèn ấm rọi từ trên xuống, một hắt lạnh từ dưới lên.
+   `fixed` để nền đứng yên khi thẻ bên trong cuộn — máy quay giữ nguyên
+   khung hình, đúng chất diorama. */
+body{
+  background:
+    radial-gradient(115% 68% at 50% -12%, rgb(var(--lamp-warm)/.17), transparent 62%),
+    radial-gradient(88% 55% at 50% 106%, rgb(var(--lamp-cool)/.14), transparent 64%),
+    linear-gradient(180deg,#06081a 0%, var(--sky) 32%, var(--sky2) 66%, #2b2049 100%);
+  background-attachment:fixed;
+}
+
+/* --- SÀN PHỐI CẢNH: lưới hội tụ về đường chân trời. Đây là thứ biến nền
+   phẳng thành một CĂN PHÒNG có chiều sâu — dấu hiệu nhận dạng của HD-2D.
+   blur nhẹ + mask mờ dần hai đầu = xoá phông (tilt-shift) cho tiền cảnh. */
+body::before{
+  content:'';position:fixed;left:-50%;right:-50%;bottom:0;height:46vh;
+  z-index:0;pointer-events:none;
+  transform:perspective(300px) rotateX(62deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 62px,rgb(var(--lamp-cool)/.16) 62px 64px),
+    repeating-linear-gradient(180deg,transparent 0 46px,rgb(var(--lamp-cool)/.13) 46px 48px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 24%,#000 62%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 24%,#000 62%,transparent);
+  filter:blur(.6px);opacity:.65;
+}
+
+/* --- HẬU KỲ TOÀN MÀN HÌNH: vignette + hạt phim + quét dòng CRT.
+   pointer-events:none nên nằm trên cả modal vẫn không chặn bấm được gì.
+   Đặt 900 < --z-skip(1000) để link "bỏ qua" của bàn phím vẫn ở trên cùng. */
+body::after{
+  content:'';position:fixed;inset:0;z-index:900;pointer-events:none;
+  background:
+    radial-gradient(130% 105% at 50% 45%,transparent 42%,rgb(0 0 0/.5) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(180deg,rgb(0 0 0/.16) 0 1px,transparent 1px 3px);
+  background-size:auto, 120px 120px, auto;
+  mix-blend-mode:multiply;opacity:.5;
+}
+
+/* --- SAO: bỏ bo tròn thành ô vuông = ngôi sao pixel. Cứ 5 ngôi thì 1 ngôi
+   thành ĐOM ĐÓM ấm có quầng sáng, cho bầu trời hai lớp sinh khí thay vì
+   40 chấm trắng giống hệt nhau. Không đụng một dòng JS nào. */
+.star{border-radius:0;width:2px;height:2px;box-shadow:0 0 4px rgb(255 255 255/.5)}
+.star:nth-child(5n){
+  background:rgb(var(--lamp-warm));
+  box-shadow:0 0 7px rgb(var(--lamp-warm)/.9),0 0 14px rgb(var(--lamp-warm)/.4);
+  animation-duration:4.6s;
+}
+.star:nth-child(7n){background:rgb(var(--lamp-cool));box-shadow:0 0 6px rgb(var(--lamp-cool)/.7)}
+/* Ký hiệu toán trôi trong nền: phát sáng nhè nhẹ như chữ neon đằng xa. */
+.mathsym{opacity:.13;text-shadow:0 0 12px rgb(var(--lamp-cool)/.6);filter:blur(.4px)}
+
+/* =====================================================================
+   PIXEL ART — SPRITE
+   Bộ lọc #pxfx nằm trong index.html và được gắn bằng THUỘC TÍNH SVG
+   `filter` trên <g> gốc của mỗi khuôn hình. Lý do không đặt bằng CSS:
+   app.css đã dùng `filter:` trên chính .sprite cho quầng sáng / lượt đi /
+   hoá dạng — hai bên sẽ ghi đè lẫn nhau. Đặt ở tầng <g> bên trong thì
+   pixel hoá và quầng sáng chồng lên nhau đúng thứ tự, không giẫm chân.
+   ===================================================================== */
+
+/* Quái trong Gõ Chữ chỉ cao ~20px: pixel hoá ở cỡ đó thành một cục bột.
+   Lại có hàng chục con chạy cùng lúc nên bỏ luôn cho nhẹ khung hình.
+   CSS thắng thuộc tính trình bày, nên `none` ở đây tắt được bộ lọc kia. */
+.typing-monster .beast-art>g,
+.mapnode .beast-art>g{filter:none}
+
+/* Sprite trên sàn đấu: viền sáng ấm hắt từ đèn sân khấu + bóng đổ CỨNG
+   (blur 0) ngay dưới chân — bóng nhòe sẽ phá cạnh pixel vừa dựng. */
+.fighter .sprite{
+  filter:
+    drop-shadow(0 0 15px rgb(var(--lamp-warm)/.4))
+    drop-shadow(0 5px 0 rgb(0 0 0/.4));
+}
+.fighter.turn-active .sprite{
+  filter:
+    drop-shadow(0 0 6px rgb(var(--lamp-warm)/.95))
+    drop-shadow(0 0 20px rgb(var(--lamp-warm)/.55))
+    drop-shadow(0 5px 0 rgb(0 0 0/.4));
+}
+/* Emoji cỡ lớn cũng đưa qua bộ lọc pixel cho đồng bộ với sprite. Chỉ áp
+   cho emoji TO (>=48px); emoji nhỏ trong huy hiệu để nguyên kẻo mất nét. */
+.big-emoji,.result-icon{filter:url(#pxfxL)}
+
+/* =====================================================================
+   SÀN ĐẤU — HỘP DIORAMA
+   ===================================================================== */
+.arena{
+  background:
+    radial-gradient(66% 44% at 50% 47%, rgb(var(--lamp-warm)/.26), transparent 72%),
+    linear-gradient(180deg,#0c1130 0%,#1b2453 30%,#33407e 46%,#1a2246 47%,#0b0f26 100%);
+  box-shadow:
+    inset 0 0 0 var(--px) rgb(255 255 255/.07),
+    inset 0 26px 46px -14px rgb(0 0 0/.6),
+    inset 0 -34px 60px -16px rgb(0 0 0/.65),
+    var(--elev-3);
+}
+.arena.night{background:
+  radial-gradient(64% 42% at 50% 47%, rgb(var(--lamp-magenta)/.28), transparent 72%),
+  linear-gradient(180deg,#0b0722 0%,#241546 30%,#402360 46%,#1d1236 47%,#0a0619 100%)}
+.arena.lava{background:
+  radial-gradient(70% 46% at 50% 49%, rgb(255 138 40/.5), transparent 74%),
+  linear-gradient(180deg,#2a0d10 0%,#63201c 28%,#a83a1e 46%,#4d1410 47%,#1a0709 100%)}
+.arena.ice{background:
+  radial-gradient(66% 44% at 50% 47%, rgb(var(--lamp-cool)/.36), transparent 72%),
+  linear-gradient(180deg,#071a2c 0%,#123a58 30%,#2e6f92 46%,#123249 47%,#060f1c 100%)}
+
+/* --- Lớp XA: bầu trời sao + dãy núi cắt bằng clip-path. Dùng clip-path chứ
+   không conic-gradient: một polygon là dựng xong cả rặng núi, và nó hiện ra
+   ở mọi trình duyệt thay vì phải canh 4 tâm hình nón cho khớp mặt đất.
+   blur() ở đây chính là XOÁ PHÔNG: hậu cảnh mờ thì sprite nét bật hẳn ra. */
+.arena::before{
+  content:'';position:absolute;left:-2%;right:-2%;top:8%;height:39%;
+  z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,rgb(0 0 0/.34),rgb(0 0 0/.62));
+  clip-path:polygon(0 100%,0 62%,7% 40%,13% 55%,21% 26%,29% 52%,36% 44%,
+    44% 12%,52% 47%,59% 33%,67% 56%,75% 22%,83% 50%,91% 37%,100% 58%,100% 100%);
+  filter:blur(2px);
+}
+/* Sao trong hộp sàn đấu: chấm 2px rải bằng radial-gradient, không cần thẻ nào. */
+.arena .ground{z-index:1}
+.arena>.hprow{z-index:7}
+/* --- Lớp GẦN: vệt tối mờ ở mép dưới. Mắt đọc ra "có thứ gì đó ngay trước
+   ống kính", chiều sâu tăng gấp đôi mà chỉ tốn một pseudo-element. */
+.arena::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:18%;
+  z-index:6;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgb(0 0 0/.5));
+  filter:blur(3px);
+}
+
+/* --- MẶT ĐẤT: lưới hội tụ về chân trời, cùng thủ pháp với sàn trang chủ
+   nhưng nằm gọn trong hộp. `.ground::before` (vệt sáng chân trời) của
+   app.css vẫn giữ nguyên — đây là lớp ::after mới, không giẫm lên. */
+.ground{background:linear-gradient(180deg,rgb(255 255 255/.05),transparent 40%)}
+.ground::after{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  transform:perspective(210px) rotateX(64deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 40px,rgb(255 255 255/.13) 40px 42px),
+    repeating-linear-gradient(180deg,transparent 0 26px,rgb(255 255 255/.09) 26px 28px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 30%,transparent 88%);
+  mask-image:linear-gradient(180deg,transparent,#000 30%,transparent 88%);
+}
+.gdeco{z-index:2;filter:drop-shadow(0 0 8px rgb(var(--lamp-warm)/.35))}
+
+/* =====================================================================
+   GIAO DIỆN — BẢNG GỖ ĐƯỢC RỌI ĐÈN
+   Nền bảng giữ nguyên màu kem của app.css (đã đo tương phản), chỉ đổi
+   CẠNH và ÁNH SÁNG: góc pixel, mặt vát, quầng ấm hắt ra sau.
+   ===================================================================== */
+.card{
+  background:
+    linear-gradient(180deg,rgb(255 255 255/.55),transparent 34%),
+    linear-gradient(0deg,rgb(var(--lamp-warm)/.13),transparent 26%),
+    var(--panel);
+}
+/* Trang chủ: BỎ HẲN tấm nền kem. Trước đây nó là một tờ giấy to che kín cả
+   diorama, các ô bento nằm trên tờ giấy đó nên thế giới phía sau chỉ còn thấy
+   ở rìa. Nay các ô nổi thẳng trên nền tối — vẫn nguyên độ tương phản vì mỗi ô
+   giữ nền sáng của riêng nó. */
+#home .card{background:none;border:0;box-shadow:none;padding:clamp(4px,.5vw,12px)}
+/* Quầng đèn hắt sau thẻ nằm trong --elev-3-dark (box-shadow) chứ KHÔNG phải
+   một ::before tràn ra ngoài: pseudo-element `inset:-14px` có tạo vùng cuộn
+   thật, và nó đẻ ra một thanh cuộn dọc trên mọi màn hình. */
+.tile{
+  background:linear-gradient(180deg,#fff,#f6f3fd);
+  transition:transform var(--dur-2) var(--ease-pop),box-shadow var(--dur-2) var(--ease-settle),
+             background var(--dur-2) var(--ease-snap);
+}
+/* Trỏ vào: đèn quét qua mặt thẻ. Không đổi màu chữ nên tương phản y nguyên. */
+button.tile:hover{background:linear-gradient(180deg,#fff,#fff6e6)}
+/* Ô màu (Phiêu lưu / Đấu nhanh / Sinh tồn) có nền riêng trong app.css nên
+   .tile ở trên không đụng tới; ở đây chỉ thêm ÁNH SÁNG chứ không đổi màu. */
+.mode{position:relative;overflow:hidden;isolation:isolate}
+.mode::after{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgb(255 255 255/.4), transparent 60%),
+    radial-gradient(60% 40% at 50% 100%, rgb(var(--tint)/.16), transparent 70%);
+}
+/* Ô chủ lực cao gấp đôi nên bỏ trống hẳn một mảng giữa. Trải cho nó một sàn
+   phối cảnh y như sàn đấu — mảng trống thành CHIỀU SÂU chứ không còn là lỗ hổng. */
+.mode.adv::before{
+  content:'';position:absolute;left:-30%;right:-30%;bottom:0;height:58%;
+  z-index:0;pointer-events:none;
+  transform:perspective(190px) rotateX(66deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 40px,rgb(var(--tint)/.16) 40px 42px),
+    repeating-linear-gradient(180deg,transparent 0 26px,rgb(var(--tint)/.12) 26px 28px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 45%,transparent);
+}
+.mode.adv>*{position:relative;z-index:1}
+/* KHÔNG pixel hoá .mi: nó chỉ cỡ 30–46px, mà ô lưới 5px thì ♾️ (nét mảnh)
+   biến thành một cục vuông không đọc ra hình gì. Chỉ đổ bóng cứng cho nó. */
+.mode .mi{filter:drop-shadow(0 4px 0 rgb(var(--tint)/.25))}
+
+/* --- Ô tiêu đề trang chủ = TẤM BIỂN SÂN KHẤU. Đây là ô duy nhất trên
+   trang chủ lật sang nền tối, và nó có bộ màu chữ riêng ngay bên dưới nên
+   không ăn theo mấy giá trị --ink-* vốn đo cho nền kem. */
+.tile-hero{
+  background:
+    radial-gradient(80% 120% at 50% -20%, rgb(var(--lamp-warm)/.3), transparent 62%),
+    radial-gradient(70% 100% at 50% 120%, rgb(var(--lamp-cool)/.22), transparent 60%),
+    linear-gradient(180deg,#161c3f,#0c1029);
+  /* Chỉ canh giữa bằng text-align. `align-items:center` sẽ lôi cả nút loa
+     (một flex item) vào giữa tấm biển thay vì nằm yên ở góc. */
+  color:#fff;overflow:hidden;text-align:center;
+}
+.tile-hero h1{color:#fff;text-shadow:0 var(--px) 0 rgb(var(--tint)/.9),0 0 26px rgb(var(--lamp-warm)/.5)}
+.tile-hero h1 .hl{color:#ffd166;text-shadow:0 var(--px) 0 rgb(var(--tint)/.9),0 0 22px rgb(var(--lamp-warm)/.85)}
+.tile-hero .sub{color:#d3d8f5}
+/* Lưới sàn chạy dưới chân tấm biển — nối tiếp cái sàn của cả trang. */
+.tile-hero::after{
+  content:'';position:absolute;left:-30%;right:-30%;bottom:0;height:52%;
+  pointer-events:none;
+  transform:perspective(180px) rotateX(66deg);transform-origin:50% 0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 44px,rgb(var(--lamp-cool)/.2) 44px 46px),
+    repeating-linear-gradient(180deg,transparent 0 28px,rgb(var(--lamp-cool)/.14) 28px 30px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+}
+.tile-hero .big-emoji{position:relative;z-index:1;animation:hd2dBob 2.8s ease-in-out infinite}
+.tile-hero h1,.tile-hero .sub{position:relative;z-index:1}
+/* Nút loa CHỈ nâng z-index. Đặt `position:relative` cho nó là hỏng: nó vốn
+   absolute ở góc phải, đổi sang relative là nó rơi vào dòng flex và nhảy ra
+   giữa tấm biển, đè lên emoji. */
+.tile-hero .tile-sound{z-index:2}
+@keyframes hd2dBob{50%{transform:translateY(-7px)}}
+
+/* --- Nút: khối pixel bấm lún hẳn xuống. Giữ nguyên màu nền/chữ cũ. */
+.btn:hover{filter:brightness(1.08) saturate(1.06)}
+.btn:active{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
+
+/* --- Số liệu: canh cột đều nhau. Ở bảng điểm mà chữ số nhảy bề ngang thì
+   nhìn như đang giật, dù giá trị chẳng đổi. */
+.badge,.hptext,.timernum,.streak,.crit,.tile-progress{font-variant-numeric:tabular-nums}
+
+/* --- Thanh máu / năng lượng / giờ: đèn neon trong phòng tối. */
+.hpbar,.timerbar,.energybar{background:rgb(var(--tint)/.55);box-shadow:inset 0 2px 0 rgb(0 0 0/.35)}
+.hpfill,.timerfill,.energyfill{box-shadow:inset 0 var(--px) 0 rgb(255 255 255/.45),0 0 12px currentColor}
+.arena .hpname,.arena .hptext{color:#fff;text-shadow:0 2px 0 rgb(0 0 0/.75)}
+
+/* =====================================================================
+   CHUYỂN ĐỘNG — GIỮ ĐÚNG GIAO KÈO TRỢ NĂNG
+   fx-quiet: bootstrap.js bật khi rời tab. reduced-motion: người dùng chọn.
+   Cả hai phải dừng được mọi thứ mới thêm ở file này.
+   ===================================================================== */
+body.fx-quiet .tile-hero .big-emoji{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){
+  .tile-hero .big-emoji{animation:none}
+  body::after{opacity:.35}
+}
+
+/* 4K trở lên: điểm ảnh giao diện phải to theo, không thì hiệu ứng pixel /
+   quét dòng biến mất vì mỗi "điểm ảnh" chỉ còn bằng sợi tóc. */
+@media (min-width:2400px){:root{--px:4px;--r-3:7px;--radius:8px}}

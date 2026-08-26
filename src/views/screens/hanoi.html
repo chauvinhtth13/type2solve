@@ -1,0 +1,68 @@
+  <!-- THÁP HÀ NỘI (1 người) -->
+  <div class="screen learning-screen" id="hanoiGame">
+    <div class="card game-card hanoi-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveHanoiGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">CÂU ĐỐ CỔ ĐIỂN</span><h1>Tháp Hà Nội</h1></div>
+      </div>
+
+      <section class="hanoi-setup" id="hanoiSetup">
+        <p class="sub">Chuyển cả chồng đĩa từ cọc <b>A</b> sang cọc <b>C</b> — mỗi lần một đĩa, và <b>không bao giờ đặt đĩa lớn lên đĩa nhỏ</b>.</p>
+
+        <div class="duel-howto hanoi-howto">
+          <h2>📖 Luật chơi</h2>
+          <ol>
+            <li>Bấm một cọc để <b>bốc đĩa trên cùng</b>, rồi bấm cọc khác để <b>đặt xuống</b>. Bấm lại chính cọc đó để bỏ ý định.</li>
+            <li>Đĩa lớn <b>không được</b> nằm trên đĩa nhỏ — game sẽ chặn và báo lý do.</li>
+            <li>Số bước tối ưu là <b>2ⁿ − 1</b>: 3 đĩa = 7 bước, 5 đĩa = 31 bước, 7 đĩa = 127 bước.</li>
+            <li>Bí quá thì bấm <b>🤖 Tự động giải</b> — máy đi từng bước ngay từ thế cờ hiện tại để em xem quy luật. Ván có dùng trợ giúp <b>không tính kỷ lục</b>.</li>
+          </ol>
+        </div>
+
+        <label class="select-row">Số đĩa
+          <select id="hanoiDisks">
+            <option value="3" selected>3 đĩa — tối ưu 7 bước</option>
+            <option value="4">4 đĩa — tối ưu 15 bước</option>
+            <option value="5">5 đĩa — tối ưu 31 bước</option>
+            <option value="6">6 đĩa — tối ưu 63 bước</option>
+            <option value="7">7 đĩa — tối ưu 127 bước</option>
+          </select>
+        </label>
+
+        <h2 class="maplbl">🏅 Kỷ lục số bước của em</h2>
+        <div class="hanoi-records" id="hanoiRecords"></div>
+
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startHanoi()">🗼 BẮT ĐẦU</button></div>
+      </section>
+
+      <section class="hanoi-play" id="hanoiPlay" hidden>
+        <div class="hanoi-hud">
+          <span>Số bước <b id="hanoiMoves">0</b> <i class="hanoi-over" id="hanoiOver"></i></span>
+          <span>Tối ưu <b id="hanoiOptimal">7</b></span>
+          <span>Kỷ lục <b id="hanoiBest">—</b></span>
+        </div>
+        <div class="hanoi-board" id="hanoiBoard"></div>
+        <p class="hanoi-feedback" id="hanoiFeedback" aria-live="polite"></p>
+        <div class="hanoi-controls">
+          <button class="btn" type="button" id="hanoiUndoBtn" onclick="undoHanoiMove()">↩️ Hoàn tác</button>
+          <button class="btn" type="button" id="hanoiAutoBtn" onclick="toggleHanoiAutoSolve()">🤖 Tự động giải</button>
+          <button class="btn" type="button" id="hanoiSpeedBtn" onclick="cycleHanoiAutoSpeed()">⏩ Tốc độ ×1</button>
+          <button class="btn" type="button" onclick="restartHanoi()">🔁 Chơi lại</button>
+          <button class="btn" type="button" onclick="openHanoiGame()">🗼 Đổi số đĩa</button>
+        </div>
+      </section>
+
+      <section class="game-result hanoi-result" id="hanoiResult" hidden aria-live="polite">
+        <div class="result-icon" id="hanoiResultIcon">🏆</div>
+        <h2 id="hanoiResultTitle"></h2>
+        <p id="hanoiResultText"></p>
+        <div class="result-stats" id="hanoiResultStats"></div>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="restartHanoi()">🔁 Chơi lại</button>
+          <button class="btn" type="button" onclick="openHanoiGame()">🗼 Đổi số đĩa</button>
+          <button class="btn" type="button" onclick="leaveHanoiGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+

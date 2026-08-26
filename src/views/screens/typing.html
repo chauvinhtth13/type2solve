@@ -1,0 +1,67 @@
+  <!-- GÕ CHỮ DIỆT QUÁI -->
+  <div class="screen learning-screen" id="typingGame">
+    <div class="card game-card typing-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveTypingGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN GÕ & TỪ VỰNG</span><h1>Gõ Chữ Diệt Quái</h1></div>
+        <button class="icon-btn" id="typingPauseBtn" onclick="toggleTypingPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="typing-setup" id="typingSetup">
+        <div class="typing-hero"><i data-art="tplHero"></i><span>⚡</span></div>
+        <h2>Chọn chiến dịch</h2>
+        <div class="typing-setup-grid">
+          <div class="setup-col">
+        <div class="option-grid">
+          <label class="option-card"><input type="radio" name="typingLanguage" value="en" checked><span><b>Tiếng Anh</b><small>Hơn 82.000 từ kèm nghĩa tiếng Việt</small></span></label>
+          <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>Tiếng Việt</b><small>Luyện dấu, cụm từ và chính tả</small></span></label>
+        </div>
+        <p class="typing-dictionary-status" id="typingDictionaryStatus" aria-live="polite">📚 Kho từ mở sẽ tự nạp khi vào trò chơi.</p>
+        <div class="dict-progress" id="typingDictProgress" hidden><i id="typingDictProgressFill"></i></div>
+        <p class="typing-source">Dữ liệu: <a href="https://vi.wiktionary.org/" target="_blank" rel="noopener">Wiktionary tiếng Việt</a> qua <a href="https://kaikki.org/viwiktionary/" target="_blank" rel="noopener">Kaikki</a> · CC BY-SA 4.0</p>
+        <label class="select-row">Độ khó
+          <select id="typingDifficulty"><option value="superslow">🐢 Siêu chậm — chỉ 1 quái, từ dễ nhất</option><option value="easy">Dễ — quái chậm</option><option value="normal" selected>Vừa — cân bằng</option><option value="hard">Khó — quái nhanh</option><option value="superfast">🚀 Siêu nhanh — quái dồn dập, điểm ×2</option></select>
+        </label>
+        <label class="check-row"><input type="checkbox" id="typingAccentAssist"> Hỗ trợ tiếng Việt không dấu <small>(tắt mặc định để luyện dấu tốt hơn)</small></label>
+
+        <div class="typing-launch">
+          <button class="btn big green" id="typingCampaignBtn" onclick="startTypingCampaign()">⚔️ VÀO CHẶNG 1</button>
+          <button class="btn" onclick="startTypingRun()">🎯 LUYỆN TỰ DO — 3 đợt, không tính chặng</button>
+          <button class="btn typing-reset-btn" id="typingResetCampaignBtn" type="button" onclick="resetTypingCampaign()">↩️ RESET TIẾN ĐỘ 10 CHẶNG</button>
+        </div>
+        <p class="typing-campaign-status" id="typingCampaignStatus" aria-live="polite">Reset chỉ khóa lại các chặng; kỷ lục điểm, WPM, combo và tổng sao vẫn được giữ.</p>
+          </div>
+          <div class="setup-col">
+        <h3 class="maplbl">🏰 CHIẾN DỊCH 10 CHẶNG — mỗi chặng thêm đợt quái, thêm từ và khó dần</h3>
+        <div class="map typing-map" id="typingMap"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="typing-play" id="typingPlay" hidden>
+        <div class="typing-hud">
+          <span id="typingStagePill" hidden>🏰 Chặng <b id="typingStage">1/10</b></span><span>❤️ <b id="typingLives">3</b></span><span>🏆 <b id="typingScore">0</b></span><span>🔥 <b id="typingCombo">0</b></span><span>⌨️ <b id="typingWpm">0</b> WPM</span><span>🌊 Đợt <b id="typingWave">1</b>/<b id="typingWaveTotal">3</b></span>
+        </div>
+        <div class="typing-battlefield" id="typingField" aria-label="Quái vật mang từ đang tiến về cổng">
+          <div class="typing-gate"><span data-art="tplHero"></span><i></i></div>
+          <div class="lane-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="typing-monsters" id="typingMonsters"></div>
+          <div class="wave-banner" id="typingWaveBanner"></div>
+        </div>
+        <div class="learn-toast" id="typingLearnToast" aria-live="polite"></div>
+        <form class="typing-input-wrap" onsubmit="submitTypingBuffer(event)">
+          <label for="typingInput">Gõ đúng từ trên quái vật</label>
+          <input id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Bắt đầu gõ để khóa mục tiêu…">
+          <button type="submit">⚡ ĐÁNH</button>
+        </form>
+        <p class="typing-tip" id="typingTip">Gõ chữ đầu để khóa mục tiêu. Gõ đủ từ sẽ tự động tung phép.</p>
+      </section>
+
+      <section class="game-result" id="typingResult" hidden aria-live="polite">
+        <div class="result-icon" id="typingResultIcon">🏆</div><h2 id="typingResultTitle">Hoàn thành!</h2><p id="typingResultText"></p>
+        <div class="result-stats" id="typingResultStats"></div>
+        <div class="result-actions"><button class="btn big green" id="typingNextStageBtn" hidden onclick="startTypingCampaign()">⚔️ Chặng tiếp theo</button><button class="btn green" id="typingRetryBtn" onclick="startTypingRun()">🔁 Chơi lại</button><button class="btn" onclick="openTypingGame()">🗺️ Chọn chặng</button><button class="btn" onclick="leaveTypingGame()">🏠 Trang chủ</button></div>
+      </section>
+    </div>
+  </div>
+

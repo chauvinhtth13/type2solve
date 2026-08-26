@@ -1,0 +1,143 @@
+  <!-- ĐẤU ĐỐI KHÁNG (2 người) -->
+  <div class="screen learning-screen" id="duelGame">
+    <div class="card game-card duel-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveDuelGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">2 NGƯỜI CHƠI CÙNG MÁY</span><h1>Đấu Đối Kháng</h1></div>
+        <p class="duel-series" id="duelSeries" aria-live="polite"></p>
+      </div>
+
+      <!-- ===== 1. CHUẨN BỊ ===== -->
+      <section class="duel-setup" id="duelSetup">
+        <p class="sub">Thay phiên trả lời câu hỏi để hành động — ai hết máu trước sẽ thua ván đó!</p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName1">Tên người chơi 1</label>
+            <input id="duelName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+          </div>
+          <div class="duel-vs" aria-hidden="true">⚔️</div>
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName2">Tên người chơi 2</label>
+            <input id="duelName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Hướng dẫn chơi hiện NGAY ở màn chuẩn bị: trẻ phải biết luật TRƯỚC khi
+             chia điểm, vì chia điểm chính là quyết định chiến thuật đầu tiên. -->
+        <div class="duel-howto">
+          <h2>📖 Luật chơi</h2>
+          <ol>
+            <li>Mỗi người chia <b>100 điểm chỉ số</b> vào ⚔️ Tấn công / 🛡️ Phòng thủ / ❤️ Máu.</li>
+            <li>Đến lượt mình, trả lời <b>đúng</b> câu hỏi thì được chọn 1 trong 4 hành động: <b>Tấn công · Phòng thủ · Hồi máu · Tích nộ</b>. Trả lời <b>sai</b> thì mất lượt.</li>
+            <li>Thanh <b>Nộ</b> đầy 100% sẽ mở khoá <b>⚡ Tuyệt kỹ</b>: bỏ qua câu hỏi, đánh rất mạnh và xuyên 40% giáp.</li>
+            <li>Đòn thường có xác suất <b>💥 chí mạng ×1,5</b>. Mỗi ván chỉ <b>hồi máu được 3 lần</b>.</li>
+            <li>Hết một ván: người thắng <b>+100 điểm</b>, người thua <b>+50 điểm</b> để lội ngược dòng, rồi cả hai nâng cấp trước ván sau.</li>
+          </ol>
+        </div>
+
+        <div class="duel-setup-selects">
+          <label class="select-row">Thể thức
+            <select id="duelBestOf">
+              <option value="1">BO1 — ăn ngay 1 ván</option>
+              <option value="3" selected>BO3 — thắng 2 ván</option>
+              <option value="5">BO5 — thắng 3 ván</option>
+            </select>
+          </label>
+          <label class="select-row">Độ khó câu hỏi
+            <select id="duelTier">
+              <option value="1">⭐ Khởi Động</option>
+              <option value="2" selected>⭐⭐ Thử Thách</option>
+              <option value="3">⭐⭐⭐ Cao Thủ</option>
+              <option value="4">⭐⭐⭐⭐ Huyền Thoại</option>
+              <option value="5">⭐⭐⭐⭐⭐ Bậc Thầy</option>
+            </select>
+          </label>
+        </div>
+        <p class="duel-played" id="duelPlayed"></p>
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startDuel()">🎯 CHIA ĐIỂM CHỈ SỐ</button></div>
+      </section>
+
+      <!-- ===== 2. PHÂN BỔ CHỈ SỐ (dùng cả lúc đầu lẫn giữa các ván) ===== -->
+      <section class="duel-alloc" id="duelAlloc" hidden>
+        <h2 class="duel-alloc-title" id="duelAllocTitle">🎯 Chia 100 điểm chỉ số</h2>
+        <p class="duel-alloc-note" id="duelAllocNote" aria-live="polite"></p>
+        <div class="duel-alloc-grid" id="duelAllocGrid"></div>
+        <p class="duel-alloc-cap" id="duelAllocCap"></p>
+        <div style="max-width:520px;margin:14px auto 0">
+          <button class="btn big green" type="button" id="duelAllocDone" onclick="confirmDuelAlloc()">⚔️ VÀO TRẬN!</button>
+        </div>
+      </section>
+
+      <!-- ===== 3. ĐẤU ===== -->
+      <section class="duel-play" id="duelPlay" hidden>
+        <div class="battlegrid">
+          <div class="colL">
+            <div class="arena" id="duelArena">
+              <div class="ground"></div>
+              <div class="hprow">
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName1"></span><span class="duel-statline" id="duelStatLine1"></span><span class="duel-status" id="duelStatus1"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost1"></i><div class="hpfill" id="duelHp1" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt1">0</div>
+                  <div class="ragebar" title="Thanh Nộ"><div class="ragefill" id="duelRage1"></div><span class="ragetxt" id="duelRageTxt1">0%</span></div>
+                </div>
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName2"></span><span class="duel-statline" id="duelStatLine2"></span><span class="duel-status" id="duelStatus2"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost2"></i><div class="hpfill" id="duelHp2" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt2">0</div>
+                  <div class="ragebar" title="Thanh Nộ"><div class="ragefill" id="duelRage2"></div><span class="ragetxt" id="duelRageTxt2">0%</span></div>
+                </div>
+              </div>
+              <div class="fighter" id="duelP1Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+                </div>
+              </div>
+              <div class="fighter" id="duelP2Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+                </div>
+              </div>
+            </div>
+            <p class="duel-turn" id="duelTurnTxt" aria-live="polite"></p>
+          </div>
+          <div class="colR">
+            <button class="btn duel-ult" type="button" id="duelUltBtn" hidden onclick="useDuelUltimate()">⚡ TUYỆT KỸ</button>
+            <div class="qbox" id="duelQbox">
+              <div class="qtext" id="duelQuestionTxt"></div>
+            </div>
+            <div class="answers" id="duelAnswers"></div>
+            <div class="duel-actions" id="duelActions" hidden role="group" aria-label="Chọn hành động"></div>
+            <div class="feedback" id="duelFeedback" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 4. KẾT QUẢ LOẠT TRẬN ===== -->
+      <section class="game-result duel-result" id="duelResult" hidden aria-live="polite">
+        <div class="result-icon" id="duelResultIcon">🏆</div>
+        <h2 id="duelResultTitle"></h2>
+        <p id="duelResultText"></p>
+        <div class="result-stats" id="duelResultStats"></div>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchDuel()">🔁 Loạt trận mới</button>
+          <button class="btn" type="button" onclick="leaveDuelGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+

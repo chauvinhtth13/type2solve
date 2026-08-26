@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0c1e">
+  <meta name="description" content="Đấu Trường Tư Duy — đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku từ dễ đến tối thượng.">
+  <meta name="author" content="Châu Vinh">
+  <title>Đấu Trường Tư Duy</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/app.css">
+  <link rel="stylesheet" href="styles/games.css">
+  <link rel="stylesheet" href="styles/theme-hd2d.css">
+
+  <!-- Classic scripts are intentionally ordered as the browser dependency graph. -->
+  <script defer src="scripts/platform/storage.js"></script>
+  <script defer src="scripts/engine/runtime.js"></script>
+  <script defer src="scripts/app/background.js"></script>
+  <script defer src="scripts/engine/audio.js"></script>
+  <script defer src="scripts/engine/art.js"></script>
+  <script defer src="scripts/games/adventure/config.js"></script>
+  <script defer src="scripts/games/adventure/session.js"></script>
+  <script defer src="scripts/games/adventure/questions.js"></script>
+  <script defer src="scripts/games/adventure/combat.js"></script>
+  <script defer src="scripts/games/typing/content.js"></script>
+  <script defer src="scripts/games/typing/index.js"></script>
+  <script defer src="scripts/games/sudoku/index.js"></script>
+  <script defer src="scripts/games/duel/rules.js"></script>
+  <script defer src="scripts/games/duel/index.js"></script>
+  <script defer src="scripts/games/nim/rules.js"></script>
+  <script defer src="scripts/games/nim/index.js"></script>
+  <script defer src="scripts/games/hanoi/rules.js"></script>
+  <script defer src="scripts/games/hanoi/index.js"></script>
+  <script defer src="scripts/app/bootstrap.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#homeTitle">Bỏ qua hiệu ứng, đến nội dung chính</a>
+<!-- @include views/shared/art.html -->
+<main class="wrap">
+  <!-- @include views/screens/home.html -->
+  <!-- @include views/screens/adventure.html -->
+  <!-- @include views/screens/typing.html -->
+  <!-- @include views/screens/sudoku.html -->
+  <!-- @include views/screens/duel.html -->
+  <!-- @include views/screens/nim.html -->
+  <!-- @include views/screens/hanoi.html -->
+</main>
+<!-- @include views/shared/modals.html -->
+</body>
+</html>

@@ -1,0 +1,108 @@
+  <!-- NIM MISÈRE (2 người) -->
+  <div class="screen learning-screen" id="nimGame">
+    <div class="card game-card nim-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveNimGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">ĐẤU BẠN HOẶC ĐẤU MÁY</span><h1>Nim Misère</h1></div>
+      </div>
+
+      <section class="nim-setup" id="nimSetup">
+        <p class="sub">⚠️ Luật NGƯỢC với Nim thường: <b>ai bốc viên sỏi cuối cùng sẽ THUA!</b></p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName1">Tên người chơi 1</label>
+            <input id="nimName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+          </div>
+          <div class="duel-vs" aria-hidden="true">🪨</div>
+          <div class="duel-player-card" id="nimPlayer2Card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName2">Tên người chơi 2</label>
+            <input id="nimName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="nim-config">
+          <label class="select-row">Đối thủ
+            <select id="nimOpponent" onchange="syncNimOpponent()">
+              <option value="human" selected>👥 2 người cùng máy</option>
+              <option value="easy">🤖 Máy — Dễ (bốc ngẫu nhiên)</option>
+              <option value="medium">🤖 Máy — Vừa (đi đúng phần lớn)</option>
+              <option value="hard">🧠 Máy — Khó (không bao giờ đi sai)</option>
+            </select>
+          </label>
+          <label class="select-row">Số đống sỏi
+            <select id="nimPileCount" onchange="renderNimPileInputs()">
+              <option value="2">2 đống</option>
+              <option value="3" selected>3 đống — bàn kinh điển</option>
+              <option value="4">4 đống</option>
+              <option value="5">5 đống</option>
+              <option value="6">6 đống</option>
+            </select>
+          </label>
+        </div>
+        <p class="nim-ai-note" id="nimAiNote" hidden></p>
+
+        <fieldset class="nim-piles-fieldset">
+          <legend>Số sỏi mỗi đống (1–15)</legend>
+          <div class="nim-pile-inputs" id="nimPileInputs"></div>
+        </fieldset>
+
+        <label class="nim-hint-toggle"><input type="checkbox" id="nimShowHint"> 💡 Hiện gợi ý thế cờ (đang thắng hay đang thua)</label>
+
+        <h2 class="maplbl">🏅 Số ván em đã hạ được máy</h2>
+        <div class="nim-records" id="nimRecords"></div>
+
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>
+      </section>
+
+      <section class="nim-play" id="nimPlay" hidden>
+        <!-- Nhân vật đã chọn phải XUẤT HIỆN ở màn chơi. Bản trước cho chọn nhân
+             vật ở màn chuẩn bị rồi không bao giờ vẽ ra — ma sát không trả lại gì. -->
+        <div class="nim-players">
+          <span class="nim-player">
+            <svg class="sprite nim-play-sprite" id="nimSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <b id="nimPlayerName1"></b>
+          </span>
+          <span class="nim-versus" aria-hidden="true">⚔️</span>
+          <span class="nim-player">
+            <svg class="sprite nim-play-sprite" id="nimSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <b id="nimPlayerName2"></b>
+          </span>
+        </div>
+        <p class="nim-warning">⚠️ Ai bốc viên sỏi cuối cùng sẽ THUA!</p>
+        <p class="duel-turn" id="nimTurnTxt" aria-live="polite"></p>
+        <div class="nim-board" id="nimBoard"></div>
+        <p class="nim-hint" id="nimHint" aria-live="polite"></p>
+        <!-- Bấm sỏi chỉ là CHỌN; phải xác nhận mới đi thật. Ở Misère một nước lỡ
+             tay là thua cả ván, nên không cho phép "bấm một phát đi luôn". -->
+        <div class="nim-controls">
+          <button class="btn green" type="button" id="nimConfirmBtn" hidden onclick="confirmNimTake()">✓ Xác nhận</button>
+          <button class="btn" type="button" id="nimCancelBtn" hidden onclick="cancelNimTake()">✕ Bỏ chọn</button>
+          <button class="btn" type="button" id="nimUndoBtn" onclick="undoNimMove()">↩️ Hoàn tác</button>
+        </div>
+        <p class="nim-feedback" id="nimFeedback" aria-live="polite"></p>
+      </section>
+
+      <section class="game-result nim-result" id="nimResult" hidden aria-live="polite">
+        <div class="result-icon" id="nimResultIcon">🏆</div>
+        <h2 id="nimResultTitle"></h2>
+        <p id="nimResultText"></p>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchNim()">🔁 Chơi lại</button>
+          <button class="btn" type="button" onclick="leaveNimGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+

@@ -1,0 +1,105 @@
+  <!-- SUDOKU THỬ THÁCH -->
+  <div class="screen learning-screen" id="sudokuGame">
+    <div class="card game-card sudoku-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveSudokuGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN SUY LUẬN LOGIC</span><h1>Sudoku Thử Thách</h1></div>
+        <button class="icon-btn" id="sudokuPauseBtn" onclick="toggleSudokuPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="sudoku-setup" id="sudokuSetup">
+        <div class="sudoku-hero" aria-hidden="true">🧩</div>
+        <h2>Chọn cấp độ của bạn</h2>
+        <p>Tất cả bàn đều có đúng một nghiệm. Cấp càng cao thì càng ít ô mở sẵn và ít gợi ý hơn.</p>
+        <div class="sudoku-level-grid">
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="beginner">
+            <span><i>🌱</i><b>Làm quen</b><small>50 ô mở · 5 gợi ý</small><em id="sudokuBest-beginner">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="easy">
+            <span><i>🙂</i><b>Dễ</b><small>42 ô mở · 4 gợi ý</small><em id="sudokuBest-easy">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="medium" checked>
+            <span><i>🧠</i><b>Vừa</b><small>36 ô mở · 3 gợi ý</small><em id="sudokuBest-medium">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="hard">
+            <span><i>🔥</i><b>Khó</b><small>28 ô mở · 2 gợi ý</small><em id="sudokuBest-hard">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="expert">
+            <span><i>💎</i><b>Chuyên gia</b><small>23 ô mở · 1 gợi ý</small><em id="sudokuBest-expert">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card ultimate">
+            <input type="radio" name="sudokuDifficulty" value="ultimate">
+            <span><i>👑</i><b>Tối thượng</b><small>Chỉ 17 ô · không gợi ý</small><em id="sudokuBest-ultimate">Chưa có kỷ lục</em></span>
+          </label>
+        </div>
+        <div class="sudoku-setup-footer">
+          <span>🏆 Đã thắng <b id="sudokuTotalWins">0</b> ván</span>
+          <button class="btn big green" type="button" onclick="startSudoku()">🧩 BẮT ĐẦU SUDOKU</button>
+        </div>
+      </section>
+
+      <section class="sudoku-play" id="sudokuPlay" hidden>
+        <div class="sudoku-hud">
+          <span id="sudokuLevel">🧠 Vừa</span>
+          <span>⏱️ <b id="sudokuTime">00:00</b></span>
+          <span>🔢 <b id="sudokuClues">36</b> ô mở</span>
+          <span>💡 <b id="sudokuHints">3</b> gợi ý</span>
+          <span>🔎 còn <b id="sudokuChecks">0</b> lượt kiểm tra</span>
+        </div>
+        <div class="sudoku-layout">
+          <div class="sudoku-board-column">
+            <div class="sudoku-board-wrap">
+              <div class="sudoku-board" id="sudokuBoard" role="grid" aria-label="Bàn Sudoku 9 hàng 9 cột"></div>
+              <div class="sudoku-pause-overlay" id="sudokuPauseOverlay" hidden>
+                <span>⏸️</span><b>ĐÃ TẠM DỪNG</b>
+                <button class="btn green" type="button" onclick="toggleSudokuPause()">▶️ Tiếp tục</button>
+              </div>
+            </div>
+            <div class="sudoku-feedback" id="sudokuFeedback" aria-live="polite">Chọn một ô rồi điền số.</div>
+          </div>
+
+          <aside class="sudoku-controls" aria-label="Bộ điều khiển Sudoku">
+            <div class="sudoku-number-pad" aria-label="Chọn số">
+              <button type="button" onclick="sudokuInput(1)" aria-label="Điền số 1">1</button>
+              <button type="button" onclick="sudokuInput(2)" aria-label="Điền số 2">2</button>
+              <button type="button" onclick="sudokuInput(3)" aria-label="Điền số 3">3</button>
+              <button type="button" onclick="sudokuInput(4)" aria-label="Điền số 4">4</button>
+              <button type="button" onclick="sudokuInput(5)" aria-label="Điền số 5">5</button>
+              <button type="button" onclick="sudokuInput(6)" aria-label="Điền số 6">6</button>
+              <button type="button" onclick="sudokuInput(7)" aria-label="Điền số 7">7</button>
+              <button type="button" onclick="sudokuInput(8)" aria-label="Điền số 8">8</button>
+              <button type="button" onclick="sudokuInput(9)" aria-label="Điền số 9">9</button>
+              <button class="erase" type="button" onclick="eraseSudokuCell()" aria-label="Xoá ô">⌫</button>
+            </div>
+            <div class="sudoku-tool-grid">
+              <button id="sudokuNoteBtn" type="button" onclick="toggleSudokuNotes()" aria-pressed="false">✏️ Ghi chú: TẮT</button>
+              <button id="sudokuHintBtn" type="button" onclick="useSudokuHint()">💡 Gợi ý (3)</button>
+              <button class="check" type="button" id="sudokuCheckBtn" onclick="checkSudoku()">🔍 Kiểm tra lỗi</button>
+              <button type="button" onclick="restartSudoku()">↩️ Chơi lại bàn</button>
+              <button type="button" onclick="newSudoku()">🔀 Bàn mới</button>
+              <button type="button" onclick="chooseSudokuLevel()">🎚️ Đổi cấp độ</button>
+            </div>
+            <p class="sudoku-shortcuts"><b>Phím tắt:</b> 1–9 điền số · N ghi chú · H gợi ý · phím mũi tên di chuyển · Delete xoá · Esc tạm dừng.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="game-result sudoku-result" id="sudokuResult" hidden aria-live="polite">
+        <div class="result-icon" id="sudokuResultIcon">🏆</div>
+        <h2 id="sudokuResultTitle">Hoàn thành Sudoku!</h2>
+        <p id="sudokuResultText"></p>
+        <div class="result-stats" id="sudokuResultStats"></div>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="newSudoku()">🔀 Bàn mới cùng cấp</button>
+          <button class="btn" type="button" onclick="chooseSudokuLevel()">🎚️ Chọn cấp độ</button>
+          <button class="btn" type="button" onclick="leaveSudokuGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+

@@ -1,0 +1,40 @@
+<div class="modal" id="restartModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" aria-hidden="true">
+  <div class="modalbox" tabindex="-1">
+    <div style="font-size:54px">⏸️</div>
+    <h1 id="pauseTitle" style="font-size:26px">TẠM DỪNG</h1>
+    <p class="sub" id="pauseInfo">Đồng hồ đã dừng — em cứ nghỉ thoải mái nhé!</p>
+    <div style="display:grid;gap:10px;margin-top:16px">
+      <button class="btn big green" onclick="closeRestart()">▶️ TIẾP TỤC CHƠI</button>
+      <button class="btn big" onclick="doRestart()">🔄 CHƠI LẠI TỪ ĐẦU</button>
+      <button class="btn big" onclick="goHomeFromPause()">🏠 VỀ TRANG CHỦ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" aria-hidden="true">
+  <div class="modalbox info-modalbox" tabindex="-1">
+    <button class="modal-close" onclick="closeInfoModal()" aria-label="Đóng">✕</button>
+    <h1 id="infoModalTitle" class="info-title">💛 Ủng hộ &amp; Góp ý</h1>
+    <p class="info-subtitle">Vài cách nhỏ để ủng hộ hoặc góp ý cho Đấu Trường Tư Duy — không cái nào bắt buộc để chơi game.</p>
+
+    <div class="info-sections">
+      <section class="info-section">
+        <h2>☕ Ủng hộ dự án</h2>
+        <p>Nếu Đấu Trường Tư Duy giúp ích cho con em bạn, một tách cà phê nhỏ sẽ tiếp thêm động lực để mình làm thêm nội dung mới. Quét mã QR bên dưới nếu muốn ủng hộ — hoàn toàn tuỳ tâm.</p>
+        <img class="info-qr" src="assets/images/donate-qr.jpg" alt="Mã QR ủng hộ cho Châu Vinh" loading="lazy" width="220" height="360">
+      </section>
+
+      <section class="info-section">
+        <h2>✉️ Góp ý cho phụ huynh &amp; học sinh</h2>
+        <p>Phát hiện lỗi, câu hỏi sai, hoặc muốn đề xuất tính năng mới? Gửi email trực tiếp:</p>
+        <a class="info-link" href="mailto:chauvinhtth13@gmail.com"><span class="info-link-icon">✉️</span><span>chauvinhtth13@gmail.com</span></a>
+      </section>
+
+      <section class="info-section">
+        <h2>💻 Mã nguồn mở</h2>
+        <p>Toàn bộ mã nguồn được công khai — xem, tải về hoặc đóng góp trên GitHub:</p>
+        <a class="info-link" href="https://github.com/chauvinhtth13/type2solve" target="_blank" rel="noopener"><span class="info-link-icon">💻</span><span>github.com/chauvinhtth13/type2solve</span></a>
+      </section>
+    </div>
+  </div>
+</div>
