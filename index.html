@@ -1,0 +1,922 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1b2a52">
+  <meta name="description" content="Đấu Trường Tư Duy — đấu toán, luyện gõ Anh–Việt và chinh phục Sudoku từ dễ đến tối thượng.">
+  <meta name="author" content="Châu Vinh">
+  <title>Đấu Trường Tư Duy</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&amp;family=Nunito:wght@600;700;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/learning-games.css">
+
+  <!-- THỨ TỰ NẠP LÀ HỆ THỐNG MÔ-ĐUN của dự án này (xem CLAUDE.md): mỗi file
+       dùng biến toàn cục do file trước định nghĩa. `defer` GIỮ NGUYÊN thứ tự
+       đó — trình duyệt chạy chúng đúng thứ tự trong tài liệu, sau khi phân
+       tích xong HTML. Đặt ở <head> để bộ quét tải trước phát hiện và tải
+       song song NGAY, thay vì đợi phân tích hết 530 dòng markup mới thấy.
+       Cùng danh sách này phải khớp CORE_ASSETS trong sw.js. -->
+  <script defer src="assets/js/storage.js"></script>
+  <script defer src="assets/js/core.js"></script>
+  <script defer src="assets/js/question-bank.js"></script>
+  <script defer src="assets/js/arena.js"></script>
+  <script defer src="assets/js/data/typing-content.js"></script>
+  <script defer src="assets/js/games/typing.js"></script>
+  <script defer src="assets/js/games/sudoku.js"></script>
+  <script defer src="assets/js/games/duel.js"></script>
+  <script defer src="assets/js/games/nim.js"></script>
+  <script defer src="assets/js/bootstrap.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#homeTitle">Bỏ qua hiệu ứng, đến nội dung chính</a>
+<!-- Nhân vật vẽ bằng SVG nội tuyến (không <use>): CSS phải với tới được từng bộ
+     phận để chớp mắt / vung tay, mà <use> lại giấu chúng trong shadow DOM. --><!-- Khuôn hình quái: NGUỒN DUY NHẤT. #bossSprite (màn Đấu Toán) và mọi quái
+     trong Gõ Chữ đều clone từ đây, nên sửa hình một chỗ là đổi khắp nơi. Dùng
+     <template>+cloneNode chứ không <use>: <use> giấu nội dung trong shadow DOM,
+     CSS ngoài sẽ không animate được mắt/sừng. -->
+<template id="tplBeast"><svg viewBox="0 0 120 120" class="beast-art" aria-hidden="true">
+  <g stroke="#2b2350" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="60" cy="107" rx="24" ry="5" fill="#2b2350" stroke="none" opacity=".22"/>
+
+    <!-- ===== BỘ PHẬN SAU LƯNG (vẽ trước thân nên bị thân che bớt, chỉ ló ra ngoài viền) ===== -->
+    <!-- Áo choàng nằm SÂU NHẤT: nó phải chui ra sau cả cánh lẫn đuôi. -->
+    <g class="bp bp-cape">
+      <path d="M42 32 q-24 20 -25 62 q41 11 86 0 q-1-42 -25-62 q-18 7 -36 0z"
+            fill="var(--c-horn,#ffc93c)"/>
+      <path d="M17 94 q10 6 21 1 q10 6 22 1 q10 6 22-1 q11 5 21-1" fill="none" stroke-width="3.4"/>
+    </g>
+    <g class="bp bp-wings" fill="var(--c-horn,#ffc93c)">
+      <path d="M33 45 q-26-9 -29 5 q9-1 10 5 q-7 3 -6 9 q11-6 16 0 q-1-12 9-19z"/>
+      <path d="M87 45 q26-9 29 5 q-9-1 -10 5 q7 3 6 9 q-11-6 -16 0 q1-12 -9-19z"/>
+    </g>
+    <g class="bp bp-tail">
+      <path d="M88 86 q20 4 24-14 q3-13 -9-18" fill="none" stroke-width="10"/>
+      <path d="M88 86 q20 4 24-14 q3-13 -9-18" fill="none" stroke="var(--c-body,#8d6bff)" stroke-width="4"/>
+      <path d="M97 55 l10-7 l1 12z" fill="var(--c-horn,#ffc93c)"/>
+    </g>
+    <!-- Ngòi độc bọ cạp: cong ngược lên qua lưng, mũi kim chúc xuống trước mặt. -->
+    <g class="bp bp-stinger">
+      <path d="M90 90 q26-6 24-34 q-2-23 -16-30" fill="none" stroke-width="12"/>
+      <path d="M90 90 q26-6 24-34 q-2-23 -16-30" fill="none" stroke="var(--c-body,#8d6bff)" stroke-width="6"/>
+      <path d="M103 23 l-13-9 l2 18z" fill="var(--c-horn,#ffc93c)"/>
+    </g>
+    <!-- Vỏ phải LÒI HẲN ra khỏi thân mới đọc được vòng xoáy. Đặt cx=90 r=23 thì thân
+         (rộng tới x=94) nuốt mất cả ba vòng tròn, chỉ còn một vệt cong vô nghĩa. -->
+    <g class="bp bp-shell">
+      <circle cx="97" cy="57" r="26" fill="var(--c-horn,#ffc93c)"/>
+      <circle cx="101" cy="58" r="16" fill="none" stroke-width="3.6"/>
+      <circle cx="104" cy="59" r="7" fill="none" stroke-width="3.2"/>
+    </g>
+    <g class="bp bp-plates" fill="var(--c-horn,#ffc93c)">
+      <path d="M29 58 l-13-5 l12-8z"/><path d="M27 74 l-14-3 l12-9z"/>
+      <path d="M91 58 l13-5 l-12-8z"/><path d="M93 74 l14-3 l-12-9z"/>
+    </g>
+
+    <!-- ===== THỨ MỌC TRÊN ĐẦU (cũng vẽ trước thân, gốc giấu dưới đỉnh đầu) ===== -->
+    <g class="bp bp-stalks">
+      <path d="M47 33 q-7-15 -5-24" fill="none" stroke-width="9"/>
+      <path d="M73 33 q7-15 5-24" fill="none" stroke-width="9"/>
+      <path d="M47 33 q-7-15 -5-24" fill="none" stroke="var(--c-body,#8d6bff)" stroke-width="4"/>
+      <path d="M73 33 q7-15 5-24" fill="none" stroke="var(--c-body,#8d6bff)" stroke-width="4"/>
+      <circle cx="42" cy="10" r="7.5" fill="var(--c-belly,#fff)"/>
+      <circle cx="78" cy="10" r="7.5" fill="var(--c-belly,#fff)"/>
+      <circle cx="42" cy="10" r="2.8" fill="#2b2350" stroke="none"/>
+      <circle cx="78" cy="10" r="2.8" fill="#2b2350" stroke="none"/>
+    </g>
+    <g class="bp bp-antennae">
+      <path d="M49 30 q-9-13 -13-17" fill="none" stroke-width="6"/>
+      <path d="M71 30 q9-13 13-17" fill="none" stroke-width="6"/>
+      <circle cx="35" cy="11" r="6" fill="var(--c-horn,#ffc93c)"/>
+      <circle cx="85" cy="11" r="6" fill="var(--c-horn,#ffc93c)"/>
+    </g>
+    <g class="bp bp-ears">
+      <path d="M39 36 q-11-24 -3-32 q13 7 18 26z" fill="var(--c-body,#8d6bff)"/>
+      <path d="M81 36 q11-24 3-32 q-13 7 -18 26z" fill="var(--c-body,#8d6bff)"/>
+      <path d="M40 31 q-6-15 -2-20 q7 5 10 17z" fill="var(--c-belly,#fff)" stroke="none"/>
+      <path d="M80 31 q6-15 2-20 q-7 5 -10 17z" fill="var(--c-belly,#fff)" stroke="none"/>
+    </g>
+
+    <g class="chr-horns" fill="var(--c-horn,#ffc93c)">
+      <path d="M34 40 q-6-16 -2-26 q10 6 14 20z"/>
+      <path d="M86 40 q6-16 2-26 q-10 6 -14 20z"/>
+    </g>
+    <path class="chr-spikes" d="M60 16 l9 12 h-18z M40 24 l8 12 l-14 4z M80 24 l-8 12 l14 4z"
+          fill="var(--c-horn,#ffc93c)"/>
+
+    <!-- ===== THÂN ===== -->
+    <path d="M60 22 q34 0 34 36 q0 24-14 34 q-20 8 -40 0 q-14-10 -14-34 q0-36 34-36z"
+          fill="var(--c-body,#8d6bff)"/>
+
+    <!-- ===== CHÂN, hoặc thứ thay chỗ chân ===== -->
+    <g class="chr-feet">
+      <path d="M42 98 q-4 8 2 8 q7 0 8-7z" fill="var(--c-body,#8d6bff)"/>
+      <path d="M78 98 q4 8 -2 8 q-7 0-8-7z" fill="var(--c-body,#8d6bff)"/>
+    </g>
+    <g class="bp bp-tentacles" fill="var(--c-body,#8d6bff)">
+      <path d="M34 88 q-9 9 -6 17 q7 3 9-4 q-6-4 -3-13z"/>
+      <path d="M47 93 q-6 11 -1 18 q7 1 8-6 q-7-3 -7-12z"/>
+      <path d="M60 95 q-3 12 3 18 q7-1 6-8 q-7-2 -9-10z"/>
+      <path d="M73 93 q6 11 1 18 q-7 1 -8-6 q7-3 7-12z"/>
+      <path d="M86 88 q9 9 6 17 q-7 3 -9-4 q6-4 3-13z"/>
+    </g>
+    <g class="bp bp-ghost">
+      <path d="M31 82 q-3 16 1 26 q6-3 9 3 q4-7 9-1 q5-7 10-1 q5-7 10 0 q4-6 9 2 q4-11 1-29z"
+            fill="var(--c-body,#8d6bff)"/>
+    </g>
+    <!-- Thân cuộn: rắn và sâu không có chân, chúng ngồi trên chính khúc thân mình. -->
+    <g class="bp bp-coil">
+      <path d="M60 84 q-31 1 -31 12 q0 12 31 12 q31 0 31-12 q0-9 -20-11" fill="var(--c-body,#8d6bff)"/>
+      <path d="M33 100 q27 9 54 0" fill="none" stroke-width="3.4"/>
+      <path d="M45 90 l-1 7 M60 92 l0 8 M75 90 l1 7" fill="none" stroke-width="3"/>
+    </g>
+
+    <path d="M60 96 q-17 0 -20-14 q10-8 20-8 q10 0 20 8 q-3 14 -20 14z"
+          fill="var(--c-belly,rgba(255,255,255,.4))" stroke="none"/>
+    <g class="chr-eyes">
+      <circle cx="46" cy="52" r="13" fill="#fff"/><circle cx="74" cy="52" r="13" fill="#fff"/>
+      <circle class="chr-pupil" cx="48" cy="55" r="6" fill="#2b2350" stroke="none"/>
+      <circle class="chr-pupil" cx="76" cy="55" r="6" fill="#2b2350" stroke="none"/>
+      <circle cx="44" cy="49" r="2.4" fill="#fff" stroke="none"/>
+      <circle cx="72" cy="49" r="2.4" fill="#fff" stroke="none"/>
+    </g>
+    <path d="M50 82 q10 9 20 0" fill="none" stroke-width="4"/>
+    <g class="chr-teeth">
+      <path d="M55 84 l3 6 l3-6z" fill="#fff" stroke-width="2.2"/>
+      <path d="M63 84 l3 6 l3-6z" fill="#fff" stroke-width="2.2"/>
+    </g>
+
+    <!-- ===== BỘ PHẬN PHÍA TRƯỚC ===== -->
+    <g class="bp bp-fangs" fill="#fff" stroke-width="2.4">
+      <path d="M51 82 l3.5 12 l3.5-12z"/><path d="M62 82 l3.5 12 l3.5-12z"/>
+    </g>
+    <!-- Vết khâu vắt ngang TRÁN, chỗ trống duy nhất còn lại trên mặt. Đặt ở khoảng
+         giữa mắt và bụng thì bị kẹp giữa hai thứ, trông như vệt bẩn chứ không ra vết khâu. -->
+    <g class="bp bp-stitches" fill="none" stroke-width="2.9">
+      <path d="M39 35 q21-7 42 0"/>
+      <path d="M45 30 l-1 9"/><path d="M55 27 l-1 9"/><path d="M65 27 l1 9"/><path d="M75 30 l1 9"/>
+    </g>
+    <!-- Càng bọ cạp: giơ ngang hai bên, kẹp mở sẵn. -->
+    <g class="bp bp-claws" fill="var(--c-body,#8d6bff)">
+      <path d="M29 72 q-17 1 -19 11 q7 3 11-2 q-5 8 2 11 q11-6 13-16z"/>
+      <path d="M91 72 q17 1 19 11 q-7 3 -11-2 q5 8 -2 11 q-11-6 -13-16z"/>
+    </g>
+    <g class="bp bp-crown">
+      <path d="M41 24 l4-16 l7 9 l8-13 l8 13 l7-9 l4 16z" fill="#ffd54a"/>
+      <circle cx="60" cy="12" r="3" fill="#ff5d7a" stroke="none"/>
+    </g>
+    <g class="bp bp-hat">
+      <path d="M60 2 q10 18 21 27 h-42 q11-9 21-27z" fill="#5b4bc4"/>
+      <ellipse cx="60" cy="30" rx="27" ry="6" fill="#7a68e0"/>
+      <circle cx="66" cy="18" r="3" fill="#ffe27a" stroke="none"/>
+      <circle cx="55" cy="24" r="2.4" fill="#ffe27a" stroke="none"/>
+    </g>
+    <!-- Gậy phép: cầm nghiêng bên phải, viên ngọc sáng ngang tầm đầu. -->
+    <g class="bp bp-staff">
+      <path d="M99 104 l-9-58" fill="none" stroke-width="10"/>
+      <path d="M99 104 l-9-58" fill="none" stroke="#a9793f" stroke-width="5"/>
+      <circle cx="89" cy="40" r="10" fill="var(--c-horn,#ffc93c)"/>
+      <circle cx="86" cy="37" r="3.2" fill="#fff" stroke="none"/>
+    </g>
+  </g>
+</svg></template>
+<!-- Khuôn nhân vật: NGUỒN DUY NHẤT, y hệt cách làm với quái. #heroSprite (Đấu Toán),
+     pháp sư ở màn chọn chiến dịch và pháp sư giữ cổng trong Gõ Chữ đều bơm từ đây. -->
+<template id="tplHero"><svg viewBox="0 0 120 120" class="hero-art" aria-hidden="true">
+              <g stroke="#2b2350" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 52 q-22 12 -26 44 q16 6 30-2 z" fill="#e0457b"/>
+                <ellipse cx="60" cy="104" rx="19" ry="5" fill="#2b2350" stroke="none" opacity=".22"/>
+                <path d="M48 90 h9 v13 h-9 z" fill="#3b3163"/>
+                <path d="M63 90 h9 v13 h-9 z" fill="#3b3163"/>
+                <path d="M44 100 h14 v7 h-14 z" fill="#ffc93c"/>
+                <path d="M62 100 h14 v7 h-14 z" fill="#ffc93c"/>
+                <path d="M60 50 q19 0 21 20 l3 26 q-24 7 -48 0 l3-26 q2-20 21-20z" fill="#41c9e2"/>
+                <path d="M43 80 h34" stroke="#ffc93c" stroke-width="7"/>
+                <!-- Tay vẽ bằng HAI nét chồng nhau: nét viền đậm bên dưới, nét da mảnh
+                     hơn bên trên. Một nét đơn 4,5px trông như sợi dây bên cạnh thân
+                     người mập mạp; hai nét cho tay dày dặn đúng tỉ lệ. -->
+                <g class="chr-arm chr-arm-l">
+                  <path d="M45 63 q-15 11 -13 24" fill="none" stroke-width="16"/>
+                  <path d="M45 63 q-15 11 -13 24" fill="none" stroke="#ffd8a8" stroke-width="9"/>
+                  <circle cx="32" cy="87" r="7" fill="#ffd8a8"/>
+                </g>
+                <g class="chr-arm chr-arm-r">
+                  <path d="M75 63 q14 7 16 17" fill="none" stroke-width="16"/>
+                  <path d="M75 63 q14 7 16 17" fill="none" stroke="#ffd8a8" stroke-width="9"/>
+                  <circle cx="91" cy="80" r="7" fill="#ffd8a8"/>
+                  <circle cx="99" cy="70" r="8" fill="#ffe27a"/>
+                </g>
+                <circle cx="60" cy="34" r="20" fill="#ffd8a8"/>
+                <path d="M40 30 q6-20 20-20 q14 0 20 20 q-8-8 -20-8 q-12 0-20 8z" fill="#6b4a2f" stroke="none"/>
+                <path d="M40 30 q6-20 20-20 q14 0 20 20" fill="none"/>
+                <g class="chr-eyes" fill="#2b2350" stroke="none">
+                  <circle cx="55" cy="34" r="3.4"/><circle cx="70" cy="34" r="3.4"/>
+                </g>
+                <path d="M56 43 q7 5 13 0" fill="none" stroke-width="3.4"/>
+                <circle cx="48" cy="41" r="4" fill="#ff9db4" stroke="none" opacity=".75"/>
+                <circle cx="76" cy="41" r="4" fill="#ff9db4" stroke="none" opacity=".75"/>
+              </g>
+</svg></template>
+<div class="stars" id="stars"></div>
+
+<main class="wrap">
+
+  <!-- TRANG CHỦ — sảnh game có phân khu rõ ràng, giữ mọi hành động trong một màn. -->
+  <div class="screen active" id="home">
+    <div class="card home-card">
+      <div class="home-hub">
+        <div class="home-overview">
+        <header class="home-masthead">
+          <button class="tile-sound" id="sndBtnHome" onclick="toggleSound()" aria-pressed="true" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+          <div class="masthead-copy">
+            <span class="home-kicker">HỌC · CHƠI · CHINH PHỤC</span>
+            <h1 id="homeTitle">ĐẤU TRƯỜNG<br><span class="hl">TƯ DUY</span></h1>
+            <p class="sub">Rèn toán, luyện ngôn ngữ và thử sức với những màn đấu trí mỗi ngày.</p>
+          </div>
+          <div class="hero-orbit" aria-hidden="true">
+            <span class="orbit-line orbit-line-one"></span>
+            <span class="orbit-line orbit-line-two"></span>
+            <div class="big-emoji" id="homeBigEmoji">🧠</div>
+          </div>
+        </header>
+
+        <aside class="tile-stats" id="profileSummary" aria-live="polite" aria-label="Tiến độ của em">
+          <div class="stats-heading">
+            <span class="eyebrow">HỒ SƠ HỌC VIÊN</span>
+            <span class="live-dot">Đang lưu</span>
+          </div>
+          <div class="profile-strip">
+            <span><b id="profileStars">0</b><small>⭐ sao</small></span>
+            <span><b id="profileTyping">0</b><small>⌨️ kỷ lục</small></span>
+            <span><b id="profileSudoku">0</b><small>🧩 Sudoku</small></span>
+          </div>
+        </aside>
+        </div>
+
+        <section class="home-zone math-zone" aria-labelledby="mathZoneTitle">
+          <header class="zone-heading">
+            <span class="zone-index">01</span>
+            <div><span class="zone-kicker">ĐẤU TOÁN</span><h2 id="mathZoneTitle">Chọn nhịp chiến đấu</h2></div>
+          </header>
+          <div class="modes">
+          <button class="mode adv tile tile-flagship" onclick="SFX.click();startAdventure()">
+            <span class="mode-topline"><span class="mode-label">CHIẾN DỊCH</span><span class="mi" aria-hidden="true">⚔️</span></span>
+            <span class="mode-copy"><b>Phiêu lưu<br>10 vùng đất</b><span class="tile-desc">Hạ boss, mua vật phẩm và tích năng lượng cho siêu chưởng.</span></span>
+            <span class="mode-bottom"><span class="tile-cta">Bắt đầu hành trình <span aria-hidden="true">↗</span></span><span class="tile-progress" id="advProgress"></span></span>
+          </button>
+            <div class="quick-modes">
+              <button class="mode blitz tile" onclick="SFX.click();startBlitz()">
+                <span class="mi" aria-hidden="true">⚡</span><span><b>Đấu nhanh</b><span class="mode-meta">60 giây</span><span class="tile-desc">Tăng tốc độ tính và phản xạ.</span></span><span class="mode-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="mode surv tile" onclick="SFX.click();startSurvival()">
+                <span class="mi" aria-hidden="true">∞</span><span><b>Sinh tồn</b><span class="mode-meta">3 mạng</span><span class="tile-desc">Càng chơi, thử thách càng khó.</span></span><span class="mode-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="home-zone skill-zone" aria-labelledby="skillZoneTitle">
+          <header class="zone-heading">
+            <span class="zone-index">02</span>
+            <div><span class="zone-kicker">RÈN KỸ NĂNG</span><h2 id="skillZoneTitle">Học qua từng thử thách</h2></div>
+          </header>
+          <div class="learning-modes">
+          <button class="learning-mode typing-mode tile" onclick="SFX.click();openTypingGame()">
+            <span class="world-icon" aria-hidden="true">⌨️</span>
+            <span><b>Gõ chữ diệt quái</b><small>Luyện gõ Anh–Việt, giữ combo và chinh phục boss từ vựng.</small></span>
+            <span class="world-tag">Anh–Việt</span>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="learning-mode sudoku-mode tile" onclick="SFX.click();openSudokuGame()">
+            <span class="world-icon" aria-hidden="true">🧩</span>
+            <span><b>Sudoku thử thách</b><small>6 cấp độ, ghi chú, gợi ý và kỷ lục riêng cho từng mức.</small></span>
+            <span class="world-tag">Dễ → 17 ô</span>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+          </div>
+        </section>
+
+        <section class="home-zone social-zone" aria-labelledby="socialZoneTitle">
+          <header class="zone-heading compact">
+            <span class="zone-index">03</span>
+            <div><span class="zone-kicker">CHƠI CÙNG NHAU</span><h2 id="socialZoneTitle">Thử tài trên cùng thiết bị</h2></div>
+          </header>
+          <div class="tile-more">
+          <button class="learning-mode duel-mode tile" onclick="SFX.click();openDuelGame()">
+            <span class="world-icon" aria-hidden="true">⚔️</span>
+            <span><b>Đấu đối kháng</b><small>Thay phiên giải toán và tung chưởng.</small></span>
+            <span class="world-tag">2 người</span>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="learning-mode nim-mode tile" onclick="SFX.click();openNimGame()">
+            <span class="world-icon" aria-hidden="true">🪨</span>
+            <span><b>Nim Misère</b><small>Bốc sỏi chiến thuật — lấy viên cuối sẽ thua.</small></span>
+            <span class="world-tag">2 người</span>
+            <span class="mode-arrow" aria-hidden="true">→</span>
+          </button>
+          </div>
+        </section>
+
+        <footer class="tile-credit">
+          <p class="credit-line">
+            <span class="credit-work">Đấu Trường Tư Duy</span>
+            <span class="credit-sep" aria-hidden="true">·</span>
+            <span class="credit-role">Thiết kế &amp; phát triển</span>
+            <strong class="credit-name">Châu Vinh</strong>
+          </p>
+          <button class="credit-info-btn" onclick="SFX.click();openInfoModal()">💛 Ủng hộ &amp; Góp ý</button>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- GIỚI THIỆU BOSS -->
+  <div class="screen" id="intro">
+    <div class="card">
+      <div class="big-emoji bounce" id="introEmoji"></div>
+      <h1 id="introName">BOSS XUẤT HIỆN!</h1>
+      <div class="bossintro" id="introDesc"></div>
+      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();beginBattle()">⚔️ VÀO TRẬN!</button></div>
+      <div style="margin-top:12px"><button class="btn" onclick="SFX.open();openShop('intro')">🛒 CỬA HÀNG (<span id="introCoins">0</span> 💰)</button></div>
+    </div>
+  </div>
+
+  <!-- CHIẾN ĐẤU -->
+  <div class="screen" id="battle">
+    <div class="card" id="battleCard">
+      <div class="topbar">
+        <span class="badge" id="levelBadge">Boss 1/10</span>
+        <span class="badge coin" id="coinTxt">💰 0</span>
+        <button class="minibtn" id="sndBtn" onclick="toggleSound()" title="Bật/tắt âm thanh" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+        <button class="minibtn" onclick="askRestart()" title="Tạm dừng / Về trang chủ" aria-label="Tạm dừng trò chơi">⏸️</button>
+        <button class="minibtn" onclick="quickHome()" title="Về trang chủ" aria-label="Về trang chủ">🏠</button>
+        <span class="badge type" id="typeBadge">🧮</span>
+        <span class="streak" id="streakTxt"></span>
+        <span class="crit" id="critTxt"></span>
+      </div>
+
+      <div class="battlegrid">
+       <div class="colL">
+      <div class="arena" id="arena">
+        <div class="ground" id="ground"></div>
+        <div class="hprow">
+          <div class="hpwrap">
+            <div class="hpname">🦸 Em</div>
+            <div class="hpbar"><div class="hpfill" id="heroHp" style="width:100%"></div></div>
+            <div class="hptext" id="heroHpTxt"></div>
+          </div>
+          <div class="hpwrap">
+            <div class="hpname" id="bossName">👾 Boss</div>
+            <div class="hpbar"><div class="hpfill" id="bossHp" style="width:100%"></div></div>
+            <div class="hptext" id="bossHpTxt"></div>
+          </div>
+        </div>
+        <div class="fighter" id="heroBox">
+          <div style="position:relative;display:inline-block">
+            <div class="aura" id="heroAura"></div>
+            <div class="shadowPad"></div>
+            <svg class="sprite" id="heroSprite" viewBox="0 0 120 120" role="img"
+                 aria-label="Nhân vật của em" data-art="tplHero"></svg>
+          </div>
+        </div>
+        <div class="fighter" id="bossBox">
+          <div style="position:relative;display:inline-block">
+            <div class="shadowPad"></div>
+            <svg class="sprite" id="bossSprite" viewBox="0 0 120 120" role="img"
+                 aria-label="Quái vật" data-art="tplBeast"></svg>
+          </div><br>
+          <span class="mech" id="bossMech"></span>
+        </div>
+      </div>
+
+      <div class="timerwrap">
+        <span style="font-size:18px">⏰</span>
+        <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+        <span class="timernum" id="timerNum">20s</span>
+      </div>
+
+      <div class="energywrap">
+        <span class="energylbl">⚡ Năng lượng</span>
+        <div class="energybar"><div class="energyfill" id="energyFill"></div></div>
+        <button class="ultbtn" id="ultBtn" onclick="useUltimate()">⚡ SIÊU CHƯỞNG!</button>
+      </div>
+      <div class="itembar" id="itemBar"></div>
+       </div>
+       <div class="colR">
+      <div class="qbox" id="qbox">
+        <div class="goldtag" id="goldTag" style="display:none">💛 CÂU HỎI VÀNG — SÁT THƯƠNG ×2! 💛</div>
+        <div class="qtext" id="questionTxt"></div>
+        <div class="qsvg" id="questionSvg"></div>
+      </div>
+      <div class="thinkbar" id="thinkBar"><i></i></div>
+      <div class="answer-toolbar">
+        <label for="answerModeSelect">Cách trả lời</label>
+        <select id="answerModeSelect" onchange="setAnswerMode(this.value)" title="Áp dụng từ câu tiếp theo">
+          <option value="mixed">🔀 Luân phiên</option>
+          <option value="choice">🔘 Trắc nghiệm</option>
+          <option value="input">⌨️ Tự nhập kết quả</option>
+        </select>
+        <span id="answerModeHint">Áp dụng từ câu tiếp theo</span>
+      </div>
+      <div class="answers" id="answers"></div>
+      <form class="answer-entry" id="answerForm" onsubmit="submitTypedAnswer(event)" hidden>
+        <label class="sr-only" for="answerInput">Nhập đáp án</label>
+        <input id="answerInput" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Nhập kết quả rồi nhấn Enter…">
+        <button class="answer-submit" id="answerSubmit" type="submit">TUNG CHƯỞNG</button>
+      </form>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="explain" id="explainBox"></div>
+      <button class="nextbtn" id="nextBtn" onclick="proceedNext()">▶ CÂU TIẾP THEO</button>
+       </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THẮNG BOSS + CHỌN BẢO VẬT -->
+  <div class="screen" id="bossWin">
+    <div class="card">
+      <div class="big-emoji bounce">🎁</div>
+      <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
+      <p class="sub" id="bossWinSub"></p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="bossWinStars">0</div><div class="lbl">⭐ SAO VỪA NHẬN</div></div>
+      </div>
+      <div style="margin-top:20px;max-width:520px;margin-left:auto;margin-right:auto">
+        <button class="btn big" onclick="SFX.open();openShop('next')">🛒 VÀO CỬA HÀNG MUA SẮM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CỬA HÀNG -->
+  <div class="screen" id="shop">
+    <div class="card">
+      <div class="big-emoji bounce">🛒</div>
+      <h1>CỬA HÀNG VẬT PHẨM</h1>
+      <p class="sub">Trả lời đúng để kiếm xu 💰 — mua vật phẩm để mạnh hơn!<br>
+      Xu của em: <b id="shopCoins" style="font-size:22px;color:var(--gold-ink)">0 💰</b></p>
+      <div id="shopGrid"></div>
+      <div style="margin-top:18px;max-width:520px;margin-left:auto;margin-right:auto">
+        <button class="btn big green" id="shopDoneBtn" onclick="SFX.click();closeShop()">⚔️ VÀO TRẬN!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KẾT QUẢ ĐẤU NHANH / SINH TỒN -->
+  <div class="screen" id="scoreEnd">
+    <div class="card">
+      <div class="big-emoji bounce" id="seEmoji">🏁</div>
+      <h1 id="seTitle">HẾT GIỜ!</h1>
+      <p class="sub" id="seRank"></p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="seScore">0</div><div class="lbl">ĐIỂM</div></div>
+        <div class="stat"><div class="num" id="seCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="seStreak">0</div><div class="lbl">COMBO MAX</div></div>
+        <div class="stat"><div class="num" id="seBest">0</div><div class="lbl">KỶ LỤC 🏅</div></div>
+      </div>
+      <div style="display:grid;gap:12px;max-width:520px;margin:0 auto">
+        <button class="btn big green" id="seAgain">🔁 CHƠI LẠI</button>
+        <button class="btn big" onclick="SFX.click();goHome()">🏠 VỀ TRANG CHỦ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VÔ ĐỊCH -->
+  <div class="screen" id="victory">
+    <div class="card">
+      <div class="big-emoji bounce">🏆</div>
+      <h1>NHÀ VÔ ĐỊCH TƯ DUY!</h1>
+      <p class="sub">Em đã chinh phục cả 10 boss của Đấu Trường Tư Duy! Quá đỉnh!</p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="stWrong">0</div><div class="lbl">CÂU SAI</div></div>
+        <div class="stat"><div class="num" id="stGold">0</div><div class="lbl">CÂU VÀNG</div></div>
+        <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">COMBO MAX</div></div>
+        <div class="stat"><div class="num" id="stCoins">0</div><div class="lbl">XU CÒN LẠI 💰</div></div>
+      </div>
+      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();goHome()">🏠 CHƠI LẠI</button></div>
+    </div>
+  </div>
+
+  <!-- THUA -->
+  <div class="screen" id="defeat">
+    <div class="card">
+      <div class="big-emoji">😵</div>
+      <h1>ÔI KHÔNG!</h1>
+      <p class="sub">Câu đố tư duy khó mà! Thử lại là quen tay ngay! 💪</p>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stCorrect2">0</div><div class="lbl">CÂU ĐÚNG</div></div>
+        <div class="stat"><div class="num" id="stWrong2">0</div><div class="lbl">CÂU SAI</div></div>
+        <div class="stat"><div class="num" id="stTimeout2">0</div><div class="lbl">HẾT GIỜ</div></div>
+      </div>
+      <div style="display:grid;gap:12px;max-width:520px;margin:0 auto">
+        <button class="btn big" onclick="SFX.open();openShop('defeat')">🛒 CỬA HÀNG (<span id="defeatCoins">0</span> 💰)</button>
+        <button class="btn big green" onclick="SFX.click();retryBoss()">🔁 ĐÁNH LẠI BOSS NÀY</button>
+        <button class="btn big" onclick="SFX.click();goHome()">🏠 VỀ TRANG CHỦ</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- GÕ CHỮ DIỆT QUÁI -->
+  <div class="screen learning-screen" id="typingGame">
+    <div class="card game-card typing-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveTypingGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN GÕ & TỪ VỰNG</span><h1>Gõ Chữ Diệt Quái</h1></div>
+        <button class="icon-btn" id="typingPauseBtn" onclick="toggleTypingPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="typing-setup" id="typingSetup">
+        <div class="typing-hero"><i data-art="tplHero"></i><span>⚡</span></div>
+        <h2>Chọn chiến dịch</h2>
+        <div class="typing-setup-grid">
+          <div class="setup-col">
+        <div class="option-grid">
+          <label class="option-card"><input type="radio" name="typingLanguage" value="en" checked><span><b>Tiếng Anh</b><small>Hơn 82.000 từ kèm nghĩa tiếng Việt</small></span></label>
+          <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>Tiếng Việt</b><small>Luyện dấu, cụm từ và chính tả</small></span></label>
+        </div>
+        <p class="typing-dictionary-status" id="typingDictionaryStatus" aria-live="polite">📚 Kho từ mở sẽ tự nạp khi vào trò chơi.</p>
+        <div class="dict-progress" id="typingDictProgress" hidden><i id="typingDictProgressFill"></i></div>
+        <p class="typing-source">Dữ liệu: <a href="https://vi.wiktionary.org/" target="_blank" rel="noopener">Wiktionary tiếng Việt</a> qua <a href="https://kaikki.org/viwiktionary/" target="_blank" rel="noopener">Kaikki</a> · CC BY-SA 4.0</p>
+        <label class="select-row">Độ khó
+          <select id="typingDifficulty"><option value="superslow">🐢 Siêu chậm — chỉ 1 quái, từ dễ nhất</option><option value="easy">Dễ — quái chậm</option><option value="normal" selected>Vừa — cân bằng</option><option value="hard">Khó — quái nhanh</option><option value="superfast">🚀 Siêu nhanh — quái dồn dập, điểm ×2</option></select>
+        </label>
+        <label class="check-row"><input type="checkbox" id="typingAccentAssist"> Hỗ trợ tiếng Việt không dấu <small>(tắt mặc định để luyện dấu tốt hơn)</small></label>
+
+        <div class="typing-launch">
+          <button class="btn big green" id="typingCampaignBtn" onclick="startTypingCampaign()">⚔️ VÀO CHẶNG 1</button>
+          <button class="btn" onclick="startTypingRun()">🎯 LUYỆN TỰ DO — 3 đợt, không tính chặng</button>
+          <button class="btn typing-reset-btn" id="typingResetCampaignBtn" type="button" onclick="resetTypingCampaign()">↩️ RESET TIẾN ĐỘ 10 CHẶNG</button>
+        </div>
+        <p class="typing-campaign-status" id="typingCampaignStatus" aria-live="polite">Reset chỉ khóa lại các chặng; kỷ lục điểm, WPM, combo và tổng sao vẫn được giữ.</p>
+          </div>
+          <div class="setup-col">
+        <h3 class="maplbl">🏰 CHIẾN DỊCH 10 CHẶNG — mỗi chặng thêm đợt quái, thêm từ và khó dần</h3>
+        <div class="map typing-map" id="typingMap"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="typing-play" id="typingPlay" hidden>
+        <div class="typing-hud">
+          <span id="typingStagePill" hidden>🏰 Chặng <b id="typingStage">1/10</b></span><span>❤️ <b id="typingLives">3</b></span><span>🏆 <b id="typingScore">0</b></span><span>🔥 <b id="typingCombo">0</b></span><span>⌨️ <b id="typingWpm">0</b> WPM</span><span>🌊 Đợt <b id="typingWave">1</b>/<b id="typingWaveTotal">3</b></span>
+        </div>
+        <div class="typing-battlefield" id="typingField" aria-label="Quái vật mang từ đang tiến về cổng">
+          <div class="typing-gate"><span data-art="tplHero"></span><i></i></div>
+          <div class="lane-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="typing-monsters" id="typingMonsters"></div>
+          <div class="wave-banner" id="typingWaveBanner"></div>
+        </div>
+        <div class="learn-toast" id="typingLearnToast" aria-live="polite"></div>
+        <form class="typing-input-wrap" onsubmit="submitTypingBuffer(event)">
+          <label for="typingInput">Gõ đúng từ trên quái vật</label>
+          <input id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Bắt đầu gõ để khóa mục tiêu…">
+          <button type="submit">⚡ ĐÁNH</button>
+        </form>
+        <p class="typing-tip" id="typingTip">Gõ chữ đầu để khóa mục tiêu. Gõ đủ từ sẽ tự động tung phép.</p>
+      </section>
+
+      <section class="game-result" id="typingResult" hidden aria-live="polite">
+        <div class="result-icon" id="typingResultIcon">🏆</div><h2 id="typingResultTitle">Hoàn thành!</h2><p id="typingResultText"></p>
+        <div class="result-stats" id="typingResultStats"></div>
+        <div class="result-actions"><button class="btn big green" id="typingNextStageBtn" hidden onclick="startTypingCampaign()">⚔️ Chặng tiếp theo</button><button class="btn green" id="typingRetryBtn" onclick="startTypingRun()">🔁 Chơi lại</button><button class="btn" onclick="openTypingGame()">🗺️ Chọn chặng</button><button class="btn" onclick="leaveTypingGame()">🏠 Trang chủ</button></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- SUDOKU THỬ THÁCH -->
+  <div class="screen learning-screen" id="sudokuGame">
+    <div class="card game-card sudoku-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveSudokuGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">LUYỆN SUY LUẬN LOGIC</span><h1>Sudoku Thử Thách</h1></div>
+        <button class="icon-btn" id="sudokuPauseBtn" onclick="toggleSudokuPause()" aria-label="Tạm dừng" disabled>⏸️</button>
+      </div>
+
+      <section class="sudoku-setup" id="sudokuSetup">
+        <div class="sudoku-hero" aria-hidden="true">🧩</div>
+        <h2>Chọn cấp độ của bạn</h2>
+        <p>Tất cả bàn đều có đúng một nghiệm. Cấp càng cao thì càng ít ô mở sẵn và ít gợi ý hơn.</p>
+        <div class="sudoku-level-grid">
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="beginner">
+            <span><i>🌱</i><b>Làm quen</b><small>50 ô mở · 5 gợi ý</small><em id="sudokuBest-beginner">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="easy">
+            <span><i>🙂</i><b>Dễ</b><small>42 ô mở · 4 gợi ý</small><em id="sudokuBest-easy">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="medium" checked>
+            <span><i>🧠</i><b>Vừa</b><small>36 ô mở · 3 gợi ý</small><em id="sudokuBest-medium">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="hard">
+            <span><i>🔥</i><b>Khó</b><small>28 ô mở · 2 gợi ý</small><em id="sudokuBest-hard">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card">
+            <input type="radio" name="sudokuDifficulty" value="expert">
+            <span><i>💎</i><b>Chuyên gia</b><small>23 ô mở · 1 gợi ý</small><em id="sudokuBest-expert">Chưa có kỷ lục</em></span>
+          </label>
+          <label class="sudoku-level-card ultimate">
+            <input type="radio" name="sudokuDifficulty" value="ultimate">
+            <span><i>👑</i><b>Tối thượng</b><small>Chỉ 17 ô · không gợi ý</small><em id="sudokuBest-ultimate">Chưa có kỷ lục</em></span>
+          </label>
+        </div>
+        <div class="sudoku-setup-footer">
+          <span>🏆 Đã thắng <b id="sudokuTotalWins">0</b> ván</span>
+          <button class="btn big green" type="button" onclick="startSudoku()">🧩 BẮT ĐẦU SUDOKU</button>
+        </div>
+      </section>
+
+      <section class="sudoku-play" id="sudokuPlay" hidden>
+        <div class="sudoku-hud">
+          <span id="sudokuLevel">🧠 Vừa</span>
+          <span>⏱️ <b id="sudokuTime">00:00</b></span>
+          <span>🔢 <b id="sudokuClues">36</b> ô mở</span>
+          <span>💡 <b id="sudokuHints">3</b> gợi ý</span>
+          <span>🔎 <b id="sudokuChecks">0</b> lần kiểm tra</span>
+        </div>
+        <div class="sudoku-layout">
+          <div class="sudoku-board-column">
+            <div class="sudoku-board-wrap">
+              <div class="sudoku-board" id="sudokuBoard" role="grid" aria-label="Bàn Sudoku 9 hàng 9 cột"></div>
+              <div class="sudoku-pause-overlay" id="sudokuPauseOverlay" hidden>
+                <span>⏸️</span><b>ĐÃ TẠM DỪNG</b>
+                <button class="btn green" type="button" onclick="toggleSudokuPause()">▶️ Tiếp tục</button>
+              </div>
+            </div>
+            <div class="sudoku-feedback" id="sudokuFeedback" aria-live="polite">Chọn một ô rồi điền số.</div>
+          </div>
+
+          <aside class="sudoku-controls" aria-label="Bộ điều khiển Sudoku">
+            <div class="sudoku-number-pad" aria-label="Chọn số">
+              <button type="button" onclick="sudokuInput(1)" aria-label="Điền số 1">1</button>
+              <button type="button" onclick="sudokuInput(2)" aria-label="Điền số 2">2</button>
+              <button type="button" onclick="sudokuInput(3)" aria-label="Điền số 3">3</button>
+              <button type="button" onclick="sudokuInput(4)" aria-label="Điền số 4">4</button>
+              <button type="button" onclick="sudokuInput(5)" aria-label="Điền số 5">5</button>
+              <button type="button" onclick="sudokuInput(6)" aria-label="Điền số 6">6</button>
+              <button type="button" onclick="sudokuInput(7)" aria-label="Điền số 7">7</button>
+              <button type="button" onclick="sudokuInput(8)" aria-label="Điền số 8">8</button>
+              <button type="button" onclick="sudokuInput(9)" aria-label="Điền số 9">9</button>
+              <button class="erase" type="button" onclick="eraseSudokuCell()" aria-label="Xoá ô">⌫</button>
+            </div>
+            <div class="sudoku-tool-grid">
+              <button id="sudokuNoteBtn" type="button" onclick="toggleSudokuNotes()" aria-pressed="false">✏️ Ghi chú: TẮT</button>
+              <button id="sudokuHintBtn" type="button" onclick="useSudokuHint()">💡 Gợi ý (3)</button>
+              <button class="check" type="button" onclick="checkSudoku()">✅ Kiểm tra bàn</button>
+              <button type="button" onclick="restartSudoku()">↩️ Chơi lại bàn</button>
+              <button type="button" onclick="newSudoku()">🔀 Bàn mới</button>
+              <button type="button" onclick="chooseSudokuLevel()">🎚️ Đổi cấp độ</button>
+            </div>
+            <p class="sudoku-shortcuts"><b>Phím tắt:</b> 1–9 điền số · N ghi chú · H gợi ý · phím mũi tên di chuyển · Delete xoá · Esc tạm dừng.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="game-result sudoku-result" id="sudokuResult" hidden aria-live="polite">
+        <div class="result-icon" id="sudokuResultIcon">🏆</div>
+        <h2 id="sudokuResultTitle">Hoàn thành Sudoku!</h2>
+        <p id="sudokuResultText"></p>
+        <div class="result-stats" id="sudokuResultStats"></div>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="newSudoku()">🔀 Bàn mới cùng cấp</button>
+          <button class="btn" type="button" onclick="chooseSudokuLevel()">🎚️ Chọn cấp độ</button>
+          <button class="btn" type="button" onclick="leaveSudokuGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ĐẤU ĐỐI KHÁNG (2 người) -->
+  <div class="screen learning-screen" id="duelGame">
+    <div class="card game-card duel-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveDuelGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">2 NGƯỜI CHƠI CÙNG MÁY</span><h1>Đấu Đối Kháng</h1></div>
+      </div>
+
+      <section class="duel-setup" id="duelSetup">
+        <p class="sub">Mỗi người thay phiên trả lời câu hỏi để tung chưởng — ai hết máu trước sẽ thua!</p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName1">Tên người chơi 1</label>
+            <input id="duelName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+            <label class="sr-only" for="duelSkill1">Kỹ năng người chơi 1</label>
+            <select id="duelSkill1" class="duel-skill">
+              <option value="drain" selected>🩸 Hút máu — hồi nửa sát thương</option>
+              <option value="heal">💚 Hồi máu — mỗi câu đúng +10 máu</option>
+              <option value="armor">🛡️ Giáp — chịu ít hơn 30% sát thương</option>
+              <option value="rage">😡 Cuồng nộ — càng combo càng mạnh</option>
+            </select>
+          </div>
+          <div class="duel-vs" aria-hidden="true">⚔️</div>
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="duelSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleDuelSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="duelName2">Tên người chơi 2</label>
+            <input id="duelName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+            <label class="sr-only" for="duelSkill2">Kỹ năng người chơi 2</label>
+            <select id="duelSkill2" class="duel-skill">
+              <option value="drain">🩸 Hút máu — hồi nửa sát thương</option>
+              <option value="heal">💚 Hồi máu — mỗi câu đúng +10 máu</option>
+              <option value="armor" selected>🛡️ Giáp — chịu ít hơn 30% sát thương</option>
+              <option value="rage">😡 Cuồng nộ — càng combo càng mạnh</option>
+            </select>
+          </div>
+        </div>
+        <p class="duel-rule-hint">⚡ Trả lời đúng <b>3 câu liên tiếp</b> thì đòn kế tiếp thành <b>CHÍ MẠNG ×2</b>. Trả lời sai sẽ mất combo!</p>
+        <label class="select-row">Độ khó câu hỏi
+          <select id="duelTier">
+            <option value="1">⭐ Khởi Động</option>
+            <option value="2" selected>⭐⭐ Thử Thách</option>
+            <option value="3">⭐⭐⭐ Cao Thủ</option>
+            <option value="4">⭐⭐⭐⭐ Huyền Thoại</option>
+            <option value="5">⭐⭐⭐⭐⭐ Bậc Thầy</option>
+          </select>
+        </label>
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startDuel()">⚔️ BẮT ĐẦU ĐẤU!</button></div>
+      </section>
+
+      <section class="duel-play" id="duelPlay" hidden>
+        <!-- LỖI THẬT: xếp đấu trường + câu hỏi + 4 đáp án CHỒNG DỌC một cột từng
+             khiến nút đáp án cuối trôi xuống DƯỚI mép 768px — bấm thật (toạ độ)
+             trúng khoảng trống ngoài viewport, document.elementFromPoint trả về
+             null. Màn Đấu Toán gốc tránh đúng lỗi này bằng .battlegrid 2 cột
+             (đấu trường trái, câu hỏi phải) ở màn ≥900px — dùng lại nguyên khuôn
+             đó thay vì tự nghĩ cách xếp dọc mới. -->
+        <div class="battlegrid">
+          <div class="colL">
+            <div class="arena" id="duelArena">
+              <div class="ground"></div>
+              <div class="hprow">
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName1"></span><span class="duel-skill-badge" id="duelSkillBadge1"></span><span class="duel-combo" id="duelCombo1"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost1"></i><div class="hpfill" id="duelHp1" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt1">100</div>
+                </div>
+                <div class="hpwrap">
+                  <div class="hpname"><span id="duelHpName2"></span><span class="duel-skill-badge" id="duelSkillBadge2"></span><span class="duel-combo" id="duelCombo2"></span></div>
+                  <div class="hpbar"><i class="hpghost" id="duelHpGhost2"></i><div class="hpfill" id="duelHp2" style="width:100%"></div></div>
+                  <div class="hptext" id="duelHpTxt2">100</div>
+                </div>
+              </div>
+              <div class="fighter" id="duelP1Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+                </div>
+              </div>
+              <div class="fighter" id="duelP2Box">
+                <div style="position:relative;display:inline-block">
+                  <div class="shadowPad"></div>
+                  <svg class="sprite" id="duelSprite2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+                </div>
+              </div>
+            </div>
+            <p class="duel-turn" id="duelTurnTxt" aria-live="polite"></p>
+          </div>
+          <div class="colR">
+            <div class="qbox" id="duelQbox">
+              <div class="qtext" id="duelQuestionTxt"></div>
+            </div>
+            <div class="answers" id="duelAnswers"></div>
+            <div class="feedback" id="duelFeedback" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-result duel-result" id="duelResult" hidden aria-live="polite">
+        <div class="result-icon" id="duelResultIcon">🏆</div>
+        <h2 id="duelResultTitle"></h2>
+        <p id="duelResultText"></p>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchDuel()">🔁 Đấu lại</button>
+          <button class="btn" type="button" onclick="leaveDuelGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- NIM MISÈRE (2 người) -->
+  <div class="screen learning-screen" id="nimGame">
+    <div class="card game-card nim-card">
+      <div class="game-topbar">
+        <button class="icon-btn home-btn" onclick="leaveNimGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
+        <div><span class="eyebrow">2 NGƯỜI CHƠI CÙNG MÁY</span><h1>Nim Misère</h1></div>
+      </div>
+
+      <section class="nim-setup" id="nimSetup">
+        <p class="sub">⚠️ Luật NGƯỢC với Nim thường: <b>ai bốc viên sỏi cuối cùng sẽ THUA!</b></p>
+        <div class="duel-setup-grid">
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(1,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName1">Tên người chơi 1</label>
+            <input id="nimName1" maxlength="16" placeholder="Người chơi 1" autocomplete="off">
+          </div>
+          <div class="duel-vs" aria-hidden="true">🪨</div>
+          <div class="duel-player-card">
+            <svg class="sprite duel-skin-preview" id="nimSkinPreview2" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 2" data-art="tplBeast"></svg>
+            <div class="duel-skin-row">
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,-1)" aria-label="Đổi nhân vật trước">◀</button>
+              <span>Tuỳ chỉnh nhân vật</span>
+              <button type="button" class="icon-btn" onclick="cycleNimSkin(2,1)" aria-label="Đổi nhân vật sau">▶</button>
+            </div>
+            <label class="sr-only" for="nimName2">Tên người chơi 2</label>
+            <input id="nimName2" maxlength="16" placeholder="Người chơi 2" autocomplete="off">
+          </div>
+        </div>
+        <label class="select-row">Kích thước ván
+          <select id="nimPreset">
+            <option value="small" selected>Kinh điển — 3 hàng (3-5-7 viên)</option>
+            <option value="medium">Vừa — 4 hàng (3-5-7-9 viên)</option>
+            <option value="large">Lớn — 5 hàng (3-5-7-9-11 viên)</option>
+          </select>
+        </label>
+        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>
+      </section>
+
+      <section class="nim-play" id="nimPlay" hidden>
+        <p class="nim-warning">⚠️ Ai bốc viên sỏi cuối cùng sẽ THUA!</p>
+        <p class="duel-turn" id="nimTurnTxt" aria-live="polite"></p>
+        <div class="nim-board" id="nimBoard"></div>
+        <p class="nim-feedback" id="nimFeedback" aria-live="polite"></p>
+      </section>
+
+      <section class="game-result nim-result" id="nimResult" hidden aria-live="polite">
+        <div class="result-icon" id="nimResultIcon">🏆</div>
+        <h2 id="nimResultTitle"></h2>
+        <p id="nimResultText"></p>
+        <div class="result-actions">
+          <button class="btn big green" type="button" onclick="rematchNim()">🔁 Chơi lại</button>
+          <button class="btn" type="button" onclick="leaveNimGame()">🏠 Trang chủ</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<div class="modal" id="restartModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" aria-hidden="true">
+  <div class="modalbox" tabindex="-1">
+    <div style="font-size:54px">⏸️</div>
+    <h1 id="pauseTitle" style="font-size:26px">TẠM DỪNG</h1>
+    <p class="sub" id="pauseInfo">Đồng hồ đã dừng — em cứ nghỉ thoải mái nhé!</p>
+    <div style="display:grid;gap:10px;margin-top:16px">
+      <button class="btn big green" onclick="closeRestart()">▶️ TIẾP TỤC CHƠI</button>
+      <button class="btn big" onclick="doRestart()">🔄 CHƠI LẠI TỪ ĐẦU</button>
+      <button class="btn big" onclick="goHomeFromPause()">🏠 VỀ TRANG CHỦ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" aria-hidden="true">
+  <div class="modalbox info-modalbox" tabindex="-1">
+    <button class="modal-close" onclick="closeInfoModal()" aria-label="Đóng">✕</button>
+    <h1 id="infoModalTitle" class="info-title">💛 Ủng hộ &amp; Góp ý</h1>
+    <p class="info-subtitle">Vài cách nhỏ để ủng hộ hoặc góp ý cho Đấu Trường Tư Duy — không cái nào bắt buộc để chơi game.</p>
+
+    <div class="info-sections">
+      <section class="info-section">
+        <h2>☕ Ủng hộ dự án</h2>
+        <p>Nếu Đấu Trường Tư Duy giúp ích cho con em bạn, một tách cà phê nhỏ sẽ tiếp thêm động lực để mình làm thêm nội dung mới. Quét mã QR bên dưới nếu muốn ủng hộ — hoàn toàn tuỳ tâm.</p>
+        <img class="info-qr" src="assets/images/donate-qr.jpg" alt="Mã QR ủng hộ cho Châu Vinh" loading="lazy" width="220" height="360">
+      </section>
+
+      <section class="info-section">
+        <h2>✉️ Góp ý cho phụ huynh &amp; học sinh</h2>
+        <p>Phát hiện lỗi, câu hỏi sai, hoặc muốn đề xuất tính năng mới? Gửi email trực tiếp:</p>
+        <a class="info-link" href="mailto:chauvinhtth13@gmail.com"><span class="info-link-icon">✉️</span><span>chauvinhtth13@gmail.com</span></a>
+      </section>
+
+      <section class="info-section">
+        <h2>💻 Mã nguồn mở</h2>
+        <p>Toàn bộ mã nguồn được công khai — xem, tải về hoặc đóng góp trên GitHub:</p>
+        <a class="info-link" href="https://github.com/chauvinhtth13/type2solve" target="_blank" rel="noopener"><span class="info-link-icon">💻</span><span>github.com/chauvinhtth13/type2solve</span></a>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

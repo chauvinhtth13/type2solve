@@ -275,104 +275,137 @@
   .btn.green{background:var(--green)}
 
   /* =====================================================
-     TRANG CHỦ — LƯỚI BENTO
-     Ô lớn = việc chính (Phiêu lưu), ô nhỏ = việc phụ.
-     Dùng CONTAINER QUERY: các ô xếp theo bề rộng của THẺ chứa chúng chứ
-     không theo bề rộng cửa sổ, nên thẻ nằm ở đâu cũng tự xếp đúng.
-     .modes/.learning-modes để display:contents để con của chúng tham gia
-     thẳng vào lưới bento thay vì sinh ra một lưới lồng nhau.
+     SẢNH GAME — một khung tổng quan và ba phân khu có thứ bậc rõ ràng.
+     Chỉ dùng HTML/CSS sẵn có, không thêm thư viện hay lớp lưới lồng nhau.
   ===================================================== */
+
   .home-card{container-type:inline-size;container-name:home;text-align:left;
-    display:flex;flex-direction:column}
-  /* Lưới bento giãn lấp đầy chiều cao thẻ. Nếu không, các hàng chỉ cao bằng nội dung
-     và để thừa ~200px trống dưới đáy — đúng thứ cần loại bỏ. Hai hàng nút chơi ăn
-     phần dư (1fr), hero và dòng ghi công giữ nguyên cỡ (auto). */
-  .home-bento{flex:1;min-height:0}
-  .home-bento{display:grid;gap:var(--gap);grid-template-areas:
-      "hero" "stats" "adv" "blitz" "surv" "typing" "sudoku" "more" "credit"}
-  .modes,.learning-modes{display:contents}
-  .tile-hero{grid-area:hero}
-  .tile-stats{grid-area:stats}
-  .mode.adv{grid-area:adv}
-  .mode.blitz{grid-area:blitz}
-  .mode.surv{grid-area:surv}
-  .typing-mode{grid-area:typing}
-  .sudoku-mode{grid-area:sudoku}
-  /* Hàng "sinh động" phụ (Đấu Đối Kháng/Nim) — cao auto, KHÔNG phải 1fr, để không
-     tranh chỗ với 3 hàng chế độ chính đã cân chiều cao vừa khít khung màn hình. */
-  .tile-more{grid-area:more;display:flex;gap:var(--gap)}
-  .tile-more>.tile{flex:1;min-width:0}
-  .tile-credit{grid-area:credit}
-
-  @container home (width >= 640px){
-    .home-bento{grid-template-columns:1fr 1fr;
-      grid-template-rows:auto repeat(3,minmax(0,1fr)) auto auto;
-      grid-template-areas:
-        "hero   stats"
-        "adv    blitz"
-        "adv    surv"
-        "typing sudoku"
-        "more   more"
-        "credit credit"}
-  }
-  @container home (width >= 1000px){
-    .home-bento{grid-template-columns:1.15fr 1fr 1fr;
-      grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) auto auto;
-      grid-template-areas:
-        "hero   hero   stats"
-        "adv    blitz  surv"
-        "adv    typing sudoku"
-        "more   more   more"
-        "credit credit credit"}
-  }
-
-  /* --- Ô bento dùng chung: viền dày + bóng cứng, giữ đúng chất arcade --- */
-  .tile{
-    border:var(--bd-3) solid var(--ink);border-radius:var(--r-3);background:#fff;color:var(--ink);
-    padding:clamp(14px,1.3vw,22px);box-shadow:var(--elev-3);
-    display:flex;flex-direction:column;gap:5px;text-align:left;font:inherit;
-    transition:transform var(--dur-2) var(--ease-pop),box-shadow var(--dur-2) var(--ease-settle);
-  }
-  button.tile{cursor:pointer}
-  button.tile:hover{transform:translateY(-4px);box-shadow:var(--elev-lift)}
-  button.tile:active{transform:translateY(3px);box-shadow:var(--sh-1) var(--ink)}
-
-  /* --- Ô tiêu đề --- */
-  .tile-hero{position:relative;justify-content:center;gap:2px;background:linear-gradient(135deg,#fff,#f4f0ff)}
-  .tile-hero .big-emoji{font-size:clamp(48px,4.4vw,78px);margin:0}
-  .tile-hero h1{margin-top:2px;text-wrap:balance}
-  .tile-hero .sub{margin-top:6px;text-wrap:pretty}
-  .tile-sound{
-    position:absolute;top:12px;right:12px;width:44px;height:44px;display:grid;place-items:center;
-    border:var(--bd-2) solid var(--ink);border-radius:var(--r-2);background:var(--gold);color:var(--ink);
-    font-size:20px;cursor:pointer;box-shadow:var(--sh-1) var(--ink);
-  }
-  .tile-sound:active{transform:translateY(2px);box-shadow:var(--sh-1) var(--ink)}
+    display:flex;flex-direction:column;padding:clamp(14px,1.3vw,22px);background:#f7f3e9}
+  .home-hub{display:flex;flex-direction:column;gap:clamp(14px,1.35vw,20px);margin:auto 0}
+  .home-overview{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(290px,.75fr);gap:var(--gap)}
+  .home-masthead{position:relative;min-height:190px;display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,.42fr);
+    align-items:center;overflow:hidden;padding:clamp(24px,2.4vw,38px);border-radius:var(--r-3);
+    background:#20264d;color:#fff;box-shadow:0 14px 30px -18px #111936}
+  .home-masthead::before{content:'';position:absolute;inset:0;opacity:.18;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);
+    background-size:34px 34px;mask-image:linear-gradient(90deg,#000,transparent 78%)}
+  .masthead-copy{position:relative;z-index:1;min-width:0}
+  .home-kicker,.zone-kicker,.mode-label{font:900 12px/1 var(--font-body);letter-spacing:.15em}
+  .home-kicker{display:inline-block;margin-bottom:10px;color:#8ee3bd}
+  #home .home-masthead h1{margin:0;color:#fff;font:800 clamp(36px,3.4vw,58px)/.82 var(--font-display);letter-spacing:-.045em}
+  #home .home-masthead .hl{color:#ffce57}
+  #home .home-masthead .sub{max-width:52ch;margin:14px 0 0;color:#d8dcf0;font-size:clamp(14px,.9vw,16px);font-weight:700;line-height:1.45}
+  .hero-orbit{position:relative;z-index:1;width:150px;height:150px;display:grid;place-items:center;justify-self:center}
+  .hero-orbit::before{content:'';position:absolute;inset:25px;border-radius:50%;background:#ffce57;box-shadow:0 0 0 12px rgba(255,206,87,.08)}
+  .hero-orbit .big-emoji{position:relative;margin:0;font-size:64px;line-height:1;filter:drop-shadow(0 7px 0 rgba(32,38,77,.24))}
+  .orbit-line{position:absolute;inset:8px;border:1px solid rgba(255,255,255,.34);border-radius:50%;animation:orbitSpin 12s linear infinite}
+  .orbit-line::before{content:'';position:absolute;top:10px;left:21px;width:9px;height:9px;border-radius:50%;background:#8ee3bd;box-shadow:0 0 12px #8ee3bd}
+  .orbit-line-two{inset:0 22px;animation-direction:reverse;animation-duration:9s;transform:rotate(62deg)}
+  .orbit-line-two::before{background:#ff8e9e;box-shadow:0 0 12px #ff8e9e}
+  @keyframes orbitSpin{to{transform:rotate(1turn)}}
+  .tile-sound{position:absolute;z-index:3;top:14px;right:14px;width:42px;height:42px;display:grid;place-items:center;
+    border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(255,255,255,.1);color:#fff;
+    font-size:18px;cursor:pointer;box-shadow:none;backdrop-filter:blur(8px);transition:background var(--dur-2),transform var(--dur-1)}
+  .tile-sound:hover{background:rgba(255,255,255,.2)}
+  .tile-sound:active{transform:scale(.94)}
   .tile-sound.muted{opacity:.55}
 
-  /* --- Ô chế độ chơi --- */
-  .mode .mi{font-size:clamp(30px,2.4vw,46px);line-height:1}
-  .mode b{font-family:var(--font-display);
-    font-size:clamp(16px,1.2vw,23px);color:var(--ink);line-height:1.15;text-wrap:balance}
-  .tile-desc{font-size:clamp(14px,.8vw,16px);font-weight:700;color:var(--ink-2);line-height:1.4;text-wrap:pretty}
-  .mode.adv{background:var(--green)}
-  .mode.blitz{background:var(--gold)}
-  .mode.surv{background:#c9b6ff}
+  #home .tile-stats{display:flex;flex-direction:column;gap:13px;padding:20px;border:1px solid #ddd7ca;
+    border-radius:var(--r-3);background:#fff;box-shadow:0 12px 24px -20px #20264d}
+  .stats-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #home .tile-stats .eyebrow{color:#5f6180;font-size:12px}
+  .live-dot{display:flex;align-items:center;gap:6px;color:#34705a;font-size:12px;font-weight:900}
+  .live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:#43b986;box-shadow:0 0 0 4px #e0f4eb}
+  #home .profile-strip{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  #home .profile-strip span{display:flex;flex-direction:column;justify-content:flex-end;gap:5px;padding:12px 8px;
+    border:0;border-left:1px solid #e9e4db;border-radius:0;background:transparent}
+  #home .profile-strip span:first-child{border-left:0}
+  #home .profile-strip b{color:#20264d;font:800 clamp(25px,2vw,34px)/1 var(--font-display)}
+  #home .profile-strip small{color:#77758b;font-size:12px}
 
-  /* --- Ô chủ lực cao gấp đôi nên được thêm thanh tiến độ cho xứng chỗ --- */
-  .tile-flagship{justify-content:space-between;gap:8px}
-  .tile-flagship .mi{font-size:clamp(38px,3.4vw,64px)}
-  .tile-flagship b{font-size:clamp(19px,1.7vw,32px)}
-  .tile-cta{margin-top:auto;font-family:var(--font-display);font-weight:800;font-size:clamp(14.5px,.9vw,17px);color:var(--ink)}
-  button.tile:hover .tile-cta span{transform:translateX(3px)}
-  .tile-cta span{display:inline-block;transition:transform var(--dur-2) var(--ease-pop)}
-  .tile-progress{display:block;font-size:clamp(14px,.78vw,15px);font-weight:900;color:var(--ink)}
-  .tile-progress i{display:block;height:9px;margin-top:5px;border:var(--bd-1) solid var(--ink);border-radius:var(--r-pill);background:rgba(255,255,255,.75);overflow:hidden;font-style:normal}
-  .tile-progress i::before{content:'';display:block;height:100%;width:var(--done,0%);background:var(--ink);border-radius:var(--r-pill)}
+  .home-zone{display:grid;grid-template-columns:minmax(150px,.18fr) minmax(0,1fr);gap:clamp(16px,2vw,28px);
+    padding-top:clamp(14px,1.3vw,19px);border-top:1px solid #d8d2c6}
+  .zone-heading{display:flex;align-items:flex-start;gap:12px;padding-top:3px}
+  .zone-index{display:grid;place-items:center;width:36px;height:36px;flex:0 0 auto;border:1px solid #cbc4b8;border-radius:50%;
+    color:#77758b;font:900 12px var(--font-body)}
+  .zone-kicker{display:block;margin-bottom:4px;color:#858092;font-size:10px}
+  #home .zone-heading h2{font:800 clamp(17px,1.25vw,22px)/1.1 var(--font-display);letter-spacing:-.015em}
+  #home .modes{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,1fr);gap:12px}
+  #home .quick-modes{display:grid;grid-template-rows:1fr 1fr;gap:12px}
+  #home .tile{position:relative;min-width:0;border:1px solid #d9d3c8;border-radius:18px;background:#fff;color:#20264d;
+    box-shadow:0 10px 24px -20px #20264d;text-align:left;font:inherit;cursor:pointer;
+    transition:transform var(--dur-2) var(--ease-settle),border-color var(--dur-2),box-shadow var(--dur-2)}
+  #home button.tile:hover{transform:translateY(-3px);border-color:#aaa4bd;box-shadow:0 17px 30px -22px #20264d}
+  #home button.tile:active{transform:translateY(0) scale(.99);box-shadow:none}
+  #home .mode{display:grid;gap:12px;padding:16px 18px}
+  #home .mode b{display:block;color:inherit;font:800 clamp(17px,1.25vw,22px)/1.05 var(--font-display);text-wrap:balance}
+  #home .tile-desc{display:block;margin-top:5px;color:#68677a;font-size:13px;font-weight:700;line-height:1.4}
+  #home .tile-flagship{min-height:174px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:9px 18px;
+    padding:19px 21px;border:0;background:#20264d;color:#fff;overflow:hidden}
+  #home .tile-flagship::after{content:'';position:absolute;width:150px;height:150px;right:-50px;bottom:-68px;border:28px solid rgba(142,227,189,.14);border-radius:50%}
+  #home .mode-topline{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+  #home .mode-label{color:#8ee3bd;font-size:10px}
+  #home .tile-flagship .mi{margin:0;font-size:30px;filter:none}
+  #home .mode-copy{align-self:center;position:relative;z-index:1}
+  #home .tile-flagship b{color:#fff;font-size:clamp(24px,2vw,34px);letter-spacing:-.02em}
+  #home .tile-flagship .tile-desc{max-width:48ch;color:#cfd3e7}
+  #home .mode-bottom{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(150px,.55fr);align-items:end;gap:18px;position:relative;z-index:1}
+  #home .tile-cta{color:#ffce57;font:900 13px var(--font-body)}
+  #home button.tile:hover .tile-cta span,#home button.tile:hover .mode-arrow{transform:translateX(3px)}
+  #home .tile-cta span,.mode-arrow{display:inline-block;transition:transform var(--dur-2) var(--ease-pop)}
+  #home .tile-progress{display:block;color:#dfe2ef;font-size:11px;font-weight:900;text-align:right}
+  #home .tile-progress i{display:block;height:5px;margin-top:5px;border:0;border-radius:var(--r-pill);background:rgba(255,255,255,.2);overflow:hidden;font-style:normal}
+  #home .tile-progress i::before{content:'';display:block;height:100%;width:var(--done,0%);border-radius:inherit;background:#8ee3bd}
+  #home .quick-modes .mode{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;padding:14px 16px}
+  #home .quick-modes .mi{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:#fff2bd;font-size:24px}
+  #home .quick-modes .surv .mi{background:#ebe5ff;color:#5c4fa1;font:900 31px/1 var(--font-display)}
+  #home .quick-modes .mode b{display:inline;font-size:17px}
+  #home .mode-meta{margin-left:7px;color:#8a8390;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+  #home .quick-modes .tile-desc{margin-top:3px;font-size:12px}
+  #home .mode-arrow{justify-self:end;color:#8a8390;font-size:18px}
 
-  /* --- Ô tiến độ --- */
-  .tile-stats{gap:9px;background:linear-gradient(135deg,#f4f0ff,#fff)}
-  .tile-stats .profile-strip{flex:1;align-content:stretch}
+  #home .learning-modes,#home .tile-more{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #home .learning-mode{min-height:96px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;
+    padding:14px 16px;overflow:hidden;isolation:isolate}
+  #home .learning-mode::before{content:'';position:absolute;inset:0 auto 0 0;width:4px;background:#61c9d7;transform:none;transition:width var(--dur-2)}
+  #home .learning-mode:hover::before{width:7px;transform:none}
+  #home .sudoku-mode::before{background:#59b77c}
+  #home .duel-mode::before{background:#e57887}
+  #home .nim-mode::before{background:#d3a747}
+  #home .learning-mode.typing-mode,#home .learning-mode.sudoku-mode,#home .learning-mode.duel-mode,#home .learning-mode.nim-mode{background:#fff}
+  #home .world-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e5f7f8;font-size:27px;filter:none;animation:none}
+  #home .sudoku-mode .world-icon{background:#e9f7e9}
+  #home .duel-mode .world-icon{background:#fcebed}
+  #home .nim-mode .world-icon{background:#fbf1d9}
+  #home .learning-mode b{display:block;color:#20264d;font:800 clamp(16px,1.1vw,19px)/1.1 var(--font-display)}
+  #home .learning-mode small{display:block;max-width:52ch;margin-top:4px;color:#747184;font-size:12px;line-height:1.35;font-weight:700}
+  #home .world-tag{position:absolute;top:9px;right:12px;border:0;border-radius:0;padding:0;background:none;color:#8b8796;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+  #home .learning-mode>.mode-arrow{align-self:end;margin-bottom:3px}
+  #home .social-zone .learning-mode{min-height:76px}
+  #home .social-zone .world-icon{width:42px;height:42px;font-size:23px}
+  #home .social-zone .learning-mode small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  @container home (width < 900px){
+    .home-overview{grid-template-columns:1fr}.home-zone{grid-template-columns:1fr}.zone-heading{align-items:center}
+  }
+  @container home (width < 620px){
+    .home-masthead{grid-template-columns:1fr;min-height:250px}.hero-orbit{position:absolute;right:-18px;bottom:-28px;opacity:.72;transform:scale(.82)}
+    #home .home-masthead .sub{max-width:70%;margin-left:0}
+    #home .modes{grid-template-columns:1fr}#home .tile-flagship{min-height:190px}
+    #home .learning-modes,#home .tile-more{grid-template-columns:1fr}
+    #home .mode-bottom{grid-template-columns:1fr}#home .tile-progress{text-align:left}
+    #home .social-zone .learning-mode small{white-space:normal}
+  }
+  @media (min-width:900px) and (max-height:820px){
+    .home-card{padding:12px 16px}.home-hub{gap:9px}.home-masthead{min-height:150px;padding:18px 28px}
+    .hero-orbit{width:120px;height:120px}.hero-orbit .big-emoji{font-size:50px}
+    #home .home-masthead h1{font-size:clamp(32px,3vw,46px)}#home .home-masthead .sub{margin-top:9px}
+    .home-zone{padding-top:9px}.zone-index{width:32px;height:32px}
+    #home .tile-flagship{min-height:142px;padding:13px 18px}#home .tile-flagship b{font-size:25px}
+    #home .quick-modes .mode{padding:9px 14px}#home .quick-modes .mi{width:38px;height:38px}
+    #home .learning-mode{min-height:78px;padding:9px 14px}#home .social-zone .learning-mode{min-height:64px}
+    #home .world-icon{width:42px;height:42px;font-size:23px}.tile-credit{padding-block:4px}
+  }
 
 
   .maplbl{margin-top:clamp(14px,1.3vw,20px);font-family:var(--font-display);

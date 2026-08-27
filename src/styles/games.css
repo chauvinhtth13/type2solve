@@ -20,22 +20,6 @@
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 [tabindex]:focus-visible,summary:focus-visible{outline:4px solid #35d6ff;outline-offset:3px}
 
-.profile-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.profile-strip span{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:10px 11px;border:var(--bd-1) solid #c9baff;border-radius:var(--r-2);background:#fff}
-.profile-strip b{font:900 clamp(20px,1.7vw,30px)/1 var(--font-display);color:#4d426f;font-variant-numeric:tabular-nums}
-.profile-strip small{font-size:14px;font-weight:800;color:#6b6390;line-height:1.25}
-
-.learning-mode{position:relative;min-height:112px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:13px;border-radius:var(--r-3);overflow:hidden;isolation:isolate}
-.learning-mode::before{content:"";position:absolute;inset:-50%;z-index:-1;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.62),transparent 60%);transform:translateX(-55%) rotate(12deg);transition:transform var(--dur-4) var(--ease-settle)}
-.learning-mode:hover{filter:saturate(1.06)}
-.learning-mode:hover::before{transform:translateX(55%) rotate(12deg)}
-.learning-mode.typing-mode{background:linear-gradient(140deg,#bdf5ff,#e7fdff)}
-.learning-mode.sudoku-mode{background:linear-gradient(140deg,#d9ffd9,#f6ffe8)}
-.world-icon{font-size:clamp(38px,3vw,58px);filter:drop-shadow(0 5px 0 rgba(31,25,75,.13));animation:worldFloat 3s ease-in-out infinite}
-.learning-mode:nth-child(2) .world-icon{animation-delay:-1s}.learning-mode:nth-child(3) .world-icon{animation-delay:-2s}
-.learning-mode b{display:block;font:900 clamp(16px,1.15vw,22px)/1.1 var(--font-display)}
-.learning-mode small{display:block;margin-top:4px;color:#5f577d;font-size:clamp(14px,.76vw,15px);line-height:1.4;font-weight:800}
-.world-tag{position:absolute;right:8px;top:7px;border:var(--bd-1) solid rgba(43,35,80,.22);border-radius:var(--r-pill);padding:3px 9px;background:rgba(255,255,255,.72);font-size:14px;font-weight:900}
 @keyframes worldFloat{50%{transform:translateY(-7px) rotate(4deg)}}
 
 .answer-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:#645b82;font-size:14px;font-weight:900}
@@ -121,11 +105,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .typing-hud span,.sudoku-hud span{font-variant-numeric:tabular-nums}.result-actions{display:flex;justify-content:center;gap:10px}
 
 @media (max-width:900px){
-  .learning-mode{min-height:88px}.world-tag{position:static;justify-self:end}
   .typing-input-wrap{grid-template-columns:1fr auto}.typing-input-wrap label{grid-column:1/-1;text-align:center}.typing-gate{width:82px}.lane-lines{left:82px}
 }
 @media (max-width:580px){
-  .profile-strip{gap:6px}.profile-strip span{padding:8px 9px}.learning-mode{grid-template-columns:auto 1fr}.world-tag{display:none}.world-icon{font-size:40px}
+  #home .world-tag{display:none}
   .answer-toolbar{justify-content:center;flex-wrap:wrap}.answer-toolbar label,#answerModeHint{display:none}.answer-entry{grid-template-columns:1fr}.answer-submit{padding:9px}
   .game-card{width:100%;padding:13px;border-width:3px}.game-topbar{gap:8px}.game-topbar h1{font-size:22px}.icon-btn{width:40px;height:40px;font-size:19px}
   .option-grid{grid-template-columns:1fr}.select-row,.check-row{align-items:flex-start;flex-wrap:wrap}.typing-battlefield{height:460px}.typing-gate{width:62px}.typing-gate span{font-size:43px}.typing-gate i{width:55px;height:55px}.lane-lines{left:62px}.typing-monster{gap:3px}.typing-monster .monster-word{padding:6px 8px;font-size:15px}.typing-input-wrap{gap:5px}.typing-input-wrap input{padding:11px 9px;font-size:17px}.typing-input-wrap button{padding:8px}.result-stats{grid-template-columns:1fr 1fr}
@@ -392,8 +375,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
    Dùng chung khung setup/kết quả với Sudoku (.select-row/.game-result/.result-*),
    dùng chung .arena/.fighter/.hpbar với màn Đấu Toán (app.css) cho phần đấu.
 ===================================================== */
-.learning-mode.duel-mode{background:linear-gradient(140deg,#ffd3dc,#fff0f3)}
-.learning-mode.nim-mode{background:linear-gradient(140deg,#ffe6b8,#fffaf0)}
 
 /* LỖI THẬT: .card mặc định flex:1 để lấp đầy màn (đúng ý cho Đấu Toán/Sudoku, nơi
    nội dung con cũng giãn theo), nhưng nội dung setup/play của Duel & Nim CAO CỐ
