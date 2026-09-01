@@ -1,0 +1,20 @@
+<!-- ===== HẬU CẢNH DIORAMA ĐẲNG TRẮC (ISOMETRIC) ==============================
+     Vài khối nền trôi nổi vẽ bằng SVG thuần, phối cảnh trục đo (isometric):
+     một mặt trên phẳng + hai mặt bên đổ bóng, giống các "đảo trôi" HD-2D.
+     Đứng SAU #stars, KHÔNG che nội dung (pointer-events:none, z-index thấp
+     nhất) và tái tô màu theo data-theme để khớp với ánh sáng của sàn đấu. -->
+<div id="dioramaStage" class="diorama-stage" aria-hidden="true">
+  <svg class="diorama-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" focusable="false">
+    <defs>
+      <g id="isoBlock">
+        <path class="iso-top" d="M-120,0 L0,-60 L120,0 L0,60 Z" />
+        <path class="iso-right" d="M120,0 L0,60 L0,150 L120,90 Z" />
+        <path class="iso-left" d="M-120,0 L0,60 L0,150 L-120,90 Z" />
+      </g>
+    </defs>
+    <use href="#isoBlock" class="diorama-layer diorama-layer-far diorama-tint-magenta" transform="translate(230,540) scale(.62)" />
+    <use href="#isoBlock" class="diorama-layer diorama-layer-far diorama-tint-cool" transform="translate(1370,500) scale(.5)" />
+    <use href="#isoBlock" class="diorama-layer diorama-layer-mid diorama-tint-cool" transform="translate(1500,760) scale(.9)" />
+    <use href="#isoBlock" class="diorama-layer diorama-layer-near diorama-tint-warm" transform="translate(90,780) scale(1.15)" />
+  </svg>
+</div>

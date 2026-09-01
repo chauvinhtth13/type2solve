@@ -21,6 +21,17 @@
         <span class="badge type" id="typeBadge">🧮</span>
         <span class="streak" id="streakTxt"></span>
         <span class="crit" id="critTxt"></span>
+        <!-- Chọn cách trả lời là CÀI ĐẶT nên đứng cùng hàng với chuông/tạm dừng
+             /trang chủ, không chen giữa đề bài và các nút đáp án nữa. -->
+        <div class="answer-toolbar">
+          <label for="answerModeSelect">Cách trả lời</label>
+          <select id="answerModeSelect" onchange="setAnswerMode(this.value)" title="Áp dụng từ câu tiếp theo. Câu có đáp án bằng chữ luôn là trắc nghiệm.">
+            <option value="mixed">🔀 Luân phiên</option>
+            <option value="choice">🔘 Trắc nghiệm</option>
+            <option value="input">⌨️ Tự nhập kết quả</option>
+          </select>
+          <span id="answerModeHint">Câu đáp án bằng chữ luôn là trắc nghiệm</span>
+        </div>
       </div>
 
       <div class="battlegrid">
@@ -30,26 +41,36 @@
         <div class="hprow">
           <div class="hpwrap">
             <div class="hpname">🦸 Em</div>
-            <div class="hpbar"><div class="hpfill" id="heroHp" style="width:100%"></div></div>
+            <div class="hpbar"><i class="hpghost" id="heroHpGhost"></i><div class="hpfill" id="heroHp" style="width:100%"></div></div>
             <div class="hptext" id="heroHpTxt"></div>
           </div>
           <div class="hpwrap">
             <div class="hpname" id="bossName">👾 Boss</div>
-            <div class="hpbar"><div class="hpfill" id="bossHp" style="width:100%"></div></div>
+            <div class="hpbar"><i class="hpghost" id="bossHpGhost"></i><div class="hpfill" id="bossHp" style="width:100%"></div></div>
             <div class="hptext" id="bossHpTxt"></div>
           </div>
         </div>
         <div class="fighter" id="heroBox">
           <div style="position:relative;display:inline-block">
             <div class="aura" id="heroAura"></div>
-            <div class="shadowPad"></div>
+            <div class="fighter-dais hero-dais" aria-hidden="true">
+              <div class="dais-rune-ring"></div>
+              <div class="dais-top"></div>
+              <div class="dais-base"></div>
+              <div class="shadowPad"></div>
+            </div>
             <svg class="sprite" id="heroSprite" viewBox="0 0 120 120" role="img"
                  aria-label="Nhân vật của em" data-art="tplHero"></svg>
           </div>
         </div>
         <div class="fighter" id="bossBox">
           <div style="position:relative;display:inline-block">
-            <div class="shadowPad"></div>
+            <div class="fighter-dais boss-dais" aria-hidden="true">
+              <div class="dais-rune-ring"></div>
+              <div class="dais-top"></div>
+              <div class="dais-base"></div>
+              <div class="shadowPad"></div>
+            </div>
             <svg class="sprite" id="bossSprite" viewBox="0 0 120 120" role="img"
                  aria-label="Quái vật" data-art="tplBeast"></svg>
           </div><br>
@@ -77,15 +98,6 @@
         <div class="qsvg" id="questionSvg"></div>
       </div>
       <div class="thinkbar" id="thinkBar"><i></i></div>
-      <div class="answer-toolbar">
-        <label for="answerModeSelect">Cách trả lời</label>
-        <select id="answerModeSelect" onchange="setAnswerMode(this.value)" title="Áp dụng từ câu tiếp theo">
-          <option value="mixed">🔀 Luân phiên</option>
-          <option value="choice">🔘 Trắc nghiệm</option>
-          <option value="input">⌨️ Tự nhập kết quả</option>
-        </select>
-        <span id="answerModeHint">Áp dụng từ câu tiếp theo</span>
-      </div>
       <div class="answers" id="answers"></div>
       <form class="answer-entry" id="answerForm" onsubmit="submitTypedAnswer(event)" hidden>
         <label class="sr-only" for="answerInput">Nhập đáp án</label>
@@ -103,7 +115,9 @@
   <!-- THẮNG BOSS + CHỌN BẢO VẬT -->
   <div class="screen" id="bossWin">
     <div class="card">
-      <div class="big-emoji bounce">🎁</div>
+      <div class="result-badge-wrap">
+        <img src="assets/images/hd2d/chest_treasure.jpg" class="result-hd2d-badge" alt="Bảo vật chiến thắng">
+      </div>
       <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
       <p class="sub" id="bossWinSub"></p>
       <div class="stats">
@@ -118,7 +132,9 @@
   <!-- CỬA HÀNG -->
   <div class="screen" id="shop">
     <div class="card">
-      <div class="big-emoji bounce">🛒</div>
+      <div class="shop-banner-wrap">
+        <img src="assets/images/hd2d/shop_vault.jpg" class="shop-hd2d-banner" alt="Cửa hàng bảo vật">
+      </div>
       <h1>CỬA HÀNG VẬT PHẨM</h1>
       <p class="sub">Trả lời đúng để kiếm xu 💰 — mua vật phẩm để mạnh hơn!<br>
       Xu của em: <b id="shopCoins" style="font-size:22px;color:var(--gold-ink)">0 💰</b></p>
@@ -132,7 +148,9 @@
   <!-- KẾT QUẢ ĐẤU NHANH / SINH TỒN -->
   <div class="screen" id="scoreEnd">
     <div class="card">
-      <div class="big-emoji bounce" id="seEmoji">🏁</div>
+      <div class="result-badge-wrap">
+        <img src="assets/images/hd2d/ui_icon_trophy.jpg" class="result-hd2d-badge" id="seTrophy" alt="Huy hiệu xếp hạng">
+      </div>
       <h1 id="seTitle">HẾT GIỜ!</h1>
       <p class="sub" id="seRank"></p>
       <div class="stats">
@@ -151,7 +169,9 @@
   <!-- VÔ ĐỊCH -->
   <div class="screen" id="victory">
     <div class="card">
-      <div class="big-emoji bounce">🏆</div>
+      <div class="result-badge-wrap">
+        <img src="assets/images/hd2d/badge_victory.jpg" class="result-hd2d-badge" alt="Cúp Vô Địch Tư Duy">
+      </div>
       <h1>NHÀ VÔ ĐỊCH TƯ DUY!</h1>
       <p class="sub">Em đã chinh phục cả 10 boss của Đấu Trường Tư Duy! Quá đỉnh!</p>
       <div class="stats">
@@ -168,7 +188,9 @@
   <!-- THUA -->
   <div class="screen" id="defeat">
     <div class="card">
-      <div class="big-emoji">😵</div>
+      <div class="result-badge-wrap">
+        <img src="assets/images/hd2d/badge_defeat.jpg" class="result-hd2d-badge" alt="Luyện tập thêm">
+      </div>
       <h1>ÔI KHÔNG!</h1>
       <p class="sub">Câu đố tư duy khó mà! Thử lại là quen tay ngay! 💪</p>
       <div class="stats">

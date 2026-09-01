@@ -44,16 +44,14 @@
   const sessionWins = [0, 0];
   let startingPlayer = 0;    // đổi luân phiên mỗi ván để không ai giữ mãi lợi thế đi trước
 
-  /* BOSS_ART là `const` ở engine/art.js — const/let top-level KHÔNG gắn vào window,
-     phải đọc qua biến toàn cục thuần. */
   function skinAt(index) {
-    const arts = typeof BOSS_ART !== 'undefined' ? BOSS_ART : [];
-    return arts[skinIndex[index] % arts.length] || null;
+    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
+    return { spriteIndex: skinIndex[index] % count };
   }
 
   function paintSprite(el, index) {
     const art = skinAt(index);
-    if (el && art && typeof global.applySkin === 'function') global.applySkin(el, art);
+    if (el && typeof global.applySkin === 'function') global.applySkin(el, art);
   }
 
   function paintPreview(playerNumber) {
@@ -61,7 +59,7 @@
   }
 
   function cycleNimSkin(playerNumber, dir) {
-    const count = (typeof BOSS_ART !== 'undefined' ? BOSS_ART.length : 0) || 1;
+    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
     const i = playerNumber - 1;
     skinIndex[i] = (skinIndex[i] + dir + count) % count;
     paintPreview(playerNumber);

@@ -112,45 +112,13 @@
       { text: 'nuôi dưỡng trí tưởng tượng', meaning: 'Ý tưởng mới bắt đầu từ tò mò.', level: 3, topic: 'Sáng tạo' }
     ],
 
-    code: [
-      { text: 'console.log("Hello World");', meaning: 'In thông điệp ra console trong JS', level: 1, topic: 'JavaScript' },
-      { text: 'const wpm = 100;', meaning: 'Khai báo hằng số tốc độ gõ', level: 1, topic: 'JavaScript' },
-      { text: 'let score = 0;', meaning: 'Khai báo biến điểm số', level: 1, topic: 'JavaScript' },
-      { text: 'print("Hello Python")', meaning: 'In chuỗi ký tự trong Python', level: 1, topic: 'Python' },
-      { text: 'def solve():', meaning: 'Định nghĩa hàm trong Python', level: 1, topic: 'Python' },
-      { text: 'div.container { display: flex; }', meaning: 'Căn chỉnh bố cục Flexbox CSS', level: 1, topic: 'CSS' },
-      { text: 'color: #00ffcc;', meaning: 'Màu neon cyan trong CSS', level: 1, topic: 'CSS' },
-      { text: 'function checkWpm(speed) { return speed > 60; }', meaning: 'Hàm kiểm tra tốc độ gõ', level: 2, topic: 'JavaScript' },
-      { text: 'document.querySelector("#app").innerHTML = "Ready!";', meaning: 'Cập nhật nội dung HTML qua DOM', level: 2, topic: 'JavaScript' },
-      { text: 'numbers = [i for i in range(10)]', meaning: 'Tạo list comprehension trong Python', level: 2, topic: 'Python' },
-      { text: 'if __name__ == "__main__":', meaning: 'Khối thực thi chính trong Python', level: 2, topic: 'Python' },
-      { text: 'async function fetchData(url) { return await fetch(url); }', meaning: 'Gọi API bất đồng bộ với Async/Await', level: 3, topic: 'JavaScript' },
-      { text: 'const [state, setState] = useState(initialValue);', meaning: 'Hook lưu trữ trạng thái React JS', level: 3, topic: 'React' },
-      { text: 'import { useEffect, useCallback } from "react";', meaning: 'Import hooks quản lý side-effects', level: 3, topic: 'React' }
-    ],
-
-    riddle: [
-      { text: 'Cái gì càng rửa càng bẩn?', meaning: 'Đáp án: Nước', level: 1, topic: 'Đố mẹo' },
-      { text: 'Con gì có cánh mà không biết bay?', meaning: 'Đáp án: Con chim cánh cụt', level: 1, topic: 'Đố vui' },
-      { text: 'Nắng lửa mưa dầu tôi đâu có sợ', meaning: 'Đáp án: Cái ô / Cái dù', level: 1, topic: 'Đố dân gian' },
-      { text: 'Lịch nào dài nhất?', meaning: 'Đáp án: Lịch sử', level: 1, topic: 'Đố chữ' },
-      { text: 'Bệnh gì bác sĩ bó tay?', meaning: 'Đáp án: Bệnh gãy tay', level: 2, topic: 'Đố mẹo' },
-      { text: 'Cái gì không ăn được mà vẫn chín?', meaning: 'Đáp án: Quả trứng / Trứng chín (hoặc suy nghĩ chín)', level: 2, topic: 'Đố mẹo' },
-      { text: 'Quần rộng nhất là quần gì?', meaning: 'Đáp án: Quần đảo', level: 2, topic: 'Đố chữ' },
-      { text: 'Con đường ngắn nhất đến trái tim là gì?', meaning: 'Đáp án: Đường truyền Internet siêu tốc!', level: 3, topic: 'Đố vui modern' },
-      { text: 'Vật gì có mặt nhưng không có miệng?', meaning: 'Đáp án: Đồng hồ hoặc con tem', level: 3, topic: 'Đố dân gian' }
-    ],
-
-    science: [
-      { text: 'Trái Đất quay quanh Mặt Trời', meaning: 'Chu kỳ quỹ đạo 365,25 ngày', level: 1, topic: 'Thiên văn' },
-      { text: 'Nước sôi ở 100 độ C', meaning: 'Nhiệt độ sôi ở áp suất tiêu chuẩn', level: 1, topic: 'Vật lý' },
-      { text: 'Oxy duy trì sự sống', meaning: 'Khí chiếm 21% bầu khí quyển', level: 1, topic: 'Sinh học' },
-      { text: 'Ánh sáng truyền nhanh nhất', meaning: 'Tốc độ xấp xỉ 300.000 km/s', level: 2, topic: 'Vật lý' },
-      { text: 'Quang hợp tạo ra O2', meaning: 'Cây xanh hấp thụ CO2 và nhả Oxy', level: 2, topic: 'Sinh học' },
-      { text: 'Lực hấp dẫn của Trái Đất', meaning: 'Giữ bầu khí quyển và mọi vật trên mặt đất', level: 2, topic: 'Vật lý' },
-      { text: 'DNA chứa mã di truyền', meaning: 'Cấu trúc xoắn đôi mang thông tin di truyền', level: 3, topic: 'Sinh học' },
-      { text: 'Thần kinh trung ương', meaning: 'Gồm não bộ và tủy sống điều khiển hành vi', level: 3, topic: 'Y học' }
-    ],
+    /* CHỈ CÒN HAI CHỦ ĐỀ: `en` và `vi`.
+       Ba chủ đề cũ (code / riddle / science) đã bị gỡ vì chúng chưa từng chạy
+       được: `bosses` bên dưới chỉ có khoá `en` và `vi`, nên khi boss xuất hiện
+       thì freeBossData() đọc `bosses['code']` = undefined và ném TypeError giữa
+       ván. Kho lưu trữ (platform/storage.js) cũng chỉ nhận ['en','vi'] nên lựa
+       chọn của người chơi luôn bị trả về 'en' ở lần vào sau. Thêm chủ đề mới
+       phải kèm một bộ boss tương ứng trong `bosses`. */
 
     bosses: {
       en: {

@@ -139,21 +139,12 @@
     return '🐣 Tập Sự Phím Gõ';
   }
 
-  function toggleCrtFilter() {
-    document.body.classList.toggle('crt-active');
-    const active = document.body.classList.contains('crt-active');
-    const btn = byId('typingCrtBtn');
-    if (btn) btn.classList.toggle('active', active);
-    playSound('click');
-  }
-
   function copyShareCard() {
     if (!lastRunResult) return;
     const rankTitle = getRankTitle(lastRunResult.wpm);
-    const cardText = `🎮 TYPE2SOLVE: GÕ NHANH - GIẢI CHẤT 🚀\n`
+    const cardText = `⌨️ GÕ CHỮ DIỆT QUÁI — ĐẤU TRƯỜNG TƯ DUY\n`
       + `🏆 Điểm: ${lastRunResult.score} | ⌨️ WPM: ${lastRunResult.wpm} | 🎯 Độ chính xác: ${lastRunResult.accuracy}%\n`
-      + `🔥 Combo cao nhất: ${lastRunResult.combo} | 🧙‍♂️ Danh hiệu: ${rankTitle}\n`
-      + `✨ Thách đấu bàn phím & tư duy ngay tại Type2Solve!`;
+      + `🔥 Combo cao nhất: ${lastRunResult.combo} | 🧙‍♂️ Danh hiệu: ${rankTitle}`;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(cardText).then(() => {
@@ -672,9 +663,11 @@
     if (input) {
       input.value = '';
       input.disabled = false;
+      /* Giao diện luôn là tiếng Việt kể cả khi đang luyện từ tiếng Anh —
+         người chơi là học sinh Việt, chỉ có TỪ trên quái mới là tiếng Anh. */
       input.placeholder = options.lang === 'vi'
         ? 'Gõ đúng cả dấu và khoảng trắng…'
-        : 'Type the word to cast a spell…';
+        : 'Gõ đúng từ tiếng Anh trên quái…';
     }
     setSectionVisibility('typingSetup', true);
     setSectionVisibility('typingResult', true);
@@ -695,7 +688,7 @@
       ? (options.accentAssist
         ? 'Chế độ hỗ trợ đang bật: có thể gõ không dấu, nhưng gõ đủ dấu sẽ giúp em tiến bộ nhanh hơn!'
         : 'Gõ chữ đầu để khóa quái. Hãy gõ đúng cả dấu và khoảng trắng.')
-      : 'Type the first letter to lock a monster. Finish the word to cast automatically.');
+      : 'Gõ chữ cái đầu để khóa quái, gõ hết từ là tung chưởng ngay.');
     updateHud(true);
     updateMascotReaction('idle');
     beginWave(0);
@@ -841,38 +834,14 @@
      Trước đây `emoji` và `skin` bốc ngẫu nhiên ĐỘC LẬP nhau: một con dán nhãn 👻 mà
      hình lại là khối tím có sừng. Nay chỉ còn MỘT con số quyết định cả hai. */
   const BEAST_SKINS = [
-    { body:'#8d6bff', belly:'#e6dcff', horn:'#c3b0ff', horns:0, parts:['antennae'] },              // 👾
-    { body:'#bcd4e6', belly:'#f2f9ff', horn:'#dceaf5', horns:0, parts:['ghost'] },                 // 👻
-    { body:'#7ed07a', belly:'#e2f7dd', horn:'#b4e8ae', horns:1, parts:[] },                        // 🦠
-    { body:'#6f7fd6', belly:'#dfe4ff', horn:'#aab6ff', horns:0, parts:['antennae','plates'] },     // 🤖
-    { body:'#8fae72', belly:'#e8f2d8', horn:'#c2d89a', horns:0, parts:['stitches','fangs'] },      // 🧟
-    { body:'#5b4fa8', belly:'#e0dbf7', horn:'#9c8fe0', horns:0, parts:['wings','ears'] },          // 🦇
-    { body:'#3fb8b0', belly:'#d3f6f3', horn:'#7fe0d8', horns:0, parts:['tentacles'] },             // 🐙
-    { body:'#e0503f', belly:'#ffdcd2', horn:'#ffb02e', horns:1, parts:['fangs'] },                 // 👹
+    { spriteIndex: 0 }, { spriteIndex: 1 }, { spriteIndex: 2 }, { spriteIndex: 3 },
+    { spriteIndex: 4 }, { spriteIndex: 5 }, { spriteIndex: 6 }, { spriteIndex: 7 }
   ];
-  /* Boss của luyện tự do: tối màu, đội vương miện và khoác áo choàng — không thể
-     nhầm với đám quái thường dù chỉ liếc một cái. */
-  const BOSS_SKIN = { body:'#8a2f5f', belly:'#ffd6ea', horn:'#ff8dc0', horns:1,
-                      parts:['crown','cape','fangs'] };
+  const BOSS_SKIN = { spriteIndex: 9 };
 
-  /* Boss riêng của từng chặng — 10 bảng màu đậm dần. Icon trên bản đồ chặng và con
-     boss thật sự gặp trong chặng ấy dùng CHUNG bảng này, nên xem bản đồ là biết
-     trước mình sắp đánh con nào. */
-  /* Mười chặng, mười cái tên rất cụ thể — Sâu, Ma, Dơi, Rắn, Bọ Cạp, Mực, Rồng Con,
-     Quỷ, Rồng, Chúa Tể — nên phải là mười BÓNG DÁNG, không phải mười sắc độ.
-     Thứ tự bộ phận cũng leo thang đúng theo độ khó: chặng 1 chỉ có râu, chặng 10
-     đội vương miện + áo choàng + cánh + nanh. */
   const STAGE_SKINS = [
-    { body:'#7ed07a', belly:'#e6f9e2', horn:'#b9ecb2', horns:0, parts:['antennae','coil'] },                 // Sâu Chữ Cái
-    { body:'#bcc9de', belly:'#f2f7ff', horn:'#dbe5f2', horns:0, parts:['ghost'] },                           // Ma Gõ Nhầm
-    { body:'#6f5fa8', belly:'#e6e0f7', horn:'#a99ae0', horns:0, parts:['wings','ears','fangs'] },            // Dơi Lạc Phím
-    { body:'#3fa87c', belly:'#dcf5ea', horn:'#8fdcbb', horns:0, parts:['coil','fangs'] },                    // Rắn Chính Tả
-    { body:'#c2703a', belly:'#ffe6d2', horn:'#ffb173', horns:0, parts:['stinger','claws'] },                 // Bọ Cạp Dấu Thanh
-    { body:'#3f7fa8', belly:'#dceefb', horn:'#8fc9e8', horns:0, parts:['tentacles'] },                       // Mực Ngữ Pháp
-    { body:'#a83f5a', belly:'#ffdce5', horn:'#ff9bb3', horns:1, parts:['wings','tail'] },                    // Rồng Con Từ Vựng
-    { body:'#7a4fa8', belly:'#ecdcfb', horn:'#c39be8', horns:1, parts:['fangs','plates'] },                  // Quỷ Tốc Độ
-    { body:'#a8813f', belly:'#fbf0dc', horn:'#e8c78f', horns:1, parts:['wings','tail','plates','fangs'] },   // Rồng Ngôn Ngữ
-    { body:'#4a3f6b', belly:'#ddd6f0', horn:'#ff6a4d', horns:1, parts:['crown','cape','wings','fangs'] },    // Chúa Tể Bàn Phím
+    { spriteIndex: 0 }, { spriteIndex: 1 }, { spriteIndex: 2 }, { spriteIndex: 3 }, { spriteIndex: 4 },
+    { spriteIndex: 5 }, { spriteIndex: 6 }, { spriteIndex: 7 }, { spriteIndex: 8 }, { spriteIndex: 9 }
   ];
   function stageSkin(index) {
     return STAGE_SKINS[Math.max(0, index) % STAGE_SKINS.length];
@@ -1781,6 +1750,10 @@
   global.selectTypingStage = selectTypingStage;
   global.resetTypingCampaign = resetTypingCampaign;
   global.submitTypingBuffer = submitTypingBuffer;
+  /* LỖI THẬT: nút "Sao chép Card Kết quả" gọi copyShareCard() qua onclick trong
+     typing.html, nhưng hàm này nằm trong IIFE và chưa từng được gắn ra global —
+     bấm vào chỉ ném ReferenceError, không sao chép gì cả. */
+  global.copyShareCard = copyShareCard;
   global.toggleTypingPause = toggleTypingPause;
   global.pauseTypingForVisibility = pauseTypingForVisibility;
   global.leaveTypingGame = leaveTypingGame;

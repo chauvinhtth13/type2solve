@@ -2,11 +2,11 @@
 
 ## Nguồn tham khảo chuyên đề toán
 
-Danh mục công khai của khóa **Toán tư duy Singapore lớp 3** trên MathX được dùng
+Danh mục công khai trên MathX được dùng
 để tham khảo cách phân nhóm chuyên đề (quy luật, dãy số, trồng cây, đếm, tính
 ngược và IQ):
 
-- https://mathx.vn/khoa-hoc/toan-tu-duy-singapore-lop-3.html
+- https://mathx.vn/
 
 MathX chỉ được dùng để tham khảo cách phân nhóm chuyên đề; không có nội dung
 MathX nào được sao chép vào game. Ứng dụng không phân phối video hoặc phần luyện

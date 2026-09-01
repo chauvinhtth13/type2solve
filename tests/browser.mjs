@@ -1,11 +1,15 @@
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { tmpdir, platform } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 
-const root = new URL('../', import.meta.url);
-const chromePath = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const defaultChrome = platform() === 'darwin'
+  ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  : (platform() === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' : 'google-chrome');
+const chromePath = process.env.CHROME_PATH || defaultChrome;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function freePort() {
@@ -531,7 +535,11 @@ try {
   // cỡ cửa sổ thì đường bay của chưởng lệch hẳn — đo được 92,8px ở bản chưa vá.
   await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 1000, deviceScaleFactor: 1, mobile: false });
   await evaluate(`openTypingGame()`); await sleep(300);
-  await evaluate(`startTypingRun({lang:'vi',difficulty:'slow',accentAssist:false})`);
+  // startTypingRun(stageIndex) KHÔNG nhận object cấu hình — nó luôn đọc lựa chọn
+  // từ DOM qua getRunOptions(). Truyền {lang:'vi',...} như bản cũ là vô nghĩa,
+  // ván vẫn chạy tiếng Anh. Muốn ép tiếng Việt thì phải tick đúng radio trước.
+  await evaluate(`document.querySelector('input[name="typingLanguage"][value="vi"]').checked = true`);
+  await evaluate(`startTypingRun()`);
   for (let i = 0; i < 40; i++) { if (await evaluate(`document.querySelectorAll('.typing-monster').length`)) break; await sleep(250); }
   await send('Emulation.setDeviceMetricsOverride', { width: 1000, height: 560, deviceScaleFactor: 1, mobile: false });
   await sleep(800);
@@ -575,13 +583,22 @@ try {
 
   // LỖI THẬT: boss.textContent='🐛' xoá sạch nút con của <svg> → boss biến mất hẳn
   // phần còn lại của phiên (font-size:0 nên emoji thay thế cũng vô hình).
+  /* Bản cũ so sánh biến --c-body vì hồi đó 10 boss dùng CHUNG một ảnh, phải tô
+     lại màu bằng CSS mới phân biệt được. Nay mỗi boss đã có ảnh riêng
+     (BOSS_SPRITES) nên applySkin() không còn đặt --c-body nữa — giai đoạn 2
+     được thể hiện bằng class .phase2 + quầng sáng đỏ --c-aura, ảnh giữ nguyên
+     vì vẫn là chính con boss đó lúc nổi giận. Kiểm đúng tín hiệu hiện hành,
+     nhưng vẫn giữ nguyên ý đồ gốc: boss KHÔNG được biến mất sau giai đoạn 2. */
   await evaluate(`goHome();localStorage.clear();startAdventure();beginBattle()`); await sleep(500);
-  const truoc = await evaluate(`document.getElementById('bossSprite').style.getPropertyValue('--c-body')`);
+  const truoc = await evaluate(`document.getElementById('bossSprite').style.getPropertyValue('--c-aura')`);
   await evaluate(`G.bossHp=Math.floor(G.bossMaxHp*0.3);checkPhase2()`); await sleep(900);
   const sau = await evaluate(`(()=>{const el=document.getElementById('bossSprite');
-    return {con:el.childElementCount, mau:el.style.getPropertyValue('--c-body'), rage:el.classList.contains('phase2')}})()`);
-  assert(sau.con > 0 && sau.rage && sau.mau !== truoc,
-    `Boss vẫn còn hình sau khi vào giai đoạn 2 (${sau.con} nút, màu ${truoc}→${sau.mau})`);
+    const img=el.querySelector('image, img');
+    return {con:el.childElementCount, hao:el.style.getPropertyValue('--c-aura'),
+            anh:(img&&(img.getAttribute('href')||img.getAttribute('src')))||'',
+            rage:el.classList.contains('phase2')}})()`);
+  assert(sau.con > 0 && sau.rage && sau.anh !== '' && sau.hao !== truoc,
+    `Boss vẫn còn hình sau khi vào giai đoạn 2 (${sau.con} nút, ảnh ${sau.anh.split('/').pop()}, quầng ${truoc || '—'}→${sau.hao})`);
 
   // Cùng một lỗi ở chế độ Sinh tồn (survAdvance).
   await evaluate(`goHome();startSurvival()`); await sleep(400);
@@ -599,13 +616,15 @@ try {
   assert(gai.bo || (gai.sung === 'none' && gai.gai === 'none'),
     `Boss không sừng thì giấu cả gai (sừng ${gai.sung}, gai ${gai.gai})`);
 
-  // LỖI THẬT: màn giới thiệu vẽ emoji 🐌 trong khi sàn đấu vẽ một con quái khác hẳn.
+  // LỖI THẬT: màn giới thiệu vẽ đúng con quái sắp gặp
   await evaluate(`goHome();startAdventure()`); await sleep(400);
-  const gioiThieu = await evaluate(`(()=>{const art=document.querySelector('#introEmoji>svg.beast-art');
+  const gioiThieu = await evaluate(`(()=>{const art=document.querySelector('#introEmoji>svg.beast-art')||document.querySelector('#introEmoji svg');
     if(!art)return {co:false};
-    return {co:true, mau:art.style.getPropertyValue('--c-body'), boss:BOSS_ART[G.bossIndex].body}})()`);
-  assert(gioiThieu.co && gioiThieu.mau === gioiThieu.boss,
-    `Màn giới thiệu vẽ đúng con quái sắp gặp (${gioiThieu.mau})`);
+    const img=art.querySelector('image, img');
+    const src=img?((img.getAttribute&&img.getAttribute('href'))||img.src||''):'';
+    return {co:true, src, boss:BOSS_SPRITES[G.bossIndex]}})()`);
+  assert(gioiThieu.co && gioiThieu.src.includes(gioiThieu.boss),
+    `Màn giới thiệu vẽ đúng con quái sắp gặp (${gioiThieu.src})`);
   await evaluate(`goHome()`); await sleep(300);
 
   /* ===== MODAL ỦNG HỘ & GÓP Ý ===== */
@@ -655,10 +674,16 @@ try {
   // qua evaluate() và đọc trạng thái/DOM (querySelector thấy được cả phần tử trong
   // màn KHÔNG active), nên không phát hiện được lỗi này — phải bấm CHUỘT THẬT vào
   // đúng tile trên trang chủ như người dùng thật mới lộ ra.
+  // Trang chủ sau đợt tái thiết kế bento đã cao hơn 1 khung nhìn mặc định của
+  // Chrome headless (viewport bị clearDeviceMetricsOverride phía trên) — tile
+  // Đấu/Nim/Hanoi có thể nằm dưới lằn gấp. Người dùng thật sẽ cuộn tới rồi mới
+  // bấm; scrollIntoView() trước khi đo toạ độ mô phỏng đúng việc đó.
   await evaluate(`goHome()`); await sleep(200);
   for (const [tileClass, wantScreen] of [['duel-mode', 'duelGame'], ['nim-mode', 'nimGame'], ['hanoi-mode', 'hanoiGame']]) {
     const point = await evaluate(`(()=>{
-      const r=document.querySelector('.${tileClass}').getBoundingClientRect();
+      const el=document.querySelector('.${tileClass}');
+      el.scrollIntoView({behavior:'instant', block:'center'});
+      const r=el.getBoundingClientRect();
       return {x:r.left+r.width/2, y:r.top+r.height/2};
     })()`);
     await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });
@@ -749,14 +774,20 @@ try {
   assert(allocGuards.good && !allocGuards.overCap && !allocGuards.leftover
     && !allocGuards.negative && !allocGuards.fractional,
     `Phân bổ điểm chặn đủ mọi đầu vào sai: ${JSON.stringify(allocGuards)}`);
+  /* Cũng như test giai đoạn 2 ở trên: skin nhân vật giờ là ẢNH RIÊNG theo
+     spriteIndex chứ không còn tô lại --c-body, nên phải kiểm ảnh có đổi thật
+     hay không. Ý đồ gốc giữ nguyên: bấm ◀▶ phải ra một nhân vật KHÁC, chứ
+     không phải bấm cho vui. */
   const duelSkin = await evaluate(`(()=>{
     const svg=document.getElementById('duelSkinPreview1');
-    const before=svg.style.getPropertyValue('--c-body');
+    const anh=()=>{const i=svg.querySelector('image, img');
+      return (i&&(i.getAttribute('href')||i.getAttribute('src')))||'';};
+    const before=anh();
     cycleDuelSkin(1,1);
-    return {before, after:svg.style.getPropertyValue('--c-body')};
+    return {before, after:anh()};
   })()`);
   assert(Boolean(duelSkin.before) && Boolean(duelSkin.after) && duelSkin.before !== duelSkin.after,
-    `Đổi nhân vật Đấu Đối Kháng thực sự đổi màu (${duelSkin.before} → ${duelSkin.after})`);
+    `Đổi nhân vật Đấu Đối Kháng thực sự đổi hình (${duelSkin.before.split('/').pop()} → ${duelSkin.after.split('/').pop()})`);
 
   // LỖI THẬT: mặc định flex-shrink:1 từng cho phép #duelQbox bị NÉN THẤP HƠN nội
   // dung của nó khi câu hỏi dài 3 dòng — chữ tràn ra ngoài khung, đè lên "Đến lượt

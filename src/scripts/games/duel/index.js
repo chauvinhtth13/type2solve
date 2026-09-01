@@ -58,18 +58,18 @@
   }
 
   function skinAt(index) {
-    const arts = typeof BOSS_ART !== 'undefined' ? BOSS_ART : [];
-    return arts[skinIndex[index] % arts.length] || null;
+    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
+    return { spriteIndex: skinIndex[index] % count };
   }
 
   function paintPreview(playerNumber) {
     const svg = byId(`duelSkinPreview${playerNumber}`);
     const art = skinAt(playerNumber - 1);
-    if (svg && art && typeof global.applySkin === 'function') global.applySkin(svg, art);
+    if (svg && typeof global.applySkin === 'function') global.applySkin(svg, art);
   }
 
   function cycleDuelSkin(playerNumber, dir) {
-    const count = (typeof BOSS_ART !== 'undefined' ? BOSS_ART.length : 0) || 1;
+    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
     const i = playerNumber - 1;
     skinIndex[i] = (skinIndex[i] + dir + count) % count;
     paintPreview(playerNumber);
@@ -632,6 +632,7 @@
        cả loạt BO-N chỉ là một kết quả lặp lại. */
     state.turn = (state.round - 1) % 2;
     runtime.setExclusiveSections('duel', DUEL_SECTIONS, 'Play');
+    if (typeof global.startAmbient === 'function') global.startAmbient(undefined, 'duelArena');
     renderAll();
     nextTurn(state.turn);
   }
@@ -651,6 +652,7 @@
     state.players[loser].budget = LOSE_BONUS;
     state.players[loser].granted += LOSE_BONUS;
     state.round += 1;
+    if (typeof global.stopAmbient === 'function') global.stopAmbient();
     later(() => {
       byId('duelAllocTitle').textContent = `🏆 ${playerName(winner)} thắng ván ${state.round - 1}!`;
       setAllocNote(`${playerName(winner)} nhận +${WIN_BONUS} điểm · ${playerName(loser)} nhận +${LOSE_BONUS} điểm để lội ngược dòng.`);
@@ -678,6 +680,7 @@
   function endSeries(winner) {
     state.status = 'ended';
     saveSeries();
+    if (typeof global.stopAmbient === 'function') global.stopAmbient();
     runtime.setExclusiveSections('duel', DUEL_SECTIONS, 'Result');
     byId('duelResultIcon').textContent = '🏆';
     byId('duelResultTitle').textContent = `🏆 ${playerName(winner)} VÔ ĐỊCH!`;
@@ -759,6 +762,7 @@
     runId += 1;
     clearFx();
     state = null;
+    if (typeof global.stopAmbient === 'function') global.stopAmbient();
   }
 
   function leaveDuelGame() {

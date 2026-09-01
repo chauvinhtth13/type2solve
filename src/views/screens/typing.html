@@ -1,16 +1,16 @@
-  <!-- TYPE2SOLVE: GÕ NHANH - GIẢI CHẤT (HD-2D BENTO UI) -->
+  <!-- GÕ CHỮ DIỆT QUÁI -->
   <div class="screen learning-screen" id="typingGame">
     <div class="card game-card typing-card bento-typing-card">
 
-      <!-- TOPBAR & QUICK SETTINGS BAR -->
+      <!-- TOPBAR: cùng mô-típ eyebrow + tiêu đề như Sudoku / Đấu Đối Kháng /
+           Nim / Tháp Hà Nội, để mọi màn game đọc như một bộ. -->
       <div class="game-topbar bento-topbar">
         <button class="icon-btn home-btn" onclick="leaveTypingGame()" aria-label="Về trang chủ">🏠<span>Trang chủ</span></button>
         <div class="topbar-title-wrap">
-          <span class="eyebrow">TYPE2SOLVE · ĐẤU TRƯỜNG TƯ DUY</span>
-          <h1>Gõ Nhanh — Giải Chất <span class="badge-hd2d">FANTASY</span></h1>
+          <span class="eyebrow">LUYỆN GÕ ANH – VIỆT</span>
+          <h1>Gõ Chữ Diệt Quái</h1>
         </div>
         <div class="quick-settings-bar">
-          <button class="icon-btn crt-btn" id="typingCrtBtn" onclick="toggleCrtFilter()" title="Bật/Tắt hiệu ứng retro CRT scanline">📺 <span>CRT</span></button>
           <button class="icon-btn sound-btn" id="sndBtnTyping" onclick="toggleSound()" title="Bật/Tắt âm thanh">🔊</button>
           <button class="icon-btn pause-btn" id="typingPauseBtn" onclick="toggleTypingPause()" aria-label="Tạm dừng" disabled>⏸️</button>
         </div>
@@ -30,23 +30,19 @@
             </div>
             <div class="mascot-identity">
               <h3>Giáo Sư Cú Pixel 🧙‍♂️</h3>
-              <p class="mascot-role">Phù Thủy Đồng Hành · Type2Solve</p>
+              <p class="mascot-role">Phù thủy đồng hành</p>
             </div>
           </div>
 
           <!-- SETUP CONTROLS PANEL -->
           <div class="bento-panel setup-panel">
-            <h2>Chế độ &amp; Chủ đề bài gõ</h2>
-            
-            <!-- CHỌN CHỦ ĐỀ -->
+            <h2>Chọn ngôn ngữ luyện gõ</h2>
+
+            <!-- CHỌN NGÔN NGỮ — chỉ Anh và Việt. -->
             <div class="setup-group">
-              <label class="group-title">Chủ đề từ vựng / bài tập</label>
               <div class="option-grid topic-grid">
-                <label class="option-card"><input type="radio" name="typingLanguage" value="en" checked><span><b>🇬🇧 Tiếng Anh</b><small>82.000+ từ Anh–Việt</small></span></label>
-                <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>🇻🇳 Tiếng Việt</b><small>Chính tả &amp; Dấu thanh</small></span></label>
-                <label class="option-card"><input type="radio" name="typingLanguage" value="code"><span><b>💻 Code Snippets</b><small>JS, Python, HTML/CSS</small></span></label>
-                <label class="option-card"><input type="radio" name="typingLanguage" value="riddle"><span><b>🧩 Câu đố mẹo</b><small>Tư duy &amp; Đố vui</small></span></label>
-                <label class="option-card"><input type="radio" name="typingLanguage" value="science"><span><b>🔬 Khoa học</b><small>Kiến thức đời sống</small></span></label>
+                <label class="option-card"><input type="radio" name="typingLanguage" value="en" checked><span><b>🇬🇧 Tiếng Anh</b><small>Hơn 80.000 từ Anh–Việt kèm nghĩa</small></span></label>
+                <label class="option-card"><input type="radio" name="typingLanguage" value="vi"><span><b>🇻🇳 Tiếng Việt</b><small>Luyện chính tả và dấu thanh</small></span></label>
               </div>
             </div>
 

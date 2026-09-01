@@ -1,4 +1,4 @@
-﻿/* ============ TRẠNG THÁI ============ */
+/* ============ TRẠNG THÁI ============ */
 const savedAdventure=window.GameStorage?.load?.().adventure||{};
 let G={bossIndex:0,cleared:Number.isInteger(savedAdventure.cleared)?savedAdventure.cleared:-1};
 let timerId=null,timeLeft=0,timeTotal=0;
@@ -79,7 +79,7 @@ function beginBattle(){
     b.mech==='armor'?'🛡️ Giáp':b.mech==='heal'?'💚 Hồi máu':b.mech==='rage'?'😡 Cuồng nộ':b.mech==='drain'?'🩸 Hút máu':'⭐ Thường';
   $('levelBadge').textContent='Boss '+(G.bossIndex+1)+'/'+BOSSES.length+' • '+'⭐'.repeat(b.tier);
   updateBars();updateAura();
-  startAmbient(b.arena);
+  startAmbient(b.arena);setDioramaTheme(b.arena);
   showScreen('battle');
   document.querySelector('.hprow').style.display='';        // chế độ phiêu lưu: hiện lại thanh máu
   G.bombUsed=false;G.shieldOn=false;G.frozen=false;
@@ -153,11 +153,12 @@ function startSurvival(){
 function prepArenaForMode(name,theme){
   document.querySelector('.hprow').style.display='none';   // 2 chế độ này không dùng thanh máu
   $('arena').className='arena '+theme;
-  paintBoss({art:BOSS_ART[G.bossIndex%BOSS_ART.length],name:'Quái vật'});
+  const count=(typeof BOSS_SPRITES!=='undefined'?BOSS_SPRITES.length:10);
+  paintBoss({spriteIndex:G.bossIndex%count,name:'Quái vật'});
   $('bossName').textContent=name;
   $('bossMech').textContent=G.mode==='blitz'?'⚡ 60 giây':'♾️ Sinh tồn';
   G.bossHp=100;G.bossMaxHp=100;
-  startAmbient(theme);
+  startAmbient(theme);setDioramaTheme(theme);
   updateBars();updateHUD();renderEnergy();
 }
 function renderModeBar(){
@@ -187,7 +188,7 @@ function endRun(){
     :[[40,'💎','HUYỀN THOẠI','Không ai cản nổi em!'],[28,'🥇','CAO THỦ','Bền bỉ tuyệt vời!'],
       [18,'🥈','THIỆN XẠ','Rất vững vàng!'],[9,'🥉','TÂN BINH','Đang tiến bộ nhanh!'],[0,'🌱','MẦM NON','Thử lại nào, em làm được mà!']];
   const r=ranks.find(x=>G.score>=x[0]);
-  $('seEmoji').textContent=r[1];
+  if($('seEmoji'))$('seEmoji').textContent=r[1];
   $('seTitle').textContent=isBlitz?'HẾT 60 GIÂY!':'HẾT MẠNG RỒI!';
   $('seRank').innerHTML=`Xếp hạng: <b style="font-size:1.3em;color:var(--gold-ink)">${r[2]}</b><br>${r[3]}`
     +(isRecord&&G.score>0?'<br><b style="color:var(--green-ink)">🎉 KỶ LỤC MỚI!</b>':'');
@@ -205,15 +206,14 @@ function survAdvance(){
   const boss=$('bossSprite');
   boss.classList.add('morphing');
   setTimeout(()=>{
-    /* boss.textContent=... sẽ XOÁ SẠCH các nút con của <svg> và con quái biến mất
-       hẳn (font-size:0 nên emoji thay thế cũng không hiện). Đổi quái = tô lại. */
-    applySkin(boss,pick(BOSS_ART));
+    const count=(typeof BOSS_SPRITES!=='undefined'?BOSS_SPRITES.length:10);
+    applySkin(boss,{spriteIndex:ri(0,count-1)});
     boss.classList.remove('morphing');
   },400);
   G.tier=Math.min(5,G.tier+1);
   const themes=['','night','lava','ice'];
   const th=pick(themes);
-  $('arena').className='arena '+th;startAmbient(th);
+  $('arena').className='arena '+th;startAmbient(th);setDioramaTheme(th);
   SFX.bossRoar();screenFlash();
   comboPopup('🔥 QUÁI MỚI — KHÓ HƠN!');
 }

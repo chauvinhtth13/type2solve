@@ -8,7 +8,17 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots4\")",
       "Bash(node \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\playtest.mjs\" \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\shots4\")",
       "Bash(node \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\res-matrix.mjs\" \"C:\\\\Users\\\\vinhc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-vinhc-Documents-GitHub-type2solve\\\\5f6acd14-cb8d-4e4b-a802-6ca7adb6002a\\\\scratchpad\\\\res\")",
-      "Bash(node tools/verify-dist.mjs)"
+      "Bash(node tools/verify-dist.mjs)",
+      "Bash(unset -f node npm)",
+      "Bash(export CHROME_PATH=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\")",
+      "Bash(/Users/vinhc/.nvm/versions/node/v24.14.1/bin/node /private/tmp/claude-501/-Users-vinhc-Documents-GitHub-type2solve/ac7dc065-92de-41d7-9000-4eab07925106/scratchpad/screenshot-all.mjs)",
+      "Bash(/Users/vinhc/.nvm/versions/node/v24.14.1/bin/node /tmp/slack.mjs)",
+      "Bash(/Users/vinhc/.nvm/versions/node/v24.14.1/bin/node /tmp/diag_battle.mjs)",
+      "Bash(/Users/vinhc/.nvm/versions/node/v24.14.1/bin/node /tmp/worst.mjs)",
+      "Bash(python3 -)",
+      "Bash(/Users/vinhc/.nvm/versions/node/v24.14.1/bin/node /tmp/realclip.mjs)",
+      "Bash(kill -9 27957 27959 27960 27966)",
+      "Bash(ps -eo pid,command)"
     ]
   }
 }

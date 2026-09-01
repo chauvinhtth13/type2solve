@@ -1,12 +1,46 @@
-<!-- ===== BỘ LỌC HOÀNG GIA & VŨ TRỤ (VIBRANT FANTASY) =====
+<!-- ===== BỘ LỌC HOÀNG GIA & VŨ TRỤ (HD-2D VIBRANT FANTASY) =====
      Hệ thống bộ lọc vector cao cấp: quầng sáng mana, hiệu ứng ma thuật phát sáng (Glow Bloom)
      và viền ánh kim lấp lánh cho nhân vật & biểu tượng. -->
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <!-- Cắt hình tròn tinh thể cho nhân vật -->
+    <clipPath id="avatarClipCircle">
+      <circle cx="60" cy="60" r="48" />
+    </clipPath>
+
+    <!-- Hào quang đa tầng -->
+    <radialGradient id="heroAuraGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd700" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#00f2fe" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bossAuraGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--c-aura,#00f2fe)" stop-opacity="0.65"/>
+      <stop offset="60%" stop-color="#ff4757" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Viền kim loại vàng kim -->
+    <linearGradient id="goldBezel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffeaa7"/>
+      <stop offset="30%" stop-color="#fdcb6e"/>
+      <stop offset="70%" stop-color="#d63031"/>
+      <stop offset="100%" stop-color="#f9ca24"/>
+    </linearGradient>
+    <!-- Viền kim loại Titan Hắc Ám -->
+    <linearGradient id="titanBezel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#74b9ff"/>
+      <stop offset="35%" stop-color="#0984e3"/>
+      <stop offset="70%" stop-color="#2d3436"/>
+      <stop offset="100%" stop-color="#6c5ce7"/>
+    </linearGradient>
+  </defs>
+
   <!-- Quầng sáng ma thuật bộc phát (Magic Aura Bloom) cho nhân vật & Boss -->
-  <filter id="pxfx" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+  <filter id="pxfx" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
     <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
     <feComponentTransfer in="blur" result="glow">
-      <feFuncA type="linear" slope="1.8" />
+      <feFuncA type="linear" slope="1.6" />
     </feComponentTransfer>
     <feMerge>
       <feMergeNode in="glow" />
@@ -17,42 +51,33 @@
   <filter id="pxfxL" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
     <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#ffd700" flood-opacity="0.4" />
   </filter>
-  <!-- Hiệu ứng chí mạng & chiếu sáng hào quang (Holy Radiance) -->
-  <filter id="holyGlow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
-    <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
-    <feMerge>
-      <feMergeNode in="blur2" />
-      <feMergeNode in="blur1" />
-      <feMergeNode in="SourceGraphic" />
-    </feMerge>
-  </filter>
 </svg>
 
-<!-- Khuôn hình quái Vibrant Fantasy Vector -->
-<template id="tplBeast"><svg viewBox="0 0 120 120" class="beast-art fantasy-art" aria-hidden="true">
-  <g class="beast-root" stroke="var(--c-stroke,#120e29)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" filter="url(#pxfx)">
-    <circle class="chr-aura" cx="60" cy="60" r="54" fill="var(--c-aura, rgba(0, 242, 254, 0.15))" stroke="none" />
-    <image class="hd2d-avatar beast-img fantasy-avatar" href="assets/images/hd2d/boss_dragon.jpg" x="0" y="0" width="120" height="120" preserveAspectRatio="xMidYMid slice" />
-    <g class="bp bp-cape" style="display:none"></g>
-    <g class="bp bp-wings" style="display:none"></g>
-    <g class="bp bp-tail" style="display:none"></g>
-    <g class="bp bp-stinger" style="display:none"></g>
-    <g class="bp bp-shell" style="display:none"></g>
-    <g class="bp bp-plates" style="display:none"></g>
-    <g class="bp bp-stalks" style="display:none"></g>
-    <g class="bp bp-antennae" style="display:none"></g>
-    <g class="bp bp-ears" style="display:none"></g>
-    <g class="chr-horns" fill="var(--c-horn,#ffc93c)" style="display:none"></g>
-    <path class="chr-spikes" d="M60 14 l11 14 h-22z" fill="var(--c-horn,#ffc93c)" style="display:none"/>
+<!-- Khuôn nhân vật Boss HD-2D Crystalline Token -->
+<template id="tplBeast"><svg viewBox="0 0 120 120" class="beast-art fantasy-art battler-token" aria-hidden="true">
+  <g class="beast-root" filter="url(#pxfx)">
+    <circle class="chr-aura-glow" cx="60" cy="60" r="58" fill="url(#bossAuraGrad)" />
+    <circle class="chr-rune-ring" cx="60" cy="60" r="53" fill="none" stroke="var(--c-aura,#00f2fe)" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.75" />
+    <circle class="chr-bezel-outer" cx="60" cy="60" r="50.5" fill="none" stroke="url(#titanBezel)" stroke-width="3" />
+    <g class="chr-portrait-wrap" clip-path="url(#avatarClipCircle)">
+      <image class="hd2d-avatar beast-img fantasy-avatar" href="assets/images/hd2d/boss_01_sora.jpg" x="12" y="12" width="96" height="96" preserveAspectRatio="xMidYMid slice" />
+      <path class="chr-lens-shine" d="M12 60 A48 48 0 0 1 108 60 A48 24 0 0 0 12 60 Z" fill="rgba(255,255,255,0.22)" />
+    </g>
+    <circle class="chr-bezel-inner" cx="60" cy="60" r="48.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
   </g>
 </svg></template>
 
-<!-- Khuôn nhân vật Hero Vibrant Fantasy Vector -->
-<template id="tplHero"><svg viewBox="0 0 120 120" class="hero-art fantasy-art" aria-hidden="true">
-  <g class="hero-root" stroke="var(--c-stroke,#120e29)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" filter="url(#pxfx)">
-    <circle class="chr-aura" cx="60" cy="60" r="54" fill="rgba(255, 215, 0, 0.2)" stroke="none" />
-    <image class="hd2d-avatar hero-img fantasy-avatar" href="assets/images/hd2d/hero_wizard.jpg" x="0" y="0" width="120" height="120" preserveAspectRatio="xMidYMid slice" />
+<!-- Khuôn nhân vật Hero HD-2D Crystalline Token -->
+<template id="tplHero"><svg viewBox="0 0 120 120" class="hero-art fantasy-art battler-token" aria-hidden="true">
+  <g class="hero-root" filter="url(#pxfx)">
+    <circle class="chr-aura-glow" cx="60" cy="60" r="58" fill="url(#heroAuraGrad)" />
+    <circle class="chr-rune-ring" cx="60" cy="60" r="53" fill="none" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="6 3" opacity="0.8" />
+    <circle class="chr-bezel-outer" cx="60" cy="60" r="50.5" fill="none" stroke="url(#goldBezel)" stroke-width="3" />
+    <g class="chr-portrait-wrap" clip-path="url(#avatarClipCircle)">
+      <image class="hd2d-avatar hero-img fantasy-avatar" href="assets/images/hd2d/hero_wizard.jpg" x="12" y="12" width="96" height="96" preserveAspectRatio="xMidYMid slice" />
+      <path class="chr-lens-shine" d="M12 60 A48 48 0 0 1 108 60 A48 24 0 0 0 12 60 Z" fill="rgba(255,255,255,0.28)" />
+    </g>
+    <circle class="chr-bezel-inner" cx="60" cy="60" r="48.5" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1" />
   </g>
 </svg></template>
 <div class="stars" id="stars"></div>

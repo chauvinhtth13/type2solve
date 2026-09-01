@@ -16,15 +16,34 @@ function isCorrectAnswer(value,expected=currentQ?.ans){
   const accepted=[expected,...(currentQ?.acceptedAnswers||[])].map(normalizeAnswer);
   return accepted.includes(normalizeAnswer(value));
 }
+/* Đáp án có phải MỘT CON SỐ không: số nguyên/thập phân (chấp cả dấu phẩy kiểu
+   Việt: "9,6"), phân số "2/5", số âm. Dùng để quyết định câu nào được phép gõ
+   tay. */
+function isNumericAnswer(value){
+  const text=normalizeAnswer(value).replace(/,/g,'.');
+  if(text==='')return false;
+  if(!Number.isNaN(Number(text)))return true;
+  const fraction=text.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  return Boolean(fraction)&&Number(fraction[2])!==0;
+}
+/* CHỈ câu có đáp án là SỐ mới được gõ tay. Đáp án bằng CHỮ luôn là trắc nghiệm.
+   Lý do: chấm chuỗi thì "thứ 4" khác "Thứ tư", "vô số" khác "Vô số", tên riêng
+   viết hoa/không dấu cũng lệch — trẻ hiểu đúng bài vẫn bị tính sai chỉ vì cách
+   viết. Với số thì isCorrectAnswer() so sánh bằng GIÁ TRỊ nên không có chuyện đó. */
 function supportsTypedAnswer(question){
   const value=String(question?.ans??'');
-  return value.length>0&&value.length<=38&&!/\p{Extended_Pictographic}/u.test(value);
+  if(value.length===0||value.length>38)return false;
+  if(/\p{Extended_Pictographic}/u.test(value))return false;
+  return isNumericAnswer(value);
 }
 function setAnswerMode(mode){
   answerMode=['mixed','choice','input'].includes(mode)?mode:'mixed';
   if($('answerModeSelect'))$('answerModeSelect').value=answerMode;
   window.GameStorage?.updateSettings?.({answerMode});
-  const hint=$('answerModeHint');if(hint)hint.textContent='Áp dụng từ câu tiếp theo';
+  const hint=$('answerModeHint');
+  if(hint)hint.textContent=answerMode==='choice'
+    ?'Áp dụng từ câu tiếp theo'
+    :'Áp dụng từ câu tiếp theo · câu đáp án bằng chữ vẫn là trắc nghiệm';
 }
 function shouldTypeAnswer(question){
   if(!supportsTypedAnswer(question))return false;
@@ -558,7 +577,21 @@ function comboPopup(txt){
   arena.appendChild(d);setTimeout(()=>d.remove(),1000);
 }
 
-/* ============ HIỆU ỨNG CHIẾN ĐẤU ============ */
+/* ============ HIỆU ỨNG CHIẾN ĐẤU HD-2D ============ */
+const ELEMENTAL_SPELLS={
+  arcane:{className:'spell-arcane',glow:'#00f2fe',html:'<div class="vfx-orb vfx-orb-arcane"><div class="vfx-core"></div><div class="vfx-corona"></div></div>'},
+  fire:{className:'spell-fire',glow:'#ff5252',html:'<div class="vfx-orb vfx-orb-fire"><div class="vfx-flame-core"></div><div class="vfx-flame-tail"></div></div>'},
+  ice:{className:'spell-ice',glow:'#17c0eb',html:'<div class="vfx-orb vfx-orb-ice"><div class="vfx-ice-shard"></div></div>'},
+  lightning:{className:'spell-lightning',glow:'#ffd700',html:'<div class="vfx-orb vfx-orb-lightning"><div class="vfx-bolt-core"></div></div>'},
+  shadow:{className:'spell-shadow',glow:'#be2edd',html:'<div class="vfx-orb vfx-orb-shadow"><div class="vfx-shadow-eye"></div></div>'},
+  mystic:{className:'spell-mystic',glow:'#2ed573',html:'<div class="vfx-orb vfx-orb-mystic"><div class="vfx-rune-glyph"></div></div>'}
+};
+
+function getBossSpellType(bossIndex){
+  const map=['arcane','lightning','mystic','fire','fire','shadow','ice','fire','shadow','ice'];
+  return map[bossIndex]||'arcane';
+}
+
 function arenaRect(){return $('arena').getBoundingClientRect();}
 function spriteCenter(id){
   const r=$(id).getBoundingClientRect(),a=arenaRect();
@@ -569,64 +602,64 @@ function shake(big){
   c.classList.remove('shake','shakeBig');void c.offsetWidth;
   c.classList.add(big?'shakeBig':'shake');
 }
-function sparkBurst(x,y,emojis,count){
+function sparkBurst(x,y,count=12,kind='arcane'){
   const arena=$('arena');
   for(let i=0;i<count;i++){
-    const s=document.createElement('div');s.className='spark';
-    s.textContent=pick(emojis);
+    const s=document.createElement('div');
+    s.className=`spark spark-${kind}`;
     s.style.left=x+'px';s.style.top=y+'px';
-    const ang=Math.random()*Math.PI*2,dist=ri(30,80);
+    const ang=Math.random()*Math.PI*2,dist=ri(25,85);
     s.style.setProperty('--dx',Math.cos(ang)*dist+'px');
     s.style.setProperty('--dy',Math.sin(ang)*dist+'px');
-    arena.appendChild(s);setTimeout(()=>s.remove(),750);
+    arena.appendChild(s);setTimeout(()=>s.remove(),700);
   }
 }
-function boomAt(x,y){
+function boomAt(x,y,kind='arcane'){
   const arena=$('arena');
-  const bm=document.createElement('div');bm.className='boom';bm.textContent='💥';
-  bm.style.left=(x-23)+'px';bm.style.top=(y-23)+'px';
+  const bm=document.createElement('div');
+  bm.className=`boom boom-${kind}`;
+  bm.innerHTML='<div class="vfx-ring"></div><div class="vfx-burst-core"></div><div class="vfx-cross-flare"></div>';
+  bm.style.left=(x-28)+'px';bm.style.top=(y-28)+'px';
   arena.appendChild(bm);setTimeout(()=>bm.remove(),550);
 }
-/* Đường cong cubic-bezier(.3,0,.7,1) — chính là easing khai báo cho .proj trong CSS.
-   Tính lại bằng công thức để vệt khói bám sát chưởng khí mà KHÔNG phải đo DOM
-   giữa lúc chưởng đang bay (đo rồi ghi xen kẽ là đúng kiểu gây layout thrashing). */
+/* Đường cong cubic-bezier(.3,0,.7,1) — bám sát chưởng khí không đụng layout thrashing */
 function projEase(t){
-  const cx=.9,bx=.3,ax=-.2,cy=0,by=3,ay=-2;   // hệ số suy ra từ (x1,y1,x2,y2)=(.3,0,.7,1)
+  const cx=.9,bx=.3,ax=-.2,cy=0,by=3,ay=-2;
   let u=t;
-  for(let i=0;i<4;i++){                        // Newton 4 vòng đủ khít cho 450ms
+  for(let i=0;i<4;i++){
     const dx=((ax*u+bx)*u+cx)*u-t, d=(3*ax*u+2*bx)*u+cx;
     if(Math.abs(d)<1e-6)break;
     u-=dx/d;
   }
   return ((ay*u+by)*u+cy)*u;
 }
-function shootProjectile(fromId,toId,emoji,dark,onHit){
+function shootProjectile(fromId,toId,spellKind,dark,onHit){
   const arena=$('arena');
-  const from=spriteCenter(fromId),to=spriteCenter(toId);   // đo đúng một lần, trước khi bay
+  const from=spriteCenter(fromId),to=spriteCenter(toId);
   const dx=to.x-from.x;
+  const kind=typeof spellKind==='string'&&ELEMENTAL_SPELLS[spellKind]?spellKind:(dark?getBossSpellType(G.bossIndex):'arcane');
+  const spellDef=ELEMENTAL_SPELLS[kind]||ELEMENTAL_SPELLS.arcane;
   const p=document.createElement('div');
-  p.className='proj'+(dark?' dark':'');
-  p.innerHTML=`<span class="core">${emoji}</span>`;
-  p.style.left=(from.x-17)+'px';p.style.top=(from.y-17)+'px';
+  p.className=`proj ${spellDef.className}`+(dark?' dark':'');
+  p.innerHTML=spellDef.html;
+  p.style.left=(from.x-20)+'px';p.style.top=(from.y-20)+'px';
   arena.appendChild(p);SFX.shoot();
-  const trailBg=dark?'radial-gradient(circle,rgba(160,80,220,.7),transparent)'
-                    :'radial-gradient(circle,rgba(255,220,80,.8),transparent)';
+  const trailBg=dark?`radial-gradient(circle, ${spellDef.glow}b3, transparent 70%)`
+                    :`radial-gradient(circle, rgba(255,220,80,.85), rgba(0,242,254,.6) 50%, transparent 75%)`;
   const t0=performance.now();
   let trailN=0;
-  // Giảm chuyển động: CSS ép transition còn .001ms nên chưởng tới đích ngay lập tức;
-  // rải vệt khói theo đường cong 450ms nữa thì khói treo lại giữa sân. Bỏ hẳn.
   const trailId=REDUCED_MOTION()?null:setInterval(()=>{
-    const t=document.createElement('div');t.className='trail';
-    t.style.left=(from.x-9+dx*projEase(Math.min(1,(performance.now()-t0)/450)))+'px';
-    t.style.top=(from.y-9)+'px';
-    t.style.width='18px';t.style.height='18px';
+    const t=document.createElement('div');
+    t.className='trail '+(dark?'trail-dark':'trail-light');
+    t.style.left=(from.x-10+dx*projEase(Math.min(1,(performance.now()-t0)/450)))+'px';
+    t.style.top=(from.y-10)+'px';
+    t.style.width='20px';t.style.height='20px';
     t.style.background=trailBg;
-    arena.appendChild(t);setTimeout(()=>t.remove(),500);
+    arena.appendChild(t);setTimeout(()=>t.remove(),450);
     if(++trailN>8)clearInterval(trailId);
-  },50);
-  // transform thay cho left: chỉ chạm bước composite, không đụng layout.
-  requestAnimationFrame(()=>{p.style.transform=`translateX(${dx}px) scale(1.3)`;});
-  setTimeout(()=>{if(trailId)clearInterval(trailId);p.remove();boomAt(to.x,to.y);onHit(to);},460);
+  },48);
+  requestAnimationFrame(()=>{p.style.transform=`translateX(${dx}px) scale(1.25)`;});
+  setTimeout(()=>{if(trailId)clearInterval(trailId);p.remove();boomAt(to.x,to.y,kind);onHit(to);},460);
 }
 function shootBeam(onHit){
   const arena=$('arena');
@@ -636,20 +669,20 @@ function shootBeam(onHit){
   beam.style.width=(to.x-from.x)+'px';
   arena.appendChild(beam);SFX.crit();
   setTimeout(()=>{
-    boomAt(to.x,to.y);
-    sparkBurst(to.x,to.y,['⭐','✨','💫','⚡'],14);
+    boomAt(to.x,to.y,'arcane');
+    sparkBurst(to.x,to.y,16,'arcane');
     onHit(to);
     setTimeout(()=>beam.remove(),200);
   },350);
 }
 function healEffect(){
   const c=spriteCenter('heroSprite'),arena=$('arena');
-  showDmg('+10 ❤️','#1c9c5b','left');
-  for(let i=0;i<4;i++){
-    const h=document.createElement('div');h.className='healfx';h.textContent=pick(['❤️','💚','✨']);
-    h.style.left=(c.x-20+ri(0,40))+'px';h.style.top=c.y+'px';
-    h.style.animationDelay=(i*0.12)+'s';
-    arena.appendChild(h);setTimeout(()=>h.remove(),1300);
+  showDmg('+10 HP','#2ed573','left',true);
+  for(let i=0;i<5;i++){
+    const h=document.createElement('div');h.className='healfx vfx-heal-orb';
+    h.style.left=(c.x-24+ri(0,48))+'px';h.style.top=(c.y-10+ri(0,30))+'px';
+    h.style.animationDelay=(i*0.1)+'s';
+    arena.appendChild(h);setTimeout(()=>h.remove(),1200);
   }
 }
 function showDmg(text,color,side,crit){
@@ -667,50 +700,51 @@ function heroAttack(dmg,crit){
   if(crit){hero.classList.add('dash-hero');setTimeout(()=>hero.classList.remove('dash-hero'),520);}
   const onHit=(to)=>{
     if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    boss.classList.add('hurt');boss.classList.add('flashWhite');
+    boss.classList.add('hurt','flashWhite');
     shake(crit);SFX.hit();
-    sparkBurst(to.x,to.y,crit?['⭐','💥','✨','⚡']:['✦','✨','•'],crit?16:8);
+    sparkBurst(to.x,to.y,crit?18:10,'arcane');
     showDmg('−'+dmg,'#e0364f','right',crit);
     G.bossHp=Math.max(0,G.bossHp-dmg);updateBars();hpHitFx('bossHp');checkPhase2();
     setTimeout(()=>{
-      boss.classList.remove('hurt');boss.classList.remove('flashWhite');
+      boss.classList.remove('hurt','flashWhite');
       if(G.bossHp<=0)bossDefeated();else showNextBtn();
     },500);
   };
   setTimeout(()=>{
     if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
     if(crit)shootBeam(onHit);
-    else shootProjectile('heroSprite','bossSprite',pick(HERO_PROJ),false,onHit);
+    else shootProjectile('heroSprite','bossSprite','arcane',false,onHit);
   },200);
 }
 function bossAttack(dmg,drain){
   const hero=$('heroSprite'),boss=$('bossSprite');
   const b=BOSSES[G.bossIndex];
   const runId=battleRunId;
+  const spellType=getBossSpellType(G.bossIndex);
   boss.classList.add('cast-boss');
   setTimeout(()=>boss.classList.remove('cast-boss'),400);
   setTimeout(()=>{
     if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    shootProjectile('bossSprite','heroSprite',b.proj,true,(to)=>{
+    shootProjectile('bossSprite','heroSprite',spellType,true,(to)=>{
       if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
       if(dmg===0){
-        sparkBurst(to.x,to.y,['🛡️','✨','✦'],10);SFX.perk();
+        sparkBurst(to.x,to.y,12,'arcane');SFX.perk();
         showDmg('🛡️ CHẶN!','#1c9c5b','left',true);
       }else{
-        hero.classList.add('hurt-hero');hero.classList.add('flashWhite');
+        hero.classList.add('hurt-hero','flashWhite');
         shake(false);SFX.hit();
-        sparkBurst(to.x,to.y,['💢','✦','•'],8);
+        sparkBurst(to.x,to.y,10,spellType);
         showDmg('−'+dmg,'#e0364f','left');
       }
       G.heroHp=Math.max(0,G.heroHp-dmg);
       if(dmg>0)hpHitFx('heroHp');
       if(drain){
         G.bossHp=Math.min(G.bossMaxHp,G.bossHp+Math.round(dmg/2));
-        showDmg('+'+Math.round(dmg/2)+' 🩸','#8d2f4f','right');
+        showDmg('+'+Math.round(dmg/2)+' HP','#8d2f4f','right');
       }
       updateBars();
       setTimeout(()=>{
-        hero.classList.remove('hurt-hero');hero.classList.remove('flashWhite');
+        hero.classList.remove('hurt-hero','flashWhite');
         if(G.heroHp<=0){
           if(G.inv.revive>0){ // 🔮 bùa hồi sinh
             G.inv.revive--;G.heroHp=50;updateBars();updateHUD();
@@ -728,16 +762,24 @@ function hpHitFx(which){
   bar.classList.remove('hit');void bar.offsetWidth;bar.classList.add('hit');
 }
 function updateBars(){
-  // boss nổi giận khi máu thấp
   const b=BOSSES[G.bossIndex];
   const low=G.bossHp>0&&G.bossHp/G.bossMaxHp<0.35;
   const raging=low&&b.mech==='rage';
   $('arena').classList.toggle('rageOn',raging);
   $('bossSprite').classList.toggle('raging',raging);
-  $('heroHp').style.width=(G.heroHp/heroMaxHp()*100)+'%';
+
+  const heroPct=Math.max(0,G.heroHp/heroMaxHp()*100);
+  const bossPct=Math.max(0,G.bossHp/G.bossMaxHp*100);
+
+  $('heroHp').style.width=heroPct+'%';
   $('heroHpTxt').textContent=G.heroHp+'/'+heroMaxHp();
-  $('bossHp').style.width=(G.bossHp/G.bossMaxHp*100)+'%';
+  $('bossHp').style.width=bossPct+'%';
   $('bossHpTxt').textContent=G.bossHp+'/'+G.bossMaxHp;
+
+  const hGhost=$('heroHpGhost');
+  if(hGhost){setTimeout(()=>{if(hGhost)hGhost.style.width=heroPct+'%';},320);}
+  const bGhost=$('bossHpGhost');
+  if(bGhost){setTimeout(()=>{if(bGhost)bGhost.style.width=bossPct+'%';},320);}
 }
 function confetti(n){
   const emojis=['🎉','⭐','✨','🎊','💛','💙','💜'];

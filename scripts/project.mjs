@@ -23,6 +23,20 @@ export const deferredAssets = Object.freeze([
   'assets/images/hd2d/hero_wizard.jpg',
   'assets/images/hd2d/boss_dragon.jpg',
   'assets/images/hd2d/player_tiger.jpg',
+  'assets/images/hd2d/boss_01_sora.jpg',
+  'assets/images/hd2d/boss_02_sparky.jpg',
+  'assets/images/hd2d/boss_03_stitchwork.jpg',
+  'assets/images/hd2d/boss_04_ignis.jpg',
+  'assets/images/hd2d/boss_05_vex.jpg',
+  'assets/images/hd2d/boss_06_nocturne.jpg',
+  'assets/images/hd2d/boss_07_glacius.jpg',
+  'assets/images/hd2d/boss_08_solkahn.jpg',
+  'assets/images/hd2d/boss_09_lumiel.jpg',
+  'assets/images/hd2d/boss_10_leviator.jpg',
+  'assets/images/hd2d/badge_victory.jpg',
+  'assets/images/hd2d/chest_treasure.jpg',
+  'assets/images/hd2d/shop_vault.jpg',
+  'assets/images/hd2d/badge_defeat.jpg',
 ]);
 
 export function fromSource(relativePath) {

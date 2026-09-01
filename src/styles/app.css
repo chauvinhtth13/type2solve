@@ -1,4 +1,4 @@
-﻿:root{
+:root{
     --sky:#1b2a52; --sky2:#2d3f73;
     --panel:#fffdf5; --ink:#2b2350;
     /* Font dự phòng khớp số đo: đã đo Baloo 2 = 92,2–93,6% bề ngang Arial,
@@ -107,6 +107,15 @@
     --gap:12px;        /* khoảng cách giữa các khối */
     --hpH:15px;        /* cao thanh máu */
     --radius:26px;
+    /* THANG KHOẢNG CÁCH — mọi khe hở/lề trên trang chủ và thanh trạng thái đều
+       lấy từ đây thay vì đặt số lẻ tại chỗ. Co giãn theo --gap nên vẫn tự thích
+       ứng với 6 mốc khung hình đã khai bên dưới, không phải viết lại từng mốc. */
+    --sp-1:calc(var(--gap) * .34);   /* khe hở trong một dòng chữ */
+    --sp-2:calc(var(--gap) * .58);   /* giữa các phần tử cùng một khối */
+    --sp-3:calc(var(--gap) * .84);   /* giữa tiêu đề và nội dung của nó */
+    --sp-4:var(--gap);               /* giữa các ô trong cùng một lưới */
+    --sp-5:calc(var(--gap) * 1.6);   /* giữa hai phân khu khác nhau */
+    --sp-6:calc(var(--gap) * 2.3);   /* trên/dưới cả trang */
   }
   /* ===== MỘT KHUNG MÀN HÌNH =====
      Game này chạy trên desktop. Trước đây body canh giữa một thẻ vừa bằng nội dung,
@@ -151,7 +160,7 @@
     .tile-hero .big-emoji{font-size:44px}
     #home h1{font-size:clamp(26px,2.6vw,40px)}
     #home .sub{margin-top:5px;font-size:14px}
-    .home-bento{gap:10px}
+    .home-bento{gap:var(--sp-4)}
     .tile{padding:12px 13px}
     .mode .mi{font-size:30px}
     .tile-flagship .mi{font-size:36px}
@@ -181,12 +190,48 @@
   /* bố cục 2 cột: đấu trường bên trái, câu hỏi bên phải */
   .battlegrid{display:grid;gap:var(--gap)}
   @media (min-width:900px){
-    .battlegrid{grid-template-columns:1.02fr 1fr;align-items:stretch}
+    .battlegrid{grid-template-columns:1.02fr 1fr;align-items:stretch;min-height:0}
     /* hai cột tự cân chiều cao: đấu trường giãn ra cho bằng cột câu hỏi */
-    .colL,.colR{display:flex;flex-direction:column}
+    .colL,.colR{display:flex;flex-direction:column;min-height:0}
     .arena{flex:1;min-height:var(--arenaH);margin-bottom:calc(var(--gap) * .7)}
-    .colR .qbox{flex:0 0 auto;justify-content:center;min-height:calc(var(--qF) * 4.6)}
-    .colR{justify-content:space-between;gap:calc(var(--gap) * .6)}
+
+    /* LỖI THẬT: trả lời xong thì .feedback nở ra, .explain và .nextbtn từ
+       display:none hiện lên — cột phải cao thêm ~80px, vượt khỏi thẻ và đẩy nút
+       "CÂU TIẾP THEO" xuống dưới lằn gấp, bắt người chơi cuộn mới đi tiếp được
+       (đo tại 1366×768: cột phải 643px → 724px, nút biến mất khỏi khung nhìn).
+       Nguyên nhân: cột phải không bị chặn chiều cao nên cứ nở, còn
+       justify-content:space-between thì dồn hết vào khoảng cách chứ không chừa
+       chỗ co giãn. Nay: xếp từ trên xuống, chừa phần dư ở đáy làm chỗ cho khối
+       kết quả; hộp câu hỏi và hộp giải thích được phép CO LẠI (và tự cuộn bên
+       trong) nên tổng chiều cao không bao giờ vượt cột. */
+    .colR{justify-content:flex-start;gap:calc(var(--gap) * .5)}
+    /* Đề bài được ưu tiên giữ nguyên vẹn: shrink thấp (0.35) nên khi chật thì
+       phần LỜI GIẢI nhường chỗ trước (shrink 3), chứ không cắt câu hỏi — trẻ
+       vẫn đang cần đọc đề để hiểu lời giải. */
+    .colR .qbox{flex:0 1 auto;justify-content:center;min-height:calc(var(--qF) * 2.4);max-height:34vh;overflow-y:auto}
+    .colR .answers,.colR .answer-entry,.colR .nextbtn,
+    .colR .feedback,.colR .thinkbar,.colR .answer-toolbar{flex:0 0 auto}
+    .colR .explain{flex:0 4 auto;min-height:0;max-height:26vh;overflow-y:auto}
+    /* Cột đã dùng `gap` để giãn dòng — margin-top của từng khối là khoảng cách
+       CỘNG THÊM lần thứ hai, ăn mất ~31px và làm cả câu hỏi lẫn lời giải bị
+       cắt mất chữ dù cột vẫn đủ chỗ. Bỏ margin, chỉ giữ gap. */
+    .colR .feedback,.colR .explain,.colR .nextbtn{margin-top:0}
+    /* Nút "Câu tiếp theo" cao 94px là quá khổ so với vai trò của nó. */
+    .colR .nextbtn{padding:calc(var(--ansP) * .6) var(--ansP)}
+    /* Trả lời xong thì 4 nút đáp án hết là chỗ để BẤM — chúng chỉ còn nhiệm vụ
+       cho thấy đâu là đáp án đúng. Thu nhỏ lại đúng lúc đó để nhường ~55px cho
+       phần lời giải, nhờ vậy câu hỏi và giải thích không còn bị cắt phải cuộn
+       trong hộp (đo tại 1366×768: 308/600 câu bị cắt → còn rất ít).
+       KHÔNG cho transition padding/font-size: đó là thuộc tính bố cục, chuyển
+       động sẽ bắt trình duyệt tính lại layout từng khung hình. Đổi tức thì. */
+    .colR .answers:has(.right,.wrong){gap:calc(var(--gap) * .45)}
+    .colR .answers:has(.right,.wrong) .ans{
+      padding:calc(var(--ansP) * .26) 6px;font-size:calc(var(--ansF) * .78);
+    }
+    /* Dòng phản hồi đã nói lại đáp án đúng trong khi nút đúng cũng đang sáng
+       xanh và hộp giải thích nói rõ vì sao — thu nhỏ một nhịp để bớt xuống
+       dòng, nhường chỗ cho phần thật sự dạy được cho trẻ là lời giải. */
+    .colR .feedback{font-size:calc(var(--qF) * .52);min-height:0}
     /* bản đồ boss trải 1 hàng ngang, không còn 2 hàng chật chội */
     /* cửa hàng 3 cột */
     #shop .shopgrid{grid-template-columns:repeat(3,1fr)}
@@ -244,8 +289,16 @@
   /* căn giữa theo chiều dọc trên màn hình cao */
   @media (min-width:900px) and (min-height:760px){
     body{align-items:center}
+  }
+  /* Hai dòng này TRƯỚC ĐÂY nằm trong khối min-height:760px ở trên. Hậu quả:
+     màn hình cao 720p (1280×720 rất phổ biến) không được áp, thẻ đấu không phải
+     flex-column nên .battlegrid/.colR không có chiều cao xác định — các khối bên
+     trong mất khả năng co lại, câu hỏi dài đẩy phình cả thẻ và bắt cuộn dọc
+     (đo được 409px cuộn ở 1280×720). Chiều cao khung không liên quan gì tới việc
+     thẻ có phải flex hay không, nên tách ra áp cho MỌI màn desktop. */
+  @media (min-width:900px){
     #battle .card{display:flex;flex-direction:column}
-    #battle .battlegrid{flex:1}
+    #battle .battlegrid{flex:1;min-height:0}
   }
   @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
 
@@ -281,28 +334,6 @@
 
   .home-card{container-type:inline-size;container-name:home;text-align:left;
     display:flex;flex-direction:column;padding:clamp(14px,1.3vw,22px);background:#f7f3e9}
-  .home-hub{display:flex;flex-direction:column;gap:clamp(14px,1.35vw,20px);margin:auto 0}
-  .home-overview{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(290px,.75fr);gap:var(--gap)}
-  .home-masthead{position:relative;min-height:190px;display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,.42fr);
-    align-items:center;overflow:hidden;padding:clamp(24px,2.4vw,38px);border-radius:var(--r-3);
-    background:#20264d;color:#fff;box-shadow:0 14px 30px -18px #111936}
-  .home-masthead::before{content:'';position:absolute;inset:0;opacity:.18;pointer-events:none;
-    background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);
-    background-size:34px 34px;mask-image:linear-gradient(90deg,#000,transparent 78%)}
-  .masthead-copy{position:relative;z-index:1;min-width:0}
-  .home-kicker,.zone-kicker,.mode-label{font:900 12px/1 var(--font-body);letter-spacing:.15em}
-  .home-kicker{display:inline-block;margin-bottom:10px;color:#8ee3bd}
-  #home .home-masthead h1{margin:0;color:#fff;font:800 clamp(36px,3.4vw,58px)/.82 var(--font-display);letter-spacing:-.045em}
-  #home .home-masthead .hl{color:#ffce57}
-  #home .home-masthead .sub{max-width:52ch;margin:14px 0 0;color:#d8dcf0;font-size:clamp(14px,.9vw,16px);font-weight:700;line-height:1.45}
-  .hero-orbit{position:relative;z-index:1;width:150px;height:150px;display:grid;place-items:center;justify-self:center}
-  .hero-orbit::before{content:'';position:absolute;inset:25px;border-radius:50%;background:#ffce57;box-shadow:0 0 0 12px rgba(255,206,87,.08)}
-  .hero-orbit .big-emoji{position:relative;margin:0;font-size:64px;line-height:1;filter:drop-shadow(0 7px 0 rgba(32,38,77,.24))}
-  .orbit-line{position:absolute;inset:8px;border:1px solid rgba(255,255,255,.34);border-radius:50%;animation:orbitSpin 12s linear infinite}
-  .orbit-line::before{content:'';position:absolute;top:10px;left:21px;width:9px;height:9px;border-radius:50%;background:#8ee3bd;box-shadow:0 0 12px #8ee3bd}
-  .orbit-line-two{inset:0 22px;animation-direction:reverse;animation-duration:9s;transform:rotate(62deg)}
-  .orbit-line-two::before{background:#ff8e9e;box-shadow:0 0 12px #ff8e9e}
-  @keyframes orbitSpin{to{transform:rotate(1turn)}}
   .tile-sound{position:absolute;z-index:3;top:14px;right:14px;width:42px;height:42px;display:grid;place-items:center;
     border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(255,255,255,.1);color:#fff;
     font-size:18px;cursor:pointer;box-shadow:none;backdrop-filter:blur(8px);transition:background var(--dur-2),transform var(--dur-1)}
@@ -312,10 +343,7 @@
 
   #home .tile-stats{display:flex;flex-direction:column;gap:13px;padding:20px;border:1px solid #ddd7ca;
     border-radius:var(--r-3);background:#fff;box-shadow:0 12px 24px -20px #20264d}
-  .stats-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
   #home .tile-stats .eyebrow{color:#5f6180;font-size:12px}
-  .live-dot{display:flex;align-items:center;gap:6px;color:#34705a;font-size:12px;font-weight:900}
-  .live-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:#43b986;box-shadow:0 0 0 4px #e0f4eb}
   #home .profile-strip{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   #home .profile-strip span{display:flex;flex-direction:column;justify-content:flex-end;gap:5px;padding:12px 8px;
     border:0;border-left:1px solid #e9e4db;border-radius:0;background:transparent}
@@ -323,15 +351,61 @@
   #home .profile-strip b{color:#20264d;font:800 clamp(25px,2vw,34px)/1 var(--font-display)}
   #home .profile-strip small{color:#77758b;font-size:12px}
 
-  .home-zone{display:grid;grid-template-columns:minmax(150px,.18fr) minmax(0,1fr);gap:clamp(16px,2vw,28px);
-    padding-top:clamp(14px,1.3vw,19px);border-top:1px solid #d8d2c6}
-  .zone-heading{display:flex;align-items:flex-start;gap:12px;padding-top:3px}
-  .zone-index{display:grid;place-items:center;width:36px;height:36px;flex:0 0 auto;border:1px solid #cbc4b8;border-radius:50%;
-    color:#77758b;font:900 12px var(--font-body)}
-  .zone-kicker{display:block;margin-bottom:4px;color:#858092;font-size:10px}
-  #home .zone-heading h2{font:800 clamp(17px,1.25vw,22px)/1.1 var(--font-display);letter-spacing:-.015em}
-  #home .modes{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,1fr);gap:12px}
-  #home .quick-modes{display:grid;grid-template-rows:1fr 1fr;gap:12px}
+  /* --- NHỊP KHOẢNG CÁCH CỦA TRANG CHỦ -------------------------------------
+     .home-bento TRƯỚC ĐÂY không có luật bố cục nào: cả file chỉ khai `gap:10px`
+     trong @media (max-height:880px), mà không hề có display:grid/flex. Trên mọi
+     khung cao hơn 880px nó là một <div> block trơn — các ô dán sát nhau, không
+     một pixel nào ngăn cách, và đó chính là chỗ "không có khoảng cách".
+     Nay: một cột dọc, khoảng cách lấy từ thang --sp-* để mọi khe hở trên trang
+     đều là bội số của cùng một đơn vị, không còn số lẻ rải rác mỗi chỗ một kiểu. */
+  /* Một LƯỚI chứ không phải một chồng dọc: hẹp thì xếp một cột, rộng ra thì
+     trang tự lấy thêm cột — thẻ tiến độ nằm cạnh tấm biển, hai phân khu cuối
+     đứng song song — thay vì để trống hai bên rồi kéo dài mãi xuống dưới.
+     Mọi khoảng hở lấy theo CHIỀU CAO KHUNG (vh) nên co giãn liên tục theo cửa
+     sổ, không nhảy bậc tại một mốc phân giải nào. */
+  .home-bento{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);
+    gap:clamp(11px,2.1vh,34px) var(--sp-4);
+    /* stretch: hàng tự chia nhau phần chiều cao còn thừa, nên màn hình càng cao
+       thì các ô càng cao theo chứ không để một dải trắng dưới đáy. */
+    align-content:stretch}
+  /* Lưới ô bên trong cũng phải giãn theo phân khu, nếu không phân khu cao lên
+     mà mấy ô vẫn dính ở mép trên. */
+  .home-zone>.modes,.home-zone>.learning-modes,.home-zone>.tile-more{flex:1;min-height:0}
+
+  /* Mỗi phân khu = một tiêu đề NHÌN THẤY ĐƯỢC + lưới ô của nó. Trước đây ba
+     tiêu đề này là .sr-only: chỉ trình đọc màn hình biết trang chia làm ba
+     nhóm, còn mắt thường thấy 8 ô rời rạc không rõ ô nào thuộc nhóm nào. */
+  .home-zone{display:flex;flex-direction:column;gap:var(--sp-3)}
+  #home .zone-heading{display:flex;align-items:baseline;gap:var(--sp-2);margin:0;
+    color:var(--ink-3);font:800 clamp(13px,.95vw,15px)/1.2 var(--font-body);
+    letter-spacing:.11em;text-transform:uppercase}
+  /* Vạch kẻ chạy hết phần còn lại của dòng — ranh giới giữa hai nhóm hiện rõ
+     mà không cần thêm khung viền hay nền khác màu cho cả khối. */
+  #home .zone-heading::after{content:'';flex:1;height:1px;background:#d8d2c6}
+  #home .zone-heading .zone-num{display:grid;place-items:center;width:22px;height:22px;flex:0 0 auto;
+    border-radius:50%;background:#20264d;color:#fff;font-size:11px;letter-spacing:0}
+
+  /* Đủ rộng: tấm biển và bảng tiến độ chia nhau một hàng. Riêng bước này đã trả
+     lại ~120px chiều cao ở laptop 768p — chỗ trống đó đem tiêu vào cỡ chữ và
+     khoảng thở bên dưới chứ không bỏ không. */
+  @container home (width >= 980px){
+    .home-bento{grid-template-columns:minmax(0,1.9fr) minmax(250px,.75fr)}
+    #home .tile-hero{grid-column:1}
+    #home .tile-stats{grid-column:2}
+    #home .home-zone,#home .tile-credit{grid-column:1/-1}
+  }
+  /* Rất rộng: "Luyện một mình" (2 ô) và "Đấu với bạn" (3 ô) đứng cạnh nhau, chia
+     cột theo đúng số ô nên mọi ô vẫn bằng nhau chằn chặn. */
+  @container home (width >= 1360px){
+    .home-bento{grid-template-columns:repeat(5,minmax(0,1fr))}
+    #home .tile-hero{grid-column:1/4}
+    #home .tile-stats{grid-column:4/6}
+    #home .zone-play,#home .tile-credit{grid-column:1/-1}
+    #home .zone-solo{grid-column:1/3}
+    #home .zone-versus{grid-column:3/6}
+  }
+  #home .modes{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,1fr);gap:var(--sp-4)}
+  #home .quick-modes{display:grid;grid-template-rows:1fr 1fr;gap:var(--sp-4)}
   #home .tile{position:relative;min-width:0;border:1px solid #d9d3c8;border-radius:18px;background:#fff;color:#20264d;
     box-shadow:0 10px 24px -20px #20264d;text-align:left;font:inherit;cursor:pointer;
     transition:transform var(--dur-2) var(--ease-settle),border-color var(--dur-2),box-shadow var(--dur-2)}
@@ -343,16 +417,12 @@
   #home .tile-flagship{min-height:174px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:9px 18px;
     padding:19px 21px;border:0;background:#20264d;color:#fff;overflow:hidden}
   #home .tile-flagship::after{content:'';position:absolute;width:150px;height:150px;right:-50px;bottom:-68px;border:28px solid rgba(142,227,189,.14);border-radius:50%}
-  #home .mode-topline{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
-  #home .mode-label{color:#8ee3bd;font-size:10px}
   #home .tile-flagship .mi{margin:0;font-size:30px;filter:none}
-  #home .mode-copy{align-self:center;position:relative;z-index:1}
   #home .tile-flagship b{color:#fff;font-size:clamp(24px,2vw,34px);letter-spacing:-.02em}
   #home .tile-flagship .tile-desc{max-width:48ch;color:#cfd3e7}
-  #home .mode-bottom{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(150px,.55fr);align-items:end;gap:18px;position:relative;z-index:1}
   #home .tile-cta{color:#ffce57;font:900 13px var(--font-body)}
-  #home button.tile:hover .tile-cta span,#home button.tile:hover .mode-arrow{transform:translateX(3px)}
-  #home .tile-cta span,.mode-arrow{display:inline-block;transition:transform var(--dur-2) var(--ease-pop)}
+  #home button.tile:hover .tile-cta span{transform:translateX(3px)}
+  #home .tile-cta span{display:inline-block;transition:transform var(--dur-2) var(--ease-pop)}
   #home .tile-progress{display:block;color:#dfe2ef;font-size:11px;font-weight:900;text-align:right}
   #home .tile-progress i{display:block;height:5px;margin-top:5px;border:0;border-radius:var(--r-pill);background:rgba(255,255,255,.2);overflow:hidden;font-style:normal}
   #home .tile-progress i::before{content:'';display:block;height:100%;width:var(--done,0%);border-radius:inherit;background:#8ee3bd}
@@ -360,11 +430,13 @@
   #home .quick-modes .mi{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:#fff2bd;font-size:24px}
   #home .quick-modes .surv .mi{background:#ebe5ff;color:#5c4fa1;font:900 31px/1 var(--font-display)}
   #home .quick-modes .mode b{display:inline;font-size:17px}
-  #home .mode-meta{margin-left:7px;color:#8a8390;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
   #home .quick-modes .tile-desc{margin-top:3px;font-size:12px}
-  #home .mode-arrow{justify-self:end;color:#8a8390;font-size:18px}
 
-  #home .learning-modes,#home .tile-more{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #home .learning-modes,#home .tile-more{display:grid;gap:var(--sp-4)}
+  #home .learning-modes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* 3 nút (Đấu Đối Kháng/Nim/Hà Nội) xếp 1 hàng thay vì lưới 2 cột dư một ô
+     trống, kéo dài thêm hẳn một hàng cho cả khối — trang chủ vì vậy đỡ cao. */
+  #home .tile-more{grid-template-columns:repeat(3,minmax(0,1fr))}
   #home .learning-mode{min-height:96px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;
     padding:14px 16px;overflow:hidden;isolation:isolate}
   #home .learning-mode::before{content:'';position:absolute;inset:0 auto 0 0;width:4px;background:#61c9d7;transform:none;transition:width var(--dur-2)}
@@ -372,39 +444,55 @@
   #home .sudoku-mode::before{background:#59b77c}
   #home .duel-mode::before{background:#e57887}
   #home .nim-mode::before{background:#d3a747}
-  #home .learning-mode.typing-mode,#home .learning-mode.sudoku-mode,#home .learning-mode.duel-mode,#home .learning-mode.nim-mode{background:#fff}
+  #home .hanoi-mode::before{background:#8d6bff}
+  #home .learning-mode.typing-mode,#home .learning-mode.sudoku-mode,#home .learning-mode.duel-mode,#home .learning-mode.nim-mode,#home .learning-mode.hanoi-mode{background:#fff}
   #home .world-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e5f7f8;font-size:27px;filter:none;animation:none}
   #home .sudoku-mode .world-icon{background:#e9f7e9}
   #home .duel-mode .world-icon{background:#fcebed}
   #home .nim-mode .world-icon{background:#fbf1d9}
+  #home .hanoi-mode .world-icon{background:#f1ecff}
   #home .learning-mode b{display:block;color:#20264d;font:800 clamp(16px,1.1vw,19px)/1.1 var(--font-display)}
   #home .learning-mode small{display:block;max-width:52ch;margin-top:4px;color:#747184;font-size:12px;line-height:1.35;font-weight:700}
   #home .world-tag{position:absolute;top:9px;right:12px;border:0;border-radius:0;padding:0;background:none;color:#8b8796;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
-  #home .learning-mode>.mode-arrow{align-self:end;margin-bottom:3px}
-  #home .social-zone .learning-mode{min-height:76px}
-  #home .social-zone .world-icon{width:42px;height:42px;font-size:23px}
-  #home .social-zone .learning-mode small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+  /* Thẻ hẹp: mọi lưới về một cột, riêng ba ô "Đấu với bạn" xuống hai rồi một. */
   @container home (width < 900px){
-    .home-overview{grid-template-columns:1fr}.home-zone{grid-template-columns:1fr}.zone-heading{align-items:center}
+    #home .tile-more{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @container home (width < 620px){
-    .home-masthead{grid-template-columns:1fr;min-height:250px}.hero-orbit{position:absolute;right:-18px;bottom:-28px;opacity:.72;transform:scale(.82)}
-    #home .home-masthead .sub{max-width:70%;margin-left:0}
     #home .modes{grid-template-columns:1fr}#home .tile-flagship{min-height:190px}
     #home .learning-modes,#home .tile-more{grid-template-columns:1fr}
-    #home .mode-bottom{grid-template-columns:1fr}#home .tile-progress{text-align:left}
-    #home .social-zone .learning-mode small{white-space:normal}
+    #home .tile-progress{text-align:left}
   }
+  /* Kích thước theo CHIỀU CAO KHUNG, không chốt cứng ở một mốc nào: mỗi giá trị
+     là clamp(sàn, vh, trần) nên màn hình càng cao thì tranh bìa, ô bấm và chữ
+     càng lớn theo — laptop 768p vẫn gói gọn trong một khung, còn màn 1440p thì
+     dùng hết chỗ chứ không để thừa một dải trắng dưới đáy. */
+  #home .hero-art-banner-wrap{height:clamp(54px,12vh,240px);margin-bottom:clamp(6px,1.2vh,20px)}
+  #home .tile-flagship{min-height:clamp(116px,21vh,320px)}
+  #home .learning-mode{min-height:clamp(66px,11vh,190px)}
+  #home .quick-modes .mi{width:clamp(34px,5vh,64px);height:clamp(34px,5vh,64px);font-size:clamp(20px,2.9vh,36px)}
+  #home .world-icon{width:clamp(38px,5.4vh,70px);height:clamp(38px,5.4vh,70px);font-size:clamp(21px,3.1vh,39px)}
+  #home .profile-strip b{font-size:clamp(21px,3.5vh,48px)}
+
+  /* Khung THẤP (laptop 768p trở xuống) chỉ còn phải siết mấy chỗ đệm cố định —
+     phần chiều cao đã tự lo bằng vh ở trên rồi. */
   @media (min-width:900px) and (max-height:820px){
-    .home-card{padding:12px 16px}.home-hub{gap:9px}.home-masthead{min-height:150px;padding:18px 28px}
-    .hero-orbit{width:120px;height:120px}.hero-orbit .big-emoji{font-size:50px}
-    #home .home-masthead h1{font-size:clamp(32px,3vw,46px)}#home .home-masthead .sub{margin-top:9px}
-    .home-zone{padding-top:9px}.zone-index{width:32px;height:32px}
-    #home .tile-flagship{min-height:142px;padding:13px 18px}#home .tile-flagship b{font-size:25px}
-    #home .quick-modes .mode{padding:9px 14px}#home .quick-modes .mi{width:38px;height:38px}
-    #home .learning-mode{min-height:78px;padding:9px 14px}#home .social-zone .learning-mode{min-height:64px}
-    #home .world-icon{width:42px;height:42px;font-size:23px}.tile-credit{padding-block:4px}
+    .home-card{padding:var(--sp-1) var(--sp-4)}
+    .home-zone{gap:var(--sp-1)}
+    #home .zone-heading{font-size:12px}
+    #home .zone-heading .zone-num{width:19px;height:19px;font-size:10px}
+    #home .tile-hero{padding-block:var(--sp-2)}
+    #home h1{font-size:clamp(24px,2.3vw,34px)}
+    #home .sub{margin-top:var(--sp-1);font-size:13px}
+    #home .tile-stats{gap:var(--sp-1);padding:var(--sp-2) var(--sp-3)}
+    #home .profile-strip span{padding:var(--sp-1) 8px;gap:2px}
+    #home .tile-flagship{padding:10px 18px;gap:5px 18px}
+    #home .tile-flagship b{font-size:23px}#home .tile-flagship .mi{font-size:26px}
+    #home .quick-modes{gap:var(--sp-2)}
+    #home .quick-modes .mode{padding:6px 14px}
+    #home .learning-mode{padding:7px 14px}
+    .tile-credit{padding-block:2px}
   }
 
 
@@ -443,16 +531,13 @@
   .arena.lava{background:linear-gradient(180deg,#ff9e6d 0%,#ffd0a0 47%,#c94a2a 47%,#8f2d15 100%)}
   .arena.ice{background:linear-gradient(180deg,#bfeaff 0%,#e8f9ff 47%,#9fd8f0 47%,#7cc0e0 100%)}
 
-  /* dải cỏ trang trí ở mặt đất cho đấu trường đỡ trống */
+  /* dải cỏ trang trí ở mặt đất cho đấu trường */
   .ground{position:absolute;left:0;right:0;bottom:0;height:47%;pointer-events:none;z-index:1;overflow:hidden}
   /* vệt sáng mềm ở đường chân trời cho mặt đất có chiều sâu */
   .ground::before{
     content:'';position:absolute;left:0;right:0;top:0;height:14px;
     background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0));
   }
-  .gdeco{position:absolute;bottom:4%;font-size:calc(var(--spriteF) * .22);opacity:.75;
-    animation:swayGrass 3.4s ease-in-out infinite}
-  @keyframes swayGrass{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
   /* bóng đổ oval dưới chân nhân vật */
   .shadowPad{
     position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
@@ -467,17 +552,33 @@
   @keyframes riseUp{from{transform:translateY(20px) scale(1);opacity:.9}to{transform:translateY(-220px) scale(.4);opacity:0}}
 
   .fighter{position:absolute;bottom:6%;text-align:center;width:44%;z-index:3}
-  .fighter .sprite{font-size:var(--spriteF);line-height:1;display:inline-block;filter:drop-shadow(0 4px 3px rgba(0,0,0,.25));
-    animation:idleFloat 2.2s ease-in-out infinite}
-  #bossBox .sprite{animation:idleFloatB 2.6s ease-in-out infinite}
-  @keyframes idleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  @keyframes idleFloatB{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .fighter .sprite{font-size:var(--spriteF);line-height:1;display:inline-block;
+    filter:drop-shadow(0 6px 12px rgba(0,0,0,.55));
+    animation:idleBreathHero 3.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    transform-origin: 50% 90%;
+  }
+  #bossBox .sprite{
+    animation:idleBreathBoss 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    transform-origin: 50% 90%;
+  }
+
+  /* Nhịp thở sống động (Organic Breathing Idle with Squash & Stretch) */
+  @keyframes idleBreathHero{
+    0%,100%{transform:translateY(0) scale(1,1) rotate(0deg)}
+    25%{transform:translateY(-4px) scale(0.99,1.02) rotate(-0.8deg)}
+    50%{transform:translateY(-8px) scale(0.97,1.03) rotate(0.4deg)}
+    75%{transform:translateY(-3px) scale(1.02,0.98) rotate(0.8deg)}
+  }
+  @keyframes idleBreathBoss{
+    0%,100%{transform:translateY(0) scale(1,1) rotate(0deg)}
+    25%{transform:translateY(-4px) scale(0.98,1.02) rotate(0.8deg)}
+    50%{transform:translateY(-10px) scale(0.96,1.04) rotate(-0.5deg)}
+    75%{transform:translateY(-3px) scale(1.02,0.98) rotate(-0.8deg)}
+  }
+
   #heroBox{left:3%} #bossBox{right:3%}
   #duelP1Box{left:3%} #duelP2Box{right:3%}
-  .fighter.turn-active .sprite{filter:drop-shadow(0 0 10px var(--gold-ink))}
-  /* LỖI THẬT: .hpfill không có màu nền mặc định — #heroHp/#bossHp có gradient
-     riêng, nhưng #duelHp1/#duelHp2 thì không, nên thanh máu Đấu Đối Kháng hiện
-     ra RỖNG TOÀN TRẮNG dù width đã đúng %. */
+  .fighter.turn-active .sprite{filter:drop-shadow(0 0 16px var(--gold-ink))}
   #duelHp1{background:linear-gradient(90deg,#37d0a0,#7ef2b8)}
   #duelHp2{background:linear-gradient(90deg,#ff4d67,#ff9e6d)}
   .mech{font-size:calc(var(--hpH) * .72);font-weight:900;background:#fff;border:var(--bd-1) solid var(--ink);border-radius:var(--r-pill);padding:2px 8px;display:inline-block;margin-top:3px;position:relative;z-index:3}
@@ -502,15 +603,52 @@
   .hptext{font-size:calc(var(--hpH) * .75);font-weight:900;margin-top:2px;text-shadow:0 1px 0 #fff}
   .arena.night .hptext,.arena.lava .hptext{color:#fff;text-shadow:0 1px 2px #000}
 
-  @keyframes hurt{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px) rotate(-8deg)}40%{transform:translateX(8px) rotate(8deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-  @keyframes hurtHero{0%,100%{transform:none}25%{transform:rotate(10deg)}50%{transform:rotate(-10deg)}75%{transform:rotate(6deg)}}
-  @keyframes castHero{0%{transform:scale(1)}40%{transform:scale(1.25) translateY(-5px)}100%{transform:scale(1)}}
-  @keyframes castBoss{0%{transform:scale(1)}40%{transform:scale(1.25) translateY(-5px)}100%{transform:scale(1)}}
-  .hurt{animation:hurt .45s ease!important}
-  .hurt-hero{animation:hurtHero .45s ease!important}
-  .cast-hero{animation:castHero .35s ease!important}
-  .cast-boss{animation:castBoss .35s ease!important}
-  .flashWhite{filter:brightness(3) drop-shadow(0 0 10px #fff)!important}
+  /* Đòn đánh tung chưởng sinh động (Kinetic Spellcast Lunge & Recoil) */
+  @keyframes castHero{
+    0%{transform:translate(0,0) scale(1)}
+    25%{transform:translate(-14px,3px) scale(0.92,1.08) rotate(-6deg)}
+    50%{transform:translate(36px,-8px) scale(1.18,0.88) rotate(4deg);filter:brightness(1.5) drop-shadow(0 0 20px #00f2fe)}
+    75%{transform:translate(-4px,1px) scale(0.97,1.03)}
+    100%{transform:translate(0,0) scale(1)}
+  }
+  @keyframes castBoss{
+    0%{transform:translate(0,0) scale(1)}
+    25%{transform:translate(14px,-4px) scale(0.92,1.08) rotate(6deg);filter:drop-shadow(0 0 20px #ff4757)}
+    50%{transform:translate(-38px,6px) scale(1.2,0.85) rotate(-5deg)}
+    75%{transform:translate(4px,-1px) scale(0.97,1.03)}
+    100%{transform:translate(0,0) scale(1)}
+  }
+
+  /* Phản lực trúng đòn nảy bật đàn hồi (Elastic Impact & Hurt Recoil) */
+  @keyframes hurt{
+    0%{transform:translate(0,0) scale(1)}
+    15%{transform:translate(24px,-8px) scale(0.8,1.2) rotate(8deg);filter:brightness(3.5) drop-shadow(0 0 22px #fff)!important}
+    35%{transform:translate(-12px,4px) scale(1.14,0.88) rotate(-6deg)}
+    60%{transform:translate(6px,-2px) scale(0.96,1.04) rotate(3deg)}
+    80%{transform:translate(-2px,0) scale(1.02,0.98)}
+    100%{transform:translate(0,0) scale(1)}
+  }
+  @keyframes hurtHero{
+    0%{transform:translate(0,0) scale(1)}
+    15%{transform:translate(-24px,-8px) scale(0.8,1.2) rotate(-8deg);filter:brightness(3.5) drop-shadow(0 0 22px #fff)!important}
+    35%{transform:translate(12px,4px) scale(1.14,0.88) rotate(6deg)}
+    60%{transform:translate(-6px,-2px) scale(0.96,1.04) rotate(-3deg)}
+    80%{transform:translate(2px,0) scale(1.02,0.98)}
+    100%{transform:translate(0,0) scale(1)}
+  }
+  @keyframes dashHero{
+    0%{transform:translateX(0) scale(1)}
+    35%{transform:translateX(-20px) scale(0.9,1.1)}
+    55%{transform:translateX(75px) scale(1.25,0.85);filter:brightness(2) drop-shadow(0 0 24px #ffd700)}
+    100%{transform:translateX(0) scale(1)}
+  }
+
+  .hurt{animation:hurt .52s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important}
+  .hurt-hero{animation:hurtHero .52s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important}
+  .cast-hero{animation:castHero .42s cubic-bezier(0.2, 0.8, 0.2, 1)!important}
+  .cast-boss{animation:castBoss .42s cubic-bezier(0.2, 0.8, 0.2, 1)!important}
+  .dash-hero{animation:dashHero .55s cubic-bezier(0.22, 1, 0.36, 1)!important}
+  .flashWhite{filter:brightness(3) drop-shadow(0 0 16px #fff)!important}
 
   /* chưởng khí */
   .proj{position:absolute;z-index:var(--z-proj);font-size:calc(var(--spriteF) * .58);pointer-events:none;
@@ -554,7 +692,10 @@
   @keyframes softPulse{50%{opacity:0}}
 
   /* câu hỏi */
-  .qbox{position:relative;background:#fff;border:var(--bd-3) solid var(--ink);border-radius:var(--r-2);padding:calc(var(--gap) * .9);margin-bottom:calc(var(--gap) * .8);animation:qSlide .35s var(--ease-settle);display:flex;flex-direction:column;justify-content:center;min-height:calc(var(--qF) * 3.6)}
+  /* margin-bottom bỏ hẳn: cột phải đã dùng `gap`, giữ thêm margin là cộng dồn
+     hai lần khoảng cách. min-height hạ xuống để câu ngắn không nằm lọt thỏm
+     giữa một hộp trắng cao gấp đôi nội dung. */
+  .qbox{position:relative;background:#fff;border:var(--bd-3) solid var(--ink);border-radius:var(--r-2);padding:calc(var(--gap) * .75) calc(var(--gap) * .9);animation:qSlide .35s var(--ease-settle);display:flex;flex-direction:column;justify-content:center;min-height:calc(var(--qF) * 2.4)}
   @keyframes qSlide{from{transform:translateY(14px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
   .qbox.golden{
     background:linear-gradient(135deg,#fff8dc,#ffe9a8);border-color:var(--gold-ink);
@@ -593,19 +734,41 @@
   .answers.five .ans:last-child{grid-column:1/-1}
   .ans:nth-child(5){animation-delay:.2s}
   .ans{
-    font-family:var(--font-display);font-weight:700;font-size:var(--ansF);background:var(--hero);
-    border:var(--bd-3) solid var(--ink);border-radius:var(--r-2);padding:var(--ansP) 6px;cursor:pointer;
-    box-shadow:var(--elev-2);transition:transform var(--dur-1) var(--ease-snap),box-shadow var(--dur-1) var(--ease-snap),background var(--dur-2) var(--ease-snap);color:var(--ink);
-    animation:ansIn .3s var(--ease-settle) backwards;
+    font-family:var(--font-display);font-weight:800;font-size:var(--ansF);background:var(--hero);
+    border:var(--bd-3) solid var(--ink);border-radius:var(--r-2);padding:calc(var(--ansP) * .72) 6px;cursor:pointer;
+    box-shadow:0 6px 0 var(--ink), 0 8px 16px rgba(0,0,0,0.15);
+    transition:transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, background 0.15s ease, filter 0.15s ease;
+    color:var(--ink);position:relative;
+    animation:ansIn .32s cubic-bezier(0.18, 0.89, 0.32, 1.28) backwards;
   }
-  .ans:nth-child(2){animation-delay:.05s}.ans:nth-child(3){animation-delay:.1s}.ans:nth-child(4){animation-delay:.15s}
-  @keyframes ansIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .ans:hover{transform:translateY(-2px) rotate(-1deg)}
-  .ans:active{transform:translateY(4px);box-shadow:var(--sh-1) var(--ink)}
-  .ans.right{background:var(--green);animation:rightPop .4s var(--ease-pop)}
-  @keyframes rightPop{50%{transform:scale(1.1)}}
-  .ans.wrong{background:var(--boss);color:#fff;animation:wrongShake .4s ease}
-  @keyframes wrongShake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+  .ans:nth-child(2){animation-delay:.04s}.ans:nth-child(3){animation-delay:.08s}.ans:nth-child(4){animation-delay:.12s}
+  @keyframes ansIn{from{transform:translateY(16px) scale(0.92);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+  .ans:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--ink), 0 12px 20px rgba(0, 242, 254, 0.35);filter:brightness(1.04)}
+  .ans:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+  .ans.right{
+    background:linear-gradient(180deg,#2ed573 0%,#10ac84 100%)!important;
+    color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,0.4);
+    box-shadow:0 6px 0 #0b664f, 0 0 24px rgba(46, 213, 115, 0.8)!important;
+    animation:rightPop .45s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important;
+  }
+  @keyframes rightPop{
+    0%{transform:scale(1)}
+    40%{transform:scale(1.1) translateY(-4px);filter:brightness(1.35)}
+    100%{transform:scale(1) translateY(0)}
+  }
+  .ans.wrong{
+    background:linear-gradient(180deg,#ff4757 0%,#c0392b 100%)!important;
+    color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,0.4);
+    box-shadow:0 6px 0 #781912, 0 0 20px rgba(255, 71, 87, 0.7)!important;
+    animation:wrongShake .45s cubic-bezier(0.36, 0.07, 0.19, 0.97)!important;
+  }
+  @keyframes wrongShake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px) rotate(-1.5deg)}
+    40%{transform:translateX(8px) rotate(1.5deg)}
+    60%{transform:translateX(-5px)}
+    80%{transform:translateX(5px)}
+  }
   .ans:disabled{cursor:default;opacity:.95}
 
   .feedback{min-height:calc(var(--qF) * 1.1);margin-top:calc(var(--gap) * .6);font-family:var(--font-display);font-weight:800;font-size:calc(var(--qF) * .62);line-height:1.4}
@@ -954,53 +1117,14 @@
 .chr-arm{transform-origin:60px 62px;animation:chrArm 2.2s ease-in-out infinite}
 .chr-arm-r{animation-delay:-1.1s}
 @keyframes chrArm{0%,100%{transform:rotate(0)}50%{transform:rotate(6deg)}}
-/* ===== BỘ PHẬN LẮP GHÉP =====
-   20 nhân vật đều có TÊN RIÊNG (Ốc Sên, Bạch Tuộc, Rồng Băng…) nhưng trước đây
-   dùng chung một khối tròn có sừng — tên hứa một đằng, hình vẽ một nẻo. Nay mỗi
-   bộ phận là một <g class="bp bp-*"> nằm sẵn trong khuôn, ẩn hết, và applySkin()
-   bật lên theo bảng dữ liệu. Vẫn MỘT bản vẽ, nhưng con nào ra con nấy. */
-.bp{display:none}
-.p-wings .bp-wings,.p-tail .bp-tail,.p-shell .bp-shell,.p-plates .bp-plates,
-.p-tentacles .bp-tentacles,.p-ghost .bp-ghost,.p-fangs .bp-fangs,
-.p-stitches .bp-stitches,.p-crown .bp-crown,.p-hat .bp-hat,
-.p-cape .bp-cape,.p-stinger .bp-stinger,.p-stalks .bp-stalks,
-.p-antennae .bp-antennae,.p-ears .bp-ears,.p-coil .bp-coil,
-.p-claws .bp-claws,.p-staff .bp-staff{display:inline}
-/* Thứ thay chỗ chân thì phải GIẤU chân, không thì thò ra hai cái mấu vô nghĩa
-   bên dưới đám xúc tu / tà áo ma / khúc thân cuộn. */
-.p-tentacles .chr-feet,.p-ghost .chr-feet,.p-coil .chr-feet{display:none}
-/* Nanh dài thay hẳn hai răng thường chứ không chồng lên nhau. */
-.p-fangs .chr-teeth{display:none}
-/* Mũ chóp và vương miện chiếm đúng chỗ sừng/gai mọc ra. */
-.p-hat .chr-horns,.p-hat .chr-spikes,.p-crown .chr-spikes{display:none}
-/* Đỉnh đầu chỉ chứa được MỘT thứ. Mắt cuống, râu và tai dơi mọc lên từ đúng chỗ
-   ba cái gai lưng — để cả hai thì thành một mớ nhọn hoắt không đọc ra hình gì. */
-.p-stalks .chr-spikes,.p-antennae .chr-spikes,.p-ears .chr-spikes{display:none}
-.p-stalks .chr-horns,.p-ears .chr-horns{display:none}
-/* Ốc sên đã có hai mắt trên cuống; giữ thêm cặp mắt trên thân là bốn con mắt. */
-.p-stalks .chr-eyes,.p-stalks .chr-teeth{display:none}
-/* Mắt cuống và râu ngọ nguậy — dấu hiệu "con này còn sống" mà emoji không có. */
-.bp-stalks,.bp-antennae{transform-origin:60px 34px;animation:chrFeeler 3.4s ease-in-out infinite}
-@keyframes chrFeeler{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-
 /* Giai đoạn 2: hào quang đỏ quanh hình. Bảng màu do rageArt() pha ở engine/art.js, còn
    đây chỉ thêm ánh sáng — nhờ vậy con quái KHÔNG bị thay bằng chữ nữa. */
 .sprite.phase2{filter:drop-shadow(0 4px 3px rgba(0,0,0,.25)) drop-shadow(0 0 11px rgba(255,72,58,.8))}
-/* Hình nhân vật đặt vào chỗ trước đây là emoji: lấy cỡ theo font-size của ô chứa
-   (1em = ô chữ) nên mọi @media chỉnh font-size sẵn có vẫn còn tác dụng. Hệ số 1.45
-   bù cho việc hình chỉ chiếm ~70% khung viewBox 120, trong khi glyph emoji lấp kín ô em. */
+/* Hình nhân vật đặt vào chỗ trước đây là emoji */
 .mapnode .em>.beast-art{display:block;width:1.45em;height:1.45em;margin:0 auto;overflow:visible}
-/* Màn "BOSS XUẤT HIỆN" là ảnh giới thiệu nhân vật, dưới thẻ còn thừa chỗ — cho hình
-   to gấp đôi cỡ chữ chứa nó. Hệ số 2,2 là mức lớn nhất mà 5 màn vẫn gói trong
-   một khung 1366×768 (assertion trong browser-smoke.mjs). */
+/* Màn "BOSS XUẤT HIỆN" là ảnh giới thiệu nhân vật */
 .big-emoji>.beast-art,.big-emoji>.hero-art{
   display:block;width:2.2em;height:2.2em;margin:0 auto;overflow:visible}
-/* Boss nổi giận: đồng tử co lại, sừng rực lên. */
-#bossSprite.raging .chr-pupil{r:3.4}
-#bossSprite.raging .chr-horns{filter:drop-shadow(0 0 6px #ff8a3d)}
-@media (prefers-reduced-motion:reduce){
-  .chr-eyes,.chr-arm,.bp-stalks,.bp-antennae{animation:none!important}
-}
 
   /* =====================================================
      TINH CHỈNH CHỮ NGHĨA
