@@ -1,62 +1,81 @@
-/* ============ SAO NỀN & BỤI MA THUẬT HD-2D ============ */
-(function(){
-  const c=document.getElementById('stars');
-  if(c){
-    for(let i=0;i<45;i++){
-      const s=document.createElement('div');s.className='star';
-      const sz=Math.random()*3+1.2;
-      s.style.width=sz+'px';s.style.height=sz+'px';
-      s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
-      s.style.animationDelay=Math.random()*4+'s';
-      c.appendChild(s);
-    }
-  }
-  // Ký hiệu toán học cổ ngữ ma pháp trôi nổi
-  const syms=['➕','✖️','➗','−','=','7','3','9','?','△','◯','✦','✧'];
-  for(let i=0;i<10;i++){
-    const m=document.createElement('div');m.className='mathsym';
-    m.textContent=syms[i%syms.length];
-    m.style.left=Math.random()*96+'%';
-    m.style.fontSize=(16+Math.random()*20)+'px';
-    m.style.animationDuration=(16+Math.random()*16)+'s';
-    m.style.animationDelay=(-Math.random()*20)+'s';
-    document.body.appendChild(m);
-  }
+/* ============ CANVAS NỀN HÌNH HỌC NHẸ ============ */
+(function playfulBackground(){
+  const canvas=document.getElementById('playfulCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d',{alpha:true});
+  if(!ctx)return;
+  const colors=['#ffcf5c','#76d7c4','#ff8f8f','#87b6ff','#b8a1ff'];
+  const shapes=Array.from({length:12},(_,index)=>({
+    x:(index*0.137+0.08)%1,
+    y:(index*0.223+0.06)%1,
+    size:18+(index%4)*8,
+    speed:0.18+(index%3)*0.08,
+    phase:index*0.7,
+    color:colors[index%colors.length],
+    type:index%3,
+  }));
+  const reduced=window.GameRuntime?.reducedMotion?.()||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let width=0,height=0,raf=0,last=0;
 
-  // Hiệu ứng Parallax mượt mà cho các khối đảo trôi diorama
-  let rafId=null;
-  const stage=document.getElementById('dioramaStage');
-  if(stage && !window.GameRuntime?.reducedMotion?.()){
-    window.addEventListener('pointermove',e=>{
-      if(rafId) return;
-      rafId=requestAnimationFrame(()=>{
-        rafId=null;
-        const nx=(e.clientX/window.innerWidth - 0.5)*2;
-        const ny=(e.clientY/window.innerHeight - 0.5)*2;
-        stage.style.setProperty('--px-far', (nx * -18).toFixed(1) + 'px');
-        stage.style.setProperty('--py-far', (ny * -10).toFixed(1) + 'px');
-        stage.style.setProperty('--px-mid', (nx * -9).toFixed(1) + 'px');
-        stage.style.setProperty('--py-mid', (ny * -5).toFixed(1) + 'px');
-        stage.style.setProperty('--px-near', (nx * 14).toFixed(1) + 'px');
-        stage.style.setProperty('--py-near', (ny * 8).toFixed(1) + 'px');
-      });
-    }, {passive:true});
+  function resize(){
+    const dpr=Math.min(devicePixelRatio||1,1.5);
+    width=innerWidth;height=innerHeight;
+    canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+    canvas.style.width=width+'px';canvas.style.height=height+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw(0);
   }
+  function draw(time){
+    ctx.clearRect(0,0,width,height);
+    shapes.forEach(shape=>{
+      const bob=reduced?0:Math.sin(time*0.0005*shape.speed+shape.phase)*10;
+      const x=shape.x*width,y=shape.y*height+bob,s=shape.size;
+      ctx.save();ctx.translate(x,y);ctx.rotate(reduced?0:Math.sin(time*0.00012+shape.phase)*0.15);
+      ctx.globalAlpha=0.19;ctx.fillStyle=shape.color;
+      if(shape.type===0){ctx.beginPath();ctx.arc(0,0,s,0,Math.PI*2);ctx.fill();}
+      else if(shape.type===1){ctx.fillRect(-s,-s,s*2,s*2);}
+      else{ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s,s);ctx.lineTo(-s,s);ctx.closePath();ctx.fill();}
+      ctx.restore();
+    });
+  }
+  function tick(time){
+    if(time-last>33){draw(time);last=time;}
+    raf=requestAnimationFrame(tick);
+  }
+  /* Nền chỉ được chạy khi trang thực sự rảnh. Có ba lý do phải treo lại:
+     tab bị ẩn, người dùng xin giảm chuyển động, và .fx-quiet — cờ mà
+     bootstrap.js/session.js bật ở các màn có vòng lặp riêng (chiến đấu, gõ chữ,
+     Sudoku). Bỏ vế .fx-quiet thì canvas vẫn vẽ 30 khung/giây ngay giữa trận,
+     tranh đúng khung hình mà cờ này sinh ra để nhường. */
+  function nenDuocChay(){
+    return !reduced&&!document.hidden&&!document.body.classList.contains('fx-quiet');
+  }
+  function dongBoVongVe(){
+    if(nenDuocChay()){if(!raf)raf=requestAnimationFrame(tick);}
+    else if(raf){cancelAnimationFrame(raf);raf=0;}
+  }
+  addEventListener('resize',resize,{passive:true});
+  document.addEventListener('visibilitychange',dongBoVongVe);
+  /* .fx-quiet do file khác bật/tắt nên không có sự kiện để nghe — theo dõi
+     thẳng thuộc tính class của <body>. */
+  new MutationObserver(dongBoVongVe)
+    .observe(document.body,{attributes:true,attributeFilter:['class']});
+  resize();
+  dongBoVongVe();
 })();
 
-/* ============ DIORAMA NỀN TRANG ============ */
+/* ============ SẮC NỀN THEO SÀN ĐẤU ============ */
+/* Ghi data-arena-theme lên <body>; theme-playful.css đọc thuộc tính này để đổi
+   sắc nền trang cho khớp ánh sáng của sàn đấu (night / lava / ice). */
 function setDioramaTheme(theme){
-  const stage=document.getElementById('dioramaStage');
-  if(!stage)return;
-  if(theme)stage.setAttribute('data-theme',theme);
-  else stage.removeAttribute('data-theme');
+  document.body.dataset.arenaTheme=theme||'';
 }
 
 /* ============ HẠT MÔI TRƯỜNG & THẢM ĐÁ ĐẤU TRƯỜNG ============ */
 function drawGround(theme,arenaId='arena'){
   const g=document.getElementById(arenaId)?.querySelector('.ground');if(!g)return;
   g.innerHTML='';
-  const n=6;
+  const n=4;
   for(let i=0;i<n;i++){
     const d=document.createElement('div');
     d.className=`vfx-ground-flora gtheme-${theme||'default'}`;
@@ -99,8 +118,8 @@ function startAmbient(theme,arenaId='arena'){
     ambientTimers.add(gone);
   };
 
-  spawn();spawn();
-  ambientId=setInterval(spawn, theme==='lava'?400:theme==='ice'?550:1400);
+  spawn();
+  ambientId=setInterval(spawn, theme==='lava'?900:theme==='ice'?1100:1800);
 }
 
 function stopAmbient(){

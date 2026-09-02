@@ -1,20 +1,23 @@
-/* ============ 10 VIBRANT FANTASY GUARDIANS — HD-2D ART ENGINE ============ */
+/* ============ NHÂN VẬT VECTOR NHẸ ============ */
 const RANKS={1:'⭐ Khởi Động',2:'⭐⭐ Thử Thách',3:'⭐⭐⭐ Cao Thủ',4:'⭐⭐⭐⭐ Huyền Thoại',5:'⭐⭐⭐⭐⭐ Bậc Thầy'};
 
-/* Đường dẫn ảnh chân dung HD-2D của 10 Boss Vệ Binh Vũ Trụ */
-const FALLBACK_BOSS_SPRITE='assets/images/hd2d/boss_dragon.jpg';
-const BOSS_SPRITES=[
-  'assets/images/hd2d/boss_01_sora.jpg',
-  'assets/images/hd2d/boss_02_sparky.jpg',
-  'assets/images/hd2d/boss_03_stitchwork.jpg',
-  'assets/images/hd2d/boss_04_ignis.jpg',
-  'assets/images/hd2d/boss_05_vex.jpg',
-  'assets/images/hd2d/boss_06_nocturne.jpg',
-  'assets/images/hd2d/boss_07_glacius.jpg',
-  'assets/images/hd2d/boss_08_solkahn.jpg',
-  'assets/images/hd2d/boss_09_lumiel.jpg',
-  'assets/images/hd2d/boss_10_leviator.jpg',
+/* Mỗi skin chỉ đổi ba màu CSS, không tải bitmap và không tốn bộ lọc GPU. */
+const ART_PALETTES=[
+  ['#77c66e','#dff4b8','#277a52'],
+  ['#8b7cf6','#dfd9ff','#5d3bb5'],
+  ['#ff8c7a','#ffe1b8','#b44b62'],
+  ['#f5a742','#fff0a8','#b85f22'],
+  ['#ec6f91','#ffd6df','#9c3156'],
+  ['#6e86d6','#d9e2ff','#3e56a2'],
+  ['#64bde4','#d9f6ff','#257ca8'],
+  ['#f2c14e','#fff0aa','#a26b14'],
+  ['#55b89b','#d3f4e9','#237a67'],
+  ['#5fb2cc','#cdf2f4','#245f83'],
 ];
+/* Số skin có thật. Trước đây các game đếm bằng BOSS_SPRITES.length với nhánh dự
+   phòng `:10` viết cứng; xoá mảng ảnh đi thì mọi nơi lặng lẽ rơi về số 10 và chỉ
+   đúng nhờ trùng hợp. Đọc thẳng từ bảng màu để thêm/bớt skin không vỡ chỗ nào. */
+const ART_SKIN_COUNT=ART_PALETTES.length;
 
 /* Bơm hình từ <template> vào một vỏ rỗng. Vỏ là <svg> (như #bossSprite) thì chép
    phần thân vào trong; vỏ là thẻ thường thì gắn nguyên cả <svg> vào. */
@@ -34,7 +37,7 @@ function fillArt(host,tplId){
   return art;
 }
 
-/* Áp dụng skin nhân vật / boss vào phần tử hình ảnh */
+/* Áp dụng skin bằng biến màu cho SVG phẳng. */
 function applySkin(el,art){
   if(!el)return el;
   const isHero=Boolean(art&&art.isHero);
@@ -46,24 +49,15 @@ function applySkin(el,art){
   else if(art&&typeof art.spriteIndex==='number')spriteIdx=art.spriteIndex;
   else if(art&&typeof art._spriteIndex==='number')spriteIdx=art._spriteIndex;
 
+  const palette=isHero?['#4d96ff','#dff5ff','#2458a6']:
+    isTiger?['#ff9f43','#ffe0a8','#a9511f']:ART_PALETTES[((spriteIdx%ART_PALETTES.length)+ART_PALETTES.length)%ART_PALETTES.length];
+  el.style.setProperty('--art-main',palette[0]);
+  el.style.setProperty('--art-soft',palette[1]);
+  el.style.setProperty('--art-dark',palette[2]);
   if(art&&art.aura)el.style.setProperty('--c-aura',art.aura);
   if(art&&art.expression)el.setAttribute('data-expression',art.expression);
   el.classList.toggle('phase2',isPhase2);
 
-  const img=el.querySelector?el.querySelector('image, img'):null;
-  if(img){
-    let src;
-    if(isHero){
-      src='assets/images/hd2d/hero_wizard.jpg';
-    }else if(isTiger){
-      src='assets/images/hd2d/player_tiger.jpg';
-    }else{
-      const count=BOSS_SPRITES.length;
-      src=BOSS_SPRITES[((spriteIdx%count)+count)%count]||FALLBACK_BOSS_SPRITE;
-    }
-    if(img.setAttribute)img.setAttribute('href',src);
-    if(img.src)img.src=src;
-  }
   return el;
 }
 
@@ -73,7 +67,7 @@ function buildBeastArt(art){
   return svg?applySkin(svg,art):null;
 }
 
-/* Giai đoạn 2: Bộc phá hào quang cuồng nộ rực đỏ HD-2D. */
+/* Giai đoạn 2: đổi sắc đỏ để trẻ nhận ra boss đang mạnh lên. */
 function rageArt(art){
   const idx=typeof art==='number'?art:(art&&typeof art.spriteIndex==='number'?art.spriteIndex:0);
   return {spriteIndex:idx,phase2:true,aura:'rgba(255, 42, 42, 0.75)',expression:'rage'};
@@ -93,4 +87,3 @@ function paintBoss(b){
   applySkin(el,bossArt(b));
   el.setAttribute('aria-label',b?.name||'Vệ Binh Vũ Trụ');
 }
-

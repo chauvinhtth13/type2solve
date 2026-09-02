@@ -58,7 +58,7 @@
   }
 
   function skinAt(index) {
-    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
+    const count = (typeof ART_SKIN_COUNT !== 'undefined' ? ART_SKIN_COUNT : 10);
     return { spriteIndex: skinIndex[index] % count };
   }
 
@@ -69,7 +69,7 @@
   }
 
   function cycleDuelSkin(playerNumber, dir) {
-    const count = (typeof BOSS_SPRITES !== 'undefined' ? BOSS_SPRITES.length : 10);
+    const count = (typeof ART_SKIN_COUNT !== 'undefined' ? ART_SKIN_COUNT : 10);
     const i = playerNumber - 1;
     skinIndex[i] = (skinIndex[i] + dir + count) % count;
     paintPreview(playerNumber);

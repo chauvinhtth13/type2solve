@@ -23,14 +23,14 @@
           <!-- MASCOT HERO PANEL -->
           <div class="bento-panel mascot-panel">
             <div class="mascot-avatar-wrap">
-              <img src="assets/images/hd2d/mascot_idle.jpg" alt="Mascot Giáo Sư Cú Pixel" id="typingMascotImg" class="mascot-img">
+              <span id="typingMascotImg" class="mascot-img" role="img" aria-label="Bạn Cú Mè">🦉</span>
               <div class="speech-bubble" id="mascotSpeechBubble">
                 <p id="mascotSpeechText">"Bật mode tập trung, vào việc nào! 🚀"</p>
               </div>
             </div>
             <div class="mascot-identity">
-              <h3>Giáo Sư Cú Pixel 🧙‍♂️</h3>
-              <p class="mascot-role">Phù thủy đồng hành</p>
+              <h3>Bạn Cú Mè</h3>
+              <p class="mascot-role">Bạn đồng hành luyện gõ</p>
             </div>
           </div>
 
@@ -86,9 +86,9 @@
         <!-- HUD THÔNG SỐ GAMING -->
         <div class="typing-hud bento-hud">
           <div class="hud-item stage-pill" id="typingStagePill" hidden>🏰 Chặng <b id="typingStage">1/10</b></div>
-          <div class="hud-item stat-wpm"><img src="assets/images/hd2d/ui_icon_wpm.jpg" class="hud-icon" alt="WPM"> <span>WPM: <b id="typingWpm">0</b></span></div>
-          <div class="hud-item stat-acc"><img src="assets/images/hd2d/ui_icon_accuracy.jpg" class="hud-icon" alt="Accuracy"> <span>Đúng: <b id="typingAccuracy">100%</b></span></div>
-          <div class="hud-item stat-timer"><img src="assets/images/hd2d/ui_icon_timer.jpg" class="hud-icon" alt="Timer"> <span>Thời gian: <b id="typingTimer">00:00</b></span></div>
+          <div class="hud-item stat-wpm"><span class="hud-icon" aria-hidden="true">⌨️</span> <span>WPM: <b id="typingWpm">0</b></span></div>
+          <div class="hud-item stat-acc"><span class="hud-icon" aria-hidden="true">🎯</span> <span>Đúng: <b id="typingAccuracy">100%</b></span></div>
+          <div class="hud-item stat-timer"><span class="hud-icon" aria-hidden="true">⏱️</span> <span>Thời gian: <b id="typingTimer">00:00</b></span></div>
           <div class="hud-item stat-lives">❤️ <b id="typingLives">3</b></div>
           <div class="hud-item stat-score">🏆 <b id="typingScore">0</b></div>
           <div class="hud-item stat-combo">🔥 <b id="typingCombo">0</b></div>
@@ -98,7 +98,7 @@
         <!-- SÂN ĐẤU QUÁI VẬT & MASCOT CHEERING -->
         <div class="typing-battlefield" id="typingField" aria-label="Quái vật mang từ đang tiến về cổng">
           <div class="mascot-play-bubble" id="playMascotBubble">
-            <img src="assets/images/hd2d/mascot_idle.jpg" id="playMascotImg" alt="Mascot reaction">
+            <span id="playMascotImg" class="play-mascot" role="img" aria-label="Bạn Cú Mè">🦉</span>
             <div class="play-speech" id="playSpeechText">Tập trung nào!</div>
           </div>
           <div class="typing-gate"><span data-art="tplHero"></span><i></i></div>
@@ -122,8 +122,11 @@
       <section class="game-result" id="typingResult" hidden aria-live="polite">
         <div class="result-card-inner">
           <div class="result-header">
-            <img src="assets/images/hd2d/ui_icon_trophy.jpg" class="result-trophy-img" alt="Cup Trophy" id="typingResultIconImg">
-            <div class="result-icon-fallback" id="typingResultIcon" hidden>🏆</div>
+            <!-- MỘT biểu tượng duy nhất, và đúng là cái mà JS ghi vào. Trước đây
+                 có hai: một thẻ tĩnh luôn hiện 🏆 và một thẻ dự phòng mang
+                 hidden — mà JS chỉ đổi thẻ dự phòng, nên thua trận vẫn thấy cúp.
+                 aria-hidden vì tiêu đề ngay bên dưới đã nói rõ kết quả. -->
+            <span class="result-trophy-img" id="typingResultIcon" aria-hidden="true">🏆</span>
             <h2 id="typingResultTitle">HOÀN THÀNH XUẤT SẮC!</h2>
             <div class="rank-badge" id="typingRankBadge">🧙‍♂️ Phù Thủy Bàn Phím Tối Thượng</div>
             <p id="typingResultText" class="result-desc"></p>

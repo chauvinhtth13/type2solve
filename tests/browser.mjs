@@ -583,22 +583,18 @@ try {
 
   // LỖI THẬT: boss.textContent='🐛' xoá sạch nút con của <svg> → boss biến mất hẳn
   // phần còn lại của phiên (font-size:0 nên emoji thay thế cũng vô hình).
-  /* Bản cũ so sánh biến --c-body vì hồi đó 10 boss dùng CHUNG một ảnh, phải tô
-     lại màu bằng CSS mới phân biệt được. Nay mỗi boss đã có ảnh riêng
-     (BOSS_SPRITES) nên applySkin() không còn đặt --c-body nữa — giai đoạn 2
-     được thể hiện bằng class .phase2 + quầng sáng đỏ --c-aura, ảnh giữ nguyên
-     vì vẫn là chính con boss đó lúc nổi giận. Kiểm đúng tín hiệu hiện hành,
-     nhưng vẫn giữ nguyên ý đồ gốc: boss KHÔNG được biến mất sau giai đoạn 2. */
+  /* Nhân vật mới là SVG vector, nên kiểm các shape còn tồn tại và màu thân đổi
+     khi vào phase2 thay vì đòi một thẻ <image> bitmap. */
   await evaluate(`goHome();localStorage.clear();startAdventure();beginBattle()`); await sleep(500);
-  const truoc = await evaluate(`document.getElementById('bossSprite').style.getPropertyValue('--c-aura')`);
+  const truoc = await evaluate(`(()=>{const el=document.getElementById('bossSprite');return {
+    hao:el.style.getPropertyValue('--c-aura'),mau:getComputedStyle(el.querySelector('.art-body')).fill}})()`);
   await evaluate(`G.bossHp=Math.floor(G.bossMaxHp*0.3);checkPhase2()`); await sleep(900);
   const sau = await evaluate(`(()=>{const el=document.getElementById('bossSprite');
-    const img=el.querySelector('image, img');
-    return {con:el.childElementCount, hao:el.style.getPropertyValue('--c-aura'),
-            anh:(img&&(img.getAttribute('href')||img.getAttribute('src')))||'',
-            rage:el.classList.contains('phase2')}})()`);
-  assert(sau.con > 0 && sau.rage && sau.anh !== '' && sau.hao !== truoc,
-    `Boss vẫn còn hình sau khi vào giai đoạn 2 (${sau.con} nút, ảnh ${sau.anh.split('/').pop()}, quầng ${truoc || '—'}→${sau.hao})`);
+    return {con:el.childElementCount,shape:el.querySelectorAll('.art-body,.art-eye,.art-mouth').length,
+      hao:el.style.getPropertyValue('--c-aura'),mau:getComputedStyle(el.querySelector('.art-body')).fill,
+      rage:el.classList.contains('phase2')}})()`);
+  assert(sau.con > 0 && sau.shape >= 4 && sau.rage && sau.mau !== truoc.mau && sau.hao !== truoc.hao,
+    `Boss vector vẫn còn hình sau phase2 (${sau.shape} shape, màu ${truoc.mau}→${sau.mau})`);
 
   // Cùng một lỗi ở chế độ Sinh tồn (survAdvance).
   await evaluate(`goHome();startSurvival()`); await sleep(400);
@@ -620,11 +616,10 @@ try {
   await evaluate(`goHome();startAdventure()`); await sleep(400);
   const gioiThieu = await evaluate(`(()=>{const art=document.querySelector('#introEmoji>svg.beast-art')||document.querySelector('#introEmoji svg');
     if(!art)return {co:false};
-    const img=art.querySelector('image, img');
-    const src=img?((img.getAttribute&&img.getAttribute('href'))||img.src||''):'';
-    return {co:true, src, boss:BOSS_SPRITES[G.bossIndex]}})()`);
-  assert(gioiThieu.co && gioiThieu.src.includes(gioiThieu.boss),
-    `Màn giới thiệu vẽ đúng con quái sắp gặp (${gioiThieu.src})`);
+    return {co:true,shape:art.querySelectorAll('.art-body,.art-eye,.art-mouth').length,
+      mau:art.style.getPropertyValue('--art-main'),boss:ART_PALETTES[G.bossIndex][0]}})()`);
+  assert(gioiThieu.co && gioiThieu.shape >= 4 && gioiThieu.mau === gioiThieu.boss,
+    `Màn giới thiệu vẽ đúng quái vector sắp gặp (${gioiThieu.mau})`);
   await evaluate(`goHome()`); await sleep(300);
 
   /* ===== MODAL ỦNG HỘ & GÓP Ý ===== */
@@ -774,20 +769,16 @@ try {
   assert(allocGuards.good && !allocGuards.overCap && !allocGuards.leftover
     && !allocGuards.negative && !allocGuards.fractional,
     `Phân bổ điểm chặn đủ mọi đầu vào sai: ${JSON.stringify(allocGuards)}`);
-  /* Cũng như test giai đoạn 2 ở trên: skin nhân vật giờ là ẢNH RIÊNG theo
-     spriteIndex chứ không còn tô lại --c-body, nên phải kiểm ảnh có đổi thật
-     hay không. Ý đồ gốc giữ nguyên: bấm ◀▶ phải ra một nhân vật KHÁC, chứ
-     không phải bấm cho vui. */
+  /* Skin vector đổi bộ màu theo spriteIndex; bấm ◀▶ phải cho ra màu khác. */
   const duelSkin = await evaluate(`(()=>{
     const svg=document.getElementById('duelSkinPreview1');
-    const anh=()=>{const i=svg.querySelector('image, img');
-      return (i&&(i.getAttribute('href')||i.getAttribute('src')))||'';};
-    const before=anh();
+    const mau=()=>svg.style.getPropertyValue('--art-main');
+    const before=mau();
     cycleDuelSkin(1,1);
-    return {before, after:anh()};
+    return {before, after:mau()};
   })()`);
   assert(Boolean(duelSkin.before) && Boolean(duelSkin.after) && duelSkin.before !== duelSkin.after,
-    `Đổi nhân vật Đấu Đối Kháng thực sự đổi hình (${duelSkin.before.split('/').pop()} → ${duelSkin.after.split('/').pop()})`);
+    `Đổi nhân vật Đấu Đối Kháng thực sự đổi màu (${duelSkin.before} → ${duelSkin.after})`);
 
   // LỖI THẬT: mặc định flex-shrink:1 từng cho phép #duelQbox bị NÉN THẤP HƠN nội
   // dung của nó khi câu hỏi dài 3 dòng — chữ tràn ra ngoài khung, đè lên "Đến lượt

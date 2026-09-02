@@ -81,13 +81,11 @@
     min-height:100vh;color:var(--ink);
     display:flex;align-items:center;justify-content:center;overflow-x:hidden;
   }
-  .stars{position:fixed;inset:0;pointer-events:none;z-index:var(--z-bg)}
-  .star{position:absolute;background:#fff;border-radius:50%;opacity:.7;animation:twinkle 3s infinite}
-  @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.9}}
-  /* 40 ngôi sao + 10 ký hiệu toán chạy vô hạn suốt cả phiên. Ở màn hình có vòng lặp
-     riêng (chiến đấu, gõ chữ, Sudoku) chúng chỉ tranh khung hình, nên dừng hẳn.
-     bootstrap.js gắn thêm .fx-quiet khi rời tab. */
-  body.fx-quiet .star,body.fx-quiet .mathsym{animation-play-state:paused}
+  /* Nền động của phiên nay là #playfulCanvas (app/background.js) chứ không còn
+     là các thẻ .star/.mathsym rời. Ở màn hình có vòng lặp riêng (chiến đấu, gõ
+     chữ, Sudoku) nó chỉ tranh khung hình, nên bị dừng hẳn: bootstrap.js gắn
+     .fx-quiet và vòng vẽ tự treo lại — xem playfulBackground(). */
+  body.fx-quiet .playful-canvas{opacity:.5}
 
   /* =====================================================
      HỆ THỐNG BỐ CỤC — thang tỉ lệ theo bề rộng màn hình
@@ -552,33 +550,17 @@
   @keyframes riseUp{from{transform:translateY(20px) scale(1);opacity:.9}to{transform:translateY(-220px) scale(.4);opacity:0}}
 
   .fighter{position:absolute;bottom:6%;text-align:center;width:44%;z-index:3}
-  .fighter .sprite{font-size:var(--spriteF);line-height:1;display:inline-block;
-    filter:drop-shadow(0 6px 12px rgba(0,0,0,.55));
-    animation:idleBreathHero 3.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-    transform-origin: 50% 90%;
-  }
-  #bossBox .sprite{
-    animation:idleBreathBoss 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-    transform-origin: 50% 90%;
-  }
-
-  /* Nhịp thở sống động (Organic Breathing Idle with Squash & Stretch) */
-  @keyframes idleBreathHero{
-    0%,100%{transform:translateY(0) scale(1,1) rotate(0deg)}
-    25%{transform:translateY(-4px) scale(0.99,1.02) rotate(-0.8deg)}
-    50%{transform:translateY(-8px) scale(0.97,1.03) rotate(0.4deg)}
-    75%{transform:translateY(-3px) scale(1.02,0.98) rotate(0.8deg)}
-  }
-  @keyframes idleBreathBoss{
-    0%,100%{transform:translateY(0) scale(1,1) rotate(0deg)}
-    25%{transform:translateY(-4px) scale(0.98,1.02) rotate(0.8deg)}
-    50%{transform:translateY(-10px) scale(0.96,1.04) rotate(-0.5deg)}
-    75%{transform:translateY(-3px) scale(1.02,0.98) rotate(-0.8deg)}
-  }
-
+  .fighter .sprite{font-size:var(--spriteF);line-height:1;display:inline-block;filter:drop-shadow(0 4px 3px rgba(0,0,0,.25));
+    animation:idleFloat 2.2s ease-in-out infinite}
+  #bossBox .sprite{animation:idleFloatB 2.6s ease-in-out infinite}
+  @keyframes idleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes idleFloatB{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   #heroBox{left:3%} #bossBox{right:3%}
   #duelP1Box{left:3%} #duelP2Box{right:3%}
-  .fighter.turn-active .sprite{filter:drop-shadow(0 0 16px var(--gold-ink))}
+  .fighter.turn-active .sprite{filter:drop-shadow(0 0 10px var(--gold-ink))}
+  /* LỖI THẬT: .hpfill không có màu nền mặc định — #heroHp/#bossHp có gradient
+     riêng, nhưng #duelHp1/#duelHp2 thì không, nên thanh máu Đấu Đối Kháng hiện
+     ra RỖNG TOÀN TRẮNG dù width đã đúng %. */
   #duelHp1{background:linear-gradient(90deg,#37d0a0,#7ef2b8)}
   #duelHp2{background:linear-gradient(90deg,#ff4d67,#ff9e6d)}
   .mech{font-size:calc(var(--hpH) * .72);font-weight:900;background:#fff;border:var(--bd-1) solid var(--ink);border-radius:var(--r-pill);padding:2px 8px;display:inline-block;margin-top:3px;position:relative;z-index:3}
@@ -603,52 +585,20 @@
   .hptext{font-size:calc(var(--hpH) * .75);font-weight:900;margin-top:2px;text-shadow:0 1px 0 #fff}
   .arena.night .hptext,.arena.lava .hptext{color:#fff;text-shadow:0 1px 2px #000}
 
-  /* Đòn đánh tung chưởng sinh động (Kinetic Spellcast Lunge & Recoil) */
-  @keyframes castHero{
-    0%{transform:translate(0,0) scale(1)}
-    25%{transform:translate(-14px,3px) scale(0.92,1.08) rotate(-6deg)}
-    50%{transform:translate(36px,-8px) scale(1.18,0.88) rotate(4deg);filter:brightness(1.5) drop-shadow(0 0 20px #00f2fe)}
-    75%{transform:translate(-4px,1px) scale(0.97,1.03)}
-    100%{transform:translate(0,0) scale(1)}
-  }
-  @keyframes castBoss{
-    0%{transform:translate(0,0) scale(1)}
-    25%{transform:translate(14px,-4px) scale(0.92,1.08) rotate(6deg);filter:drop-shadow(0 0 20px #ff4757)}
-    50%{transform:translate(-38px,6px) scale(1.2,0.85) rotate(-5deg)}
-    75%{transform:translate(4px,-1px) scale(0.97,1.03)}
-    100%{transform:translate(0,0) scale(1)}
-  }
-
-  /* Phản lực trúng đòn nảy bật đàn hồi (Elastic Impact & Hurt Recoil) */
-  @keyframes hurt{
-    0%{transform:translate(0,0) scale(1)}
-    15%{transform:translate(24px,-8px) scale(0.8,1.2) rotate(8deg);filter:brightness(3.5) drop-shadow(0 0 22px #fff)!important}
-    35%{transform:translate(-12px,4px) scale(1.14,0.88) rotate(-6deg)}
-    60%{transform:translate(6px,-2px) scale(0.96,1.04) rotate(3deg)}
-    80%{transform:translate(-2px,0) scale(1.02,0.98)}
-    100%{transform:translate(0,0) scale(1)}
-  }
-  @keyframes hurtHero{
-    0%{transform:translate(0,0) scale(1)}
-    15%{transform:translate(-24px,-8px) scale(0.8,1.2) rotate(-8deg);filter:brightness(3.5) drop-shadow(0 0 22px #fff)!important}
-    35%{transform:translate(12px,4px) scale(1.14,0.88) rotate(6deg)}
-    60%{transform:translate(-6px,-2px) scale(0.96,1.04) rotate(-3deg)}
-    80%{transform:translate(2px,0) scale(1.02,0.98)}
-    100%{transform:translate(0,0) scale(1)}
-  }
-  @keyframes dashHero{
-    0%{transform:translateX(0) scale(1)}
-    35%{transform:translateX(-20px) scale(0.9,1.1)}
-    55%{transform:translateX(75px) scale(1.25,0.85);filter:brightness(2) drop-shadow(0 0 24px #ffd700)}
-    100%{transform:translateX(0) scale(1)}
-  }
-
-  .hurt{animation:hurt .52s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important}
-  .hurt-hero{animation:hurtHero .52s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important}
-  .cast-hero{animation:castHero .42s cubic-bezier(0.2, 0.8, 0.2, 1)!important}
-  .cast-boss{animation:castBoss .42s cubic-bezier(0.2, 0.8, 0.2, 1)!important}
-  .dash-hero{animation:dashHero .55s cubic-bezier(0.22, 1, 0.36, 1)!important}
-  .flashWhite{filter:brightness(3) drop-shadow(0 0 16px #fff)!important}
+  @keyframes hurt{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px) rotate(-8deg)}40%{transform:translateX(8px) rotate(8deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  @keyframes hurtHero{0%,100%{transform:none}25%{transform:rotate(10deg)}50%{transform:rotate(-10deg)}75%{transform:rotate(6deg)}}
+  @keyframes castHero{0%{transform:scale(1)}40%{transform:scale(1.25) translateY(-5px)}100%{transform:scale(1)}}
+  @keyframes castBoss{0%{transform:scale(1)}40%{transform:scale(1.25) translateY(-5px)}100%{transform:scale(1)}}
+  /* Đòn chí mạng: nhân vật lao lên rồi bật về. combat.js gắn .dash-hero trong
+     520ms mỗi lần crit — thiếu keyframes này thì crit trông y hệt đòn thường. */
+  @keyframes dashHero{0%{transform:translateX(0)}35%{transform:translateX(-14px) scale(.94,1.06)}
+    60%{transform:translateX(52px) scale(1.14,.9)}100%{transform:translateX(0)}}
+  .hurt{animation:hurt .45s ease!important}
+  .hurt-hero{animation:hurtHero .45s ease!important}
+  .cast-hero{animation:castHero .35s ease!important}
+  .cast-boss{animation:castBoss .35s ease!important}
+  .dash-hero{animation:dashHero .5s var(--ease-settle)!important}
+  .flashWhite{filter:brightness(3) drop-shadow(0 0 10px #fff)!important}
 
   /* chưởng khí */
   .proj{position:absolute;z-index:var(--z-proj);font-size:calc(var(--spriteF) * .58);pointer-events:none;
@@ -734,41 +684,23 @@
   .answers.five .ans:last-child{grid-column:1/-1}
   .ans:nth-child(5){animation-delay:.2s}
   .ans{
-    font-family:var(--font-display);font-weight:800;font-size:var(--ansF);background:var(--hero);
+    font-family:var(--font-display);font-weight:700;font-size:var(--ansF);background:var(--hero);
     border:var(--bd-3) solid var(--ink);border-radius:var(--r-2);padding:calc(var(--ansP) * .72) 6px;cursor:pointer;
-    box-shadow:0 6px 0 var(--ink), 0 8px 16px rgba(0,0,0,0.15);
-    transition:transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, background 0.15s ease, filter 0.15s ease;
-    color:var(--ink);position:relative;
-    animation:ansIn .32s cubic-bezier(0.18, 0.89, 0.32, 1.28) backwards;
+    box-shadow:var(--elev-2);transition:transform var(--dur-1) var(--ease-snap),box-shadow var(--dur-1) var(--ease-snap),background var(--dur-2) var(--ease-snap);color:var(--ink);
+    animation:ansIn .3s var(--ease-settle) backwards;
   }
-  .ans:nth-child(2){animation-delay:.04s}.ans:nth-child(3){animation-delay:.08s}.ans:nth-child(4){animation-delay:.12s}
-  @keyframes ansIn{from{transform:translateY(16px) scale(0.92);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-  .ans:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--ink), 0 12px 20px rgba(0, 242, 254, 0.35);filter:brightness(1.04)}
-  .ans:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
-  .ans.right{
-    background:linear-gradient(180deg,#2ed573 0%,#10ac84 100%)!important;
-    color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,0.4);
-    box-shadow:0 6px 0 #0b664f, 0 0 24px rgba(46, 213, 115, 0.8)!important;
-    animation:rightPop .45s cubic-bezier(0.18, 0.89, 0.32, 1.28)!important;
-  }
-  @keyframes rightPop{
-    0%{transform:scale(1)}
-    40%{transform:scale(1.1) translateY(-4px);filter:brightness(1.35)}
-    100%{transform:scale(1) translateY(0)}
-  }
-  .ans.wrong{
-    background:linear-gradient(180deg,#ff4757 0%,#c0392b 100%)!important;
-    color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,0.4);
-    box-shadow:0 6px 0 #781912, 0 0 20px rgba(255, 71, 87, 0.7)!important;
-    animation:wrongShake .45s cubic-bezier(0.36, 0.07, 0.19, 0.97)!important;
-  }
-  @keyframes wrongShake{
-    0%,100%{transform:translateX(0)}
-    20%{transform:translateX(-8px) rotate(-1.5deg)}
-    40%{transform:translateX(8px) rotate(1.5deg)}
-    60%{transform:translateX(-5px)}
-    80%{transform:translateX(5px)}
-  }
+  .ans:nth-child(2){animation-delay:.05s}.ans:nth-child(3){animation-delay:.1s}.ans:nth-child(4){animation-delay:.15s}
+  @keyframes ansIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .ans:hover{transform:translateY(-2px) rotate(-1deg)}
+  .ans:active{transform:translateY(4px);box-shadow:var(--sh-1) var(--ink)}
+  /* CHỈ chuyển động ở đây. Màu đúng/sai do theme-playful.css làm chủ — file
+     theme nạp sau nên nếu tô màu ở cả hai nơi thì bản ở đây bị đè im lặng và
+     ta có hai bảng màu lệch nhau (bản cũ ở đây là #fff trên --boss, mới 2.97:1,
+     không đạt cả ngưỡng chữ lớn). */
+  .ans.right{animation:rightPop .4s var(--ease-pop)}
+  @keyframes rightPop{50%{transform:scale(1.1)}}
+  .ans.wrong{animation:wrongShake .4s ease}
+  @keyframes wrongShake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
   .ans:disabled{cursor:default;opacity:.95}
 
   .feedback{min-height:calc(var(--qF) * 1.1);margin-top:calc(var(--gap) * .6);font-family:var(--font-display);font-weight:800;font-size:calc(var(--qF) * .62);line-height:1.4}
@@ -784,12 +716,6 @@
   }
   .explain.show{display:block}
   .explain b{color:var(--gold-ink)}
-
-  /* ký hiệu toán học trôi nổi trên nền */
-  .mathsym{position:fixed;z-index:0;pointer-events:none;opacity:.16;color:#fff;
-    font-family:var(--font-display);font-weight:800;
-    animation:symFloat linear infinite}
-  @keyframes symFloat{from{transform:translateY(105vh) rotate(-15deg)}to{transform:translateY(-10vh) rotate(15deg)}}
 
   /* boss xuất hiện hoành tráng ở màn giới thiệu */
   .introZoom{animation:introZoom .8s cubic-bezier(.2,1.4,.4,1) both}

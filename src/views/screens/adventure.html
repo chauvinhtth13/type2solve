@@ -115,9 +115,7 @@
   <!-- THẮNG BOSS + CHỌN BẢO VẬT -->
   <div class="screen" id="bossWin">
     <div class="card">
-      <div class="result-badge-wrap">
-        <img src="assets/images/hd2d/chest_treasure.jpg" class="result-hd2d-badge" alt="Bảo vật chiến thắng">
-      </div>
+      <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Rương quà">🎁</span></div>
       <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
       <p class="sub" id="bossWinSub"></p>
       <div class="stats">
@@ -132,9 +130,7 @@
   <!-- CỬA HÀNG -->
   <div class="screen" id="shop">
     <div class="card">
-      <div class="shop-banner-wrap">
-        <img src="assets/images/hd2d/shop_vault.jpg" class="shop-hd2d-banner" alt="Cửa hàng bảo vật">
-      </div>
+      <div class="shop-banner-wrap"><span class="shop-symbol" role="img" aria-label="Cửa hàng vật phẩm">🛍️</span></div>
       <h1>CỬA HÀNG VẬT PHẨM</h1>
       <p class="sub">Trả lời đúng để kiếm xu 💰 — mua vật phẩm để mạnh hơn!<br>
       Xu của em: <b id="shopCoins" style="font-size:22px;color:var(--gold-ink)">0 💰</b></p>
@@ -148,9 +144,9 @@
   <!-- KẾT QUẢ ĐẤU NHANH / SINH TỒN -->
   <div class="screen" id="scoreEnd">
     <div class="card">
-      <div class="result-badge-wrap">
-        <img src="assets/images/hd2d/ui_icon_trophy.jpg" class="result-hd2d-badge" id="seTrophy" alt="Huy hiệu xếp hạng">
-      </div>
+      <!-- endRun() ghi huy hiệu xếp hạng (💎/🥇/🥈/🥉/🎯) vào đây; #seRank ngay
+           dưới đã đọc thành lời nên biểu tượng để aria-hidden. -->
+      <div class="result-badge-wrap"><span class="result-symbol" id="seTrophy" aria-hidden="true">🏅</span></div>
       <h1 id="seTitle">HẾT GIỜ!</h1>
       <p class="sub" id="seRank"></p>
       <div class="stats">
@@ -169,9 +165,7 @@
   <!-- VÔ ĐỊCH -->
   <div class="screen" id="victory">
     <div class="card">
-      <div class="result-badge-wrap">
-        <img src="assets/images/hd2d/badge_victory.jpg" class="result-hd2d-badge" alt="Cúp Vô Địch Tư Duy">
-      </div>
+      <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Cúp vô địch">🏆</span></div>
       <h1>NHÀ VÔ ĐỊCH TƯ DUY!</h1>
       <p class="sub">Em đã chinh phục cả 10 boss của Đấu Trường Tư Duy! Quá đỉnh!</p>
       <div class="stats">
@@ -188,9 +182,7 @@
   <!-- THUA -->
   <div class="screen" id="defeat">
     <div class="card">
-      <div class="result-badge-wrap">
-        <img src="assets/images/hd2d/badge_defeat.jpg" class="result-hd2d-badge" alt="Luyện tập thêm">
-      </div>
+      <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Luyện tập thêm">🌱</span></div>
       <h1>ÔI KHÔNG!</h1>
       <p class="sub">Câu đố tư duy khó mà! Thử lại là quen tay ngay! 💪</p>
       <div class="stats">
@@ -205,5 +197,4 @@
       </div>
     </div>
   </div>
-
 

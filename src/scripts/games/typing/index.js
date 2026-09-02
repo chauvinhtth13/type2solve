@@ -79,10 +79,11 @@
   const pendingTimers = runtime.createTimerRegistry();
 
   const MASCOT_SPRITES = {
-    idle: 'assets/images/hd2d/mascot_idle.jpg',
-    combo: 'assets/images/hd2d/mascot_combo.jpg',
-    urgent: 'assets/images/hd2d/mascot_urgent.jpg',
-    gameover: 'assets/images/hd2d/mascot_gameover.jpg'
+    idle: '🦉',
+    combo: '🤩',
+    urgent: '😯',
+    victory: '🥳',
+    gameover: '🙂'
   };
 
   const MASCOT_QUOTES = {
@@ -123,12 +124,12 @@
 
     const mainImg = byId('typingMascotImg');
     const mainText = byId('mascotSpeechText');
-    if (mainImg) mainImg.src = sprite;
+    if (mainImg) mainImg.textContent = sprite;
     if (mainText) mainText.textContent = `"${text}"`;
 
     const playImg = byId('playMascotImg');
     const playText = byId('playSpeechText');
-    if (playImg) playImg.src = sprite;
+    if (playImg) playImg.textContent = sprite;
     if (playText) playText.textContent = text;
   }
 
@@ -1540,6 +1541,11 @@
     setSectionVisibility('typingPlay', true);
     setSectionVisibility('typingSetup', true);
     setSectionVisibility('typingResult', false);
+
+    /* Bạn Cú phải nói lời kết trận: hai bộ thoại victory/gameover đã viết sẵn
+       nhưng trước đây không có chỗ nào gọi tới, nên hết chặng mascot vẫn đứng
+       nguyên câu "tập trung nào" của lúc mới vào. */
+    updateMascotReaction(won ? 'victory' : 'gameover');
 
     const icon = byId('typingResultIcon');
     const title = byId('typingResultTitle');

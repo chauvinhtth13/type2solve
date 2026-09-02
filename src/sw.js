@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v17-architecture';
+const CACHE_VERSION = 'v18-playful-ui';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -12,7 +12,7 @@ const CORE_ASSETS = [
   './assets/icons/icon.svg',
   './styles/app.css',
   './styles/games.css',
-  './styles/theme-hd2d.css',
+  './styles/theme-playful.css',
   './scripts/platform/storage.js',
   './scripts/engine/runtime.js',
   './scripts/app/background.js',
@@ -43,32 +43,6 @@ const CORE_ASSETS = [
 const DEFERRED_ASSETS = [
   './assets/data/english-vocabulary.json',
   './assets/images/donate-qr.jpg',
-  './assets/images/hd2d/key_art_header.jpg',
-  './assets/images/hd2d/mascot_idle.jpg',
-  './assets/images/hd2d/mascot_combo.jpg',
-  './assets/images/hd2d/mascot_urgent.jpg',
-  './assets/images/hd2d/mascot_gameover.jpg',
-  './assets/images/hd2d/ui_icon_wpm.jpg',
-  './assets/images/hd2d/ui_icon_accuracy.jpg',
-  './assets/images/hd2d/ui_icon_trophy.jpg',
-  './assets/images/hd2d/ui_icon_timer.jpg',
-  './assets/images/hd2d/hero_wizard.jpg',
-  './assets/images/hd2d/boss_dragon.jpg',
-  './assets/images/hd2d/boss_01_sora.jpg',
-  './assets/images/hd2d/boss_02_sparky.jpg',
-  './assets/images/hd2d/boss_03_stitchwork.jpg',
-  './assets/images/hd2d/boss_04_ignis.jpg',
-  './assets/images/hd2d/boss_05_vex.jpg',
-  './assets/images/hd2d/boss_06_nocturne.jpg',
-  './assets/images/hd2d/boss_07_glacius.jpg',
-  './assets/images/hd2d/boss_08_solkahn.jpg',
-  './assets/images/hd2d/boss_09_lumiel.jpg',
-  './assets/images/hd2d/boss_10_leviator.jpg',
-  './assets/images/hd2d/badge_victory.jpg',
-  './assets/images/hd2d/chest_treasure.jpg',
-  './assets/images/hd2d/shop_vault.jpg',
-  './assets/images/hd2d/badge_defeat.jpg',
-  './assets/images/hd2d/player_tiger.jpg',
 ];
 
 function scopedUrl(relativePath) {

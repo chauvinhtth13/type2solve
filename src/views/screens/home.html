@@ -6,13 +6,14 @@
     <div class="card home-card">
       <div class="home-bento">
 
-        <header class="tile tile-hero tile-hero-hd2d">
+        <header class="tile tile-hero">
           <button class="tile-sound" id="sndBtnHome" onclick="toggleSound()" aria-pressed="true" aria-label="Bật hoặc tắt âm thanh">🔊</button>
-          <div class="hero-art-banner-wrap">
-            <img src="assets/images/hd2d/key_art_header.jpg" class="hero-hd2d-banner" alt="Type2Solve Cyber Study Lab HD-2D">
+          <div class="hero-doodle" aria-hidden="true">
+            <span>2 + 3</span><b>= 5</b><i>★</i>
           </div>
-          <h1 id="homeTitle">ĐẤU TRƯỜNG <span class="hl">TƯ DUY</span></h1>
-          <p class="sub">Đấu toán theo boss, luyện gõ Anh–Việt, Sudoku và ba câu đố tư duy kinh điển.</p>
+          <p class="hero-kicker">HỌC MỖI NGÀY · VUI MỖI LƯỢT</p>
+          <h1 id="homeTitle">Đấu trường <span class="hl">tư duy</span></h1>
+          <p class="sub">Chọn một trò chơi, học điều mới và gom thật nhiều sao.</p>
         </header>
 
         <div class="tile tile-stats" id="profileSummary" aria-live="polite">
@@ -25,46 +26,46 @@
         </div>
 
         <section class="home-zone zone-play">
-          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">1</span>Đấu toán</h2>
+          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">1</span>Khởi động với Toán</h2>
           <div class="modes">
             <button class="mode adv tile tile-flagship" onclick="SFX.click();startAdventure()">
               <span class="mi" aria-hidden="true">⚔️</span>
               <b>PHIÊU LƯU</b>
-              <span class="tile-desc">10 boss · mua vật phẩm · siêu chưởng</span>
+              <span class="tile-desc">Vượt 10 bạn quái vui nhộn bằng những câu Toán vừa sức.</span>
               <span class="tile-cta">Bắt đầu hành trình <span aria-hidden="true">→</span></span>
               <span class="tile-progress" id="advProgress"></span>
             </button>
             <div class="quick-modes">
               <button class="mode blitz tile" onclick="SFX.click();startBlitz()">
-                <span class="mi" aria-hidden="true">⚡</span><b>ĐẤU NHANH 60 GIÂY</b>
-                <span class="tile-desc">Trả lời càng nhiều càng tốt · sai bị trừ giờ</span>
+                <span class="mi" aria-hidden="true">⚡</span><b>60 GIÂY</b>
+                <span class="tile-desc">Khởi động nhanh và phá kỷ lục của em.</span>
               </button>
               <button class="mode surv tile" onclick="SFX.click();startSurvival()">
-                <span class="mi" aria-hidden="true">♾️</span><b>SINH TỒN</b>
-                <span class="tile-desc">3 mạng · khó dần vô tận · phá kỷ lục</span>
+                <span class="mi" aria-hidden="true">💛</span><b>3 TRÁI TIM</b>
+                <span class="tile-desc">Câu hỏi khó dần, bình tĩnh đi thật xa.</span>
               </button>
             </div>
           </div>
         </section>
 
         <section class="home-zone zone-solo">
-          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">2</span>Luyện một mình</h2>
+          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">2</span>Tự luyện kỹ năng</h2>
           <div class="learning-modes">
             <button class="learning-mode typing-mode tile" onclick="SFX.click();openTypingGame()">
               <span class="world-icon" aria-hidden="true">⌨️</span>
-              <span><b>GÕ CHỮ DIỆT QUÁI</b><small>Luyện gõ Anh–Việt · chiến dịch 10 chặng · hơn 80.000 từ</small></span>
+              <span><b>GÕ CHỮ VUI</b><small>Luyện gõ Anh–Việt · 10 chặng · hơn 80.000 từ</small></span>
               <span class="world-tag">Anh · Việt</span>
             </button>
             <button class="learning-mode sudoku-mode tile" onclick="SFX.click();openSudokuGame()">
               <span class="world-icon" aria-hidden="true">🧩</span>
-              <span><b>SUDOKU THỬ THÁCH</b><small>6 cấp độ · ghi chú · gợi ý · lưu kỷ lục theo từng level</small></span>
+              <span><b>SUDOKU</b><small>6 cấp độ · có ghi chú, gợi ý và lưu kỷ lục</small></span>
               <span class="world-tag">Dễ → 17 ô</span>
             </button>
           </div>
         </section>
 
         <section class="home-zone zone-versus">
-          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">3</span>Đấu với bạn</h2>
+          <h2 class="zone-heading"><span class="zone-num" aria-hidden="true">3</span>Chơi cùng bạn</h2>
           <div class="tile-more">
             <button class="learning-mode duel-mode tile" onclick="SFX.click();openDuelGame()">
               <span class="world-icon" aria-hidden="true">⚔️</span>

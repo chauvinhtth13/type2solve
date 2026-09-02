@@ -66,7 +66,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .typing-hud span{background:#fff;border:var(--bd-1) solid #d1c9e7;border-radius:var(--r-pill);padding:7px 11px;font-size:14.5px;font-weight:900;white-space:nowrap}
 
 /* Typing battle */
-/* Nền .typing-card chuyển sang theme-hd2d.css để làm chủ nguồn sự thật duy nhất
+/* Nền .typing-card được hoàn thiện trong theme-playful.css để làm chủ nguồn sự thật duy nhất
    cho mọi nền thẻ theo từng game — .card ở đó nạp SAU nên nếu để nền ở đây thì
    bị đè im lặng (đồng độ đặc hiệu, thắng theo thứ tự nạp file). */
 .typing-card .eyebrow{color:#6b5fa6}
@@ -233,20 +233,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .credit-line{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;
   gap:4px 9px;font-size:14px;line-height:1.5}
 .credit-work{color:#4a3f78;font-weight:900;letter-spacing:.055em;text-transform:uppercase;font-size:13px}
-.credit-sep{color:#b3a9cf}
+/* #b3a9cf chỉ 2.21:1 trên nền trắng. Dấu chấm ngăn cách vẫn là chữ, nên kéo về
+   cùng sắc với dòng ghi công thay vì để nhạt gần bằng nền. */
+.credit-sep{color:#6f6690}
 .credit-role{color:#6f6690;font-weight:600}
 .credit-name{color:#33285e;font-weight:900;letter-spacing:.012em}
 .credit-info-btn{border:0;background:none;padding:0;color:#6f6690;font:800 13px var(--font-body);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .credit-info-btn:hover{color:#4a3f78}
 
 /* Sudoku */
-/* Nền .sudoku-card cũng chuyển sang theme-hd2d.css — cùng lý do ở .typing-card
+/* Nền .sudoku-card cũng chuyển sang theme-playful.css — cùng lý do ở .typing-card
    phía trên: một nguồn sự thật duy nhất cho nền thẻ, đặt đúng chỗ thắng cascade. */
 .sudoku-card .game-topbar{border-color:#aed39b}.sudoku-card .eyebrow{color:#3d7049}
 .sudoku-setup{max-width:1000px;margin:24px auto 4px;text-align:center}.sudoku-setup[hidden],.sudoku-play[hidden]{display:none}
 .sudoku-hero{font-size:clamp(58px,6vw,88px);line-height:1;filter:drop-shadow(0 7px 0 rgba(50,95,58,.13));animation:worldFloat 3s ease-in-out infinite}.sudoku-setup h2{margin:7px 0 0;font:900 clamp(24px,2.2vw,38px) var(--font-display)}.sudoku-setup>p{margin:0 auto 14px;color:#655c7c;font-weight:800}
 .sudoku-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
-.sudoku-level-card{position:relative;cursor:pointer}.sudoku-level-card input{position:absolute;opacity:0;pointer-events:none}.sudoku-level-card span{height:100%;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;padding:13px;border:var(--bd-2) solid #d5cce9;border-radius:var(--r-2);background:#fff;box-shadow:var(--sh-2) #d5cce9,0 3px 8px -3px rgb(var(--tint)/.14);text-align:left;transition:transform var(--dur-2) var(--ease-pop),border-color var(--dur-2) var(--ease-snap),box-shadow var(--dur-2) var(--ease-settle)}.sudoku-level-card i{grid-row:1/4;font-style:normal;font-size:35px}.sudoku-level-card b{font:900 18px var(--font-display)}.sudoku-level-card small,.sudoku-level-card em{display:block;color:#6d6482;font-size:14px;font-style:normal;font-weight:800}.sudoku-level-card em{color:#258252}.sudoku-level-card input:checked+span{transform:translateY(-2px);border-color:#30b86c;box-shadow:var(--sh-3) #15814a,0 0 0 4px rgba(48,184,108,.16),0 12px 24px -10px rgba(21,129,74,.4);background:#effff4}.sudoku-level-card.ultimate input:checked+span{border-color:#a56cff;box-shadow:var(--sh-3) #7040bd,0 0 0 4px rgba(165,108,255,.16),0 12px 24px -10px rgba(112,64,189,.4);background:#f6efff}
+.sudoku-level-card{position:relative;cursor:pointer}.sudoku-level-card input{position:absolute;opacity:0;pointer-events:none}.sudoku-level-card span{height:100%;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;padding:13px;border:var(--bd-2) solid #d5cce9;border-radius:var(--r-2);background:#fff;box-shadow:var(--sh-2) #d5cce9,0 3px 8px -3px rgb(var(--tint)/.14);text-align:left;transition:transform var(--dur-2) var(--ease-pop),border-color var(--dur-2) var(--ease-snap),box-shadow var(--dur-2) var(--ease-settle)}.sudoku-level-card i{grid-row:1/4;font-style:normal;font-size:35px}.sudoku-level-card b{font:900 18px var(--font-display)}.sudoku-level-card small,.sudoku-level-card em{display:block;color:#6d6482;font-size:14px;font-style:normal;font-weight:800}.sudoku-level-card em{color:#1d7048}.sudoku-level-card input:checked+span{transform:translateY(-2px);border-color:#30b86c;box-shadow:var(--sh-3) #15814a,0 0 0 4px rgba(48,184,108,.16),0 12px 24px -10px rgba(21,129,74,.4);background:#effff4}.sudoku-level-card.ultimate input:checked+span{border-color:#a56cff;box-shadow:var(--sh-3) #7040bd,0 0 0 4px rgba(165,108,255,.16),0 12px 24px -10px rgba(112,64,189,.4);background:#f6efff}
 .sudoku-setup-footer{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;margin-top:19px}.sudoku-setup-footer>span{padding:9px 13px;border-radius:var(--r-pill);background:#efeaff;color:#564977;font-weight:900}
 .sudoku-play{margin-top:14px}.sudoku-hud{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-bottom:11px}.sudoku-hud span{padding:6px 10px;border:var(--bd-1) solid #d4cce7;border-radius:var(--r-pill);background:#fff;font-size:14px;font-weight:900;white-space:nowrap}
 .sudoku-layout{display:grid;grid-template-columns:minmax(300px,620px) minmax(235px,330px);justify-content:center;align-items:start;gap:clamp(15px,2vw,28px)}
@@ -465,7 +467,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 .hpbar{position:relative}
 .hpghost{position:absolute;left:0;top:0;bottom:0;background:#ff9db4;border-radius:var(--r-pill);
   transition:width .75s var(--ease-settle) .18s}
-#duelHp1,#duelHp2{position:relative;z-index:1}
+/* Vệt máu là position:absolute nên nó vẽ ĐÈ lên .hpfill tĩnh đứng cạnh. Đấu Đối
+   Kháng đã được nâng lên trên, còn Phiêu Lưu thì chưa — nên cả thanh máu của Em
+   lẫn của boss đều hiện màu hồng của vệt máu, kể cả lúc máu đầy, và gradient
+   xanh #heroHp chưa bao giờ thấy được. Nâng nốt hai thanh này. */
+#duelHp1,#duelHp2,#heroHp,#bossHp{position:relative;z-index:1}
 
 /* Số sát thương bay lên — kênh phản hồi rõ nhất: biết CHÍNH XÁC mất bao nhiêu. */
 .dmgfloat{position:absolute;z-index:6;transform:translate(-50%,-50%);pointer-events:none;

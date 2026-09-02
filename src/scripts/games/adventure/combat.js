@@ -577,7 +577,7 @@ function comboPopup(txt){
   arena.appendChild(d);setTimeout(()=>d.remove(),1000);
 }
 
-/* ============ HIỆU ỨNG CHIẾN ĐẤU HD-2D ============ */
+/* ============ HIỆU ỨNG CHIẾN ĐẤU NHẸ ============ */
 const ELEMENTAL_SPELLS={
   arcane:{className:'spell-arcane',glow:'#00f2fe',html:'<div class="vfx-orb vfx-orb-arcane"><div class="vfx-core"></div><div class="vfx-corona"></div></div>'},
   fire:{className:'spell-fire',glow:'#ff5252',html:'<div class="vfx-orb vfx-orb-fire"><div class="vfx-flame-core"></div><div class="vfx-flame-tail"></div></div>'},

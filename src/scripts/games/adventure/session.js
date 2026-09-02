@@ -153,7 +153,7 @@ function startSurvival(){
 function prepArenaForMode(name,theme){
   document.querySelector('.hprow').style.display='none';   // 2 chế độ này không dùng thanh máu
   $('arena').className='arena '+theme;
-  const count=(typeof BOSS_SPRITES!=='undefined'?BOSS_SPRITES.length:10);
+  const count=(typeof ART_SKIN_COUNT!=='undefined'?ART_SKIN_COUNT:10);
   paintBoss({spriteIndex:G.bossIndex%count,name:'Quái vật'});
   $('bossName').textContent=name;
   $('bossMech').textContent=G.mode==='blitz'?'⚡ 60 giây':'♾️ Sinh tồn';
@@ -188,7 +188,9 @@ function endRun(){
     :[[40,'💎','HUYỀN THOẠI','Không ai cản nổi em!'],[28,'🥇','CAO THỦ','Bền bỉ tuyệt vời!'],
       [18,'🥈','THIỆN XẠ','Rất vững vàng!'],[9,'🥉','TÂN BINH','Đang tiến bộ nhanh!'],[0,'🌱','MẦM NON','Thử lại nào, em làm được mà!']];
   const r=ranks.find(x=>G.score>=x[0]);
-  if($('seEmoji'))$('seEmoji').textContent=r[1];
+  /* Phần tử trong adventure.html tên là #seTrophy — bản cũ ghi vào #seEmoji vốn
+     không tồn tại, nên huy hiệu xếp hạng chưa bao giờ hiện ra. */
+  if($('seTrophy'))$('seTrophy').textContent=r[1];
   $('seTitle').textContent=isBlitz?'HẾT 60 GIÂY!':'HẾT MẠNG RỒI!';
   $('seRank').innerHTML=`Xếp hạng: <b style="font-size:1.3em;color:var(--gold-ink)">${r[2]}</b><br>${r[3]}`
     +(isRecord&&G.score>0?'<br><b style="color:var(--green-ink)">🎉 KỶ LỤC MỚI!</b>':'');
@@ -206,7 +208,7 @@ function survAdvance(){
   const boss=$('bossSprite');
   boss.classList.add('morphing');
   setTimeout(()=>{
-    const count=(typeof BOSS_SPRITES!=='undefined'?BOSS_SPRITES.length:10);
+    const count=(typeof ART_SKIN_COUNT!=='undefined'?ART_SKIN_COUNT:10);
     applySkin(boss,{spriteIndex:ri(0,count-1)});
     boss.classList.remove('morphing');
   },400);
