@@ -50,7 +50,7 @@
   }
   if(typeof saved.settings?.sound==='boolean'){
     SOUND_ON=saved.settings.sound;
-    document.querySelectorAll('#sndBtn,#sndBtnHome').forEach(button=>{
+    document.querySelectorAll('#sndBtn,#sndBtnHome,#sndBtnTyping').forEach(button=>{
       button.textContent=SOUND_ON?'🔊':'🔇';
       button.setAttribute('aria-pressed',String(SOUND_ON));   // "bấm xuống" = đang bật, khớp toggleSound()
     });

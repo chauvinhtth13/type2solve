@@ -1,7 +1,9 @@
 let SOUND_ON=true;
 function toggleSound(){
   SOUND_ON=!SOUND_ON;
-  document.querySelectorAll('#sndBtn,#sndBtnHome').forEach(b=>{
+  // #sndBtnTyping trước đây bị bỏ sót: tắt tiếng ở màn Gõ Chữ thì nút của chính
+  // màn đó vẫn hiện 🔊 trong khi nút trang chủ đã đổi sang 🔇.
+  document.querySelectorAll('#sndBtn,#sndBtnHome,#sndBtnTyping').forEach(b=>{
     b.textContent=SOUND_ON?'🔊':'🔇';b.classList.toggle('muted',!SOUND_ON);
     b.setAttribute('aria-pressed',String(SOUND_ON));   // nút đang "bấm xuống" = âm thanh đang bật
   });

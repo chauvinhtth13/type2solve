@@ -17,8 +17,12 @@
 .skip-link{position:fixed;left:12px;top:-80px;z-index:1000;background:#fff;color:#17143c;border:var(--bd-2) solid #17143c;border-radius:var(--r-1);padding:10px 16px;font-weight:900}
 .skip-link:focus{top:12px}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+/* #35d6ff chỉ đạt ~1.9:1 trên nền trắng — trượt ngưỡng 3:1 cho thành phần phi
+   văn bản. #1b6fb5 (đã dùng ở theme-playful.css) đạt 5.22:1. Trước đây
+   theme-playful chỉ sửa button/input/select/a, nên [tabindex] và summary vẫn
+   giữ màu cũ. */
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
-[tabindex]:focus-visible,summary:focus-visible{outline:4px solid #35d6ff;outline-offset:3px}
+[tabindex]:focus-visible,summary:focus-visible{outline:4px solid #1b6fb5;outline-offset:3px}
 
 @keyframes worldFloat{50%{transform:translateY(-7px) rotate(4deg)}}
 
@@ -100,7 +104,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
    không đọc nổi, ô số liệu thì thành mấy hộp xám phẳng. Nay tô theo nền sáng,
    dùng đúng bộ --*-ink đã đo tương phản trong app.css. */
 .game-result{max-width:700px;margin:28px auto;text-align:center;padding:25px;border:1px solid rgb(var(--lamp-warm)/.32);border-radius:var(--r-3);background:linear-gradient(180deg,#fffaf0,#fff6e2);box-shadow:inset 0 1px 0 rgb(255 255 255/.75),0 10px 24px -16px rgb(var(--tint)/.45)}.result-icon{font-size:84px;animation:resultBounce 1s ease infinite alternate}@keyframes resultBounce{to{transform:translateY(-8px) rotate(4deg)}}.game-result h2{font:900 37px var(--font-display);color:var(--ink)}.game-result p{color:var(--ink-3);font-weight:800}.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:17px 0}.result-stats>div{padding:12px;border:var(--bd-1) solid #e0d8c4;border-radius:var(--r-2);background:#fff;color:var(--ink-3);font-weight:800}.result-stats b{display:block;font-size:25px;color:var(--green-ink);font-variant-numeric:tabular-nums}
-.typing-hud span,.sudoku-hud span{font-variant-numeric:tabular-nums}.result-actions{display:flex;justify-content:center;gap:10px}
+.typing-hud span,.sudoku-hud span{font-variant-numeric:tabular-nums}.result-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 
 @media (max-width:900px){
   .typing-input-wrap{grid-template-columns:1fr auto}.typing-input-wrap label{grid-column:1/-1;text-align:center}.typing-gate{width:82px}.lane-lines{left:82px}
@@ -256,7 +260,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
 /* role="row" là bắt buộc với role="grid"; display:contents giữ 81 ô nằm thẳng trong lưới. */
 .sudoku-row{display:contents}
 .sudoku-cell{position:relative;min-width:0;min-height:0;display:grid;place-items:center;border:0;border-right:1px solid #aaa2bd;border-bottom:1px solid #aaa2bd;border-radius:0;background:#fff;color:#4d3eb0;font:900 clamp(19px,2.2vw,34px) var(--font-body);cursor:pointer;transition:background var(--dur-1) var(--ease-snap)}.sudoku-cell:nth-child(3n){border-right:3px solid #2b2350}.sudoku-cell:nth-child(9n){border-right:0}.sudoku-row:nth-child(3n) .sudoku-cell{border-bottom:3px solid #2b2350}.sudoku-row:nth-child(9) .sudoku-cell{border-bottom:0}
-.sudoku-cell.fixed{background:#f2eff8;color:#28213e}.sudoku-cell.peer{background:#edf7ff}.sudoku-cell.same{background:#d8ecff}.sudoku-cell.selected{z-index:1;background:#fff1a8;box-shadow:inset 0 0 0 3px #e19b18}.sudoku-cell.incorrect{background:#ffe2e7;color:#c52c48;animation:inputShake .25s ease}.sudoku-cell.hinted{color:#168957}.sudoku-cell:focus-visible{z-index:2;outline:4px solid #33b7e7;outline-offset:-4px}
+.sudoku-cell.fixed{background:#f2eff8;color:#28213e}.sudoku-cell.peer{background:#edf7ff}.sudoku-cell.same{background:#d8ecff}.sudoku-cell.selected{z-index:1;background:#fff1a8;box-shadow:inset 0 0 0 3px #e19b18}.sudoku-cell.incorrect{background:#ffe2e7;color:#c52c48;animation:inputShake .25s ease}.sudoku-cell.hinted{color:#168957}.sudoku-cell:focus-visible{z-index:2;outline:4px solid #1b6fb5;outline-offset:-4px}
 .sudoku-value{line-height:1}/* Ngoại lệ có chủ ý của sàn chữ 12px: ghi chú bút chì là lưới 3x3 BÊN TRONG một ô,
    mỗi ngăn chỉ rộng ~1/3 ô nên đây là chữ số để liếc, không phải chữ để đọc. */
 .sudoku-notes{position:absolute;inset:2px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);color:#5f5677;font:800 clamp(11px,.9vw,14px) var(--font-body)}.sudoku-notes i{display:grid;place-items:center;font-style:normal}
@@ -383,7 +387,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
    thành cột flex và canh GIỮA THEO CHIỀU DỌC phần đang hiển thị (setup/play/kết
    quả — 2 cái kia luôn [hidden] nên không tham gia layout) thay vì để trôi lên đầu. */
 .duel-card,.nim-card{display:flex;flex-direction:column}
-.duel-card>section,.nim-card>section{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto}
+.duel-card>section,.nim-card>section{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
 /* LỖI THẬT: quy tắc display:flex ở trên có độ đặc hiệu CAO HƠN luật [hidden]{display:none}
    mặc định của trình duyệt (đến từ UA stylesheet, luôn thua author stylesheet dù
    specificity thấp) — hệ quả là màn setup và play cùng hiện chồng lên nhau dù
@@ -734,7 +738,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
    một người chứ không phải cảnh giao chiến. */
 .hanoi-hero{display:block;width:84px;height:84px;margin:0 auto 4px}
 .hanoi-card{display:flex;flex-direction:column}
-.hanoi-card>section{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto}
+.hanoi-card>section{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
 .hanoi-card>section[hidden]{display:none}
 .hanoi-hud{display:flex;justify-content:center;flex-wrap:wrap;gap:clamp(10px,2vw,30px);
   padding:9px 14px;margin-bottom:10px;border:var(--bd-1) solid #d9cfee;border-radius:var(--r-pill);
@@ -884,3 +888,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,
   .hanoi-disk{transition:none}
   .hanoi-disk.landing{animation:none}
 }
+
+/* Thay cho style nội tuyến cũ trên biểu tượng đồng hồ ở thanh giờ. */
+.timerwrap .timer-emoji{font-size:18px}
