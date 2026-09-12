@@ -7,20 +7,19 @@
       </div>
 
       <section class="hanoi-setup" id="hanoiSetup">
-        <svg class="sprite hanoi-hero" data-art="tplHero" aria-hidden="true" focusable="false"></svg>
+<div class="setup-columns"><div class="setup-roster hanoi-intro">        <svg class="sprite hanoi-hero" data-art="tplHero" aria-hidden="true" focusable="false"></svg>
         <p class="sub">Chuyển cả chồng đĩa từ cọc <b>A</b> sang cọc <b>C</b> — mỗi lần một đĩa, và <b>không bao giờ đặt đĩa lớn lên đĩa nhỏ</b>.</p>
 
-        <div class="duel-howto hanoi-howto">
-          <h2>📖 Luật chơi</h2>
+        <details class="duel-howto setup-guide hanoi-howto"><summary>📖 Cách chơi &amp; mẹo</summary>
           <ol>
             <li>Bấm một cọc để <b>bốc đĩa trên cùng</b>, rồi bấm cọc khác để <b>đặt xuống</b>. Bấm lại chính cọc đó để bỏ ý định.</li>
             <li>Đĩa lớn <b>không được</b> nằm trên đĩa nhỏ — game sẽ chặn và báo lý do.</li>
             <li>Số bước tối ưu là <b>2ⁿ − 1</b>: 3 đĩa = 7 bước, 5 đĩa = 31 bước, 7 đĩa = 127 bước.</li>
             <li>Bí quá thì bấm <b>🤖 Tự động giải</b> — máy đi từng bước ngay từ thế cờ hiện tại để em xem quy luật. Ván có dùng trợ giúp <b>không tính kỷ lục</b>.</li>
           </ol>
-        </div>
+        </details>
 
-        <label class="select-row">Số đĩa
+</div><div class="setup-options"><h2 class="setup-heading">Chọn thử thách của em</h2>        <label class="select-row">Số đĩa
           <select id="hanoiDisks">
             <option value="3" selected>3 đĩa — tối ưu 7 bước</option>
             <option value="4">4 đĩa — tối ưu 15 bước</option>
@@ -33,7 +32,8 @@
         <h2 class="maplbl">🏅 Kỷ lục số bước của em</h2>
         <div class="hanoi-records" id="hanoiRecords"></div>
 
-        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startHanoi()">🗼 BẮT ĐẦU</button></div>
+        <div class="setup-launch"><button class="btn big green" type="button" onclick="startHanoi()">🗼 BẮT ĐẦU</button></div>
+</div></div>
       </section>
 
       <section class="hanoi-play" id="hanoiPlay" hidden>

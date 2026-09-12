@@ -134,7 +134,7 @@ try {
   assert(home.modes === 5, 'Khu học tập có Gõ Chữ, Sudoku, Đấu Đối Kháng, Nim và Tháp Hà Nội');
   assert(home.rules, 'Tầng LUẬT thuần của cả ba game được phơi ra và đã đóng băng');
   assert(home.api, 'API các game đã được nạp');
-  assert(home.schema === 1, 'Hồ sơ localStorage có schema hợp lệ');
+  assert(home.schema === 2, 'Hồ sơ localStorage có schema hợp lệ');
   const normalizers = await evaluate(`({
     decimal: isCorrectAnswer('0,5','0.5'),
     words: TYPING_CONTENT.en.length>=45&&TYPING_CONTENT.vi.length>=45

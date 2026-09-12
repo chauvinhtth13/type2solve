@@ -78,12 +78,6 @@
         </div>
       </div>
 
-      <div class="timerwrap">
-        <span class="timer-emoji" aria-hidden="true">⏰</span>
-        <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
-        <span class="timernum" id="timerNum">20s</span>
-      </div>
-
       <div class="energywrap">
         <span class="energylbl">⚡ Năng lượng</span>
         <div class="energybar"><div class="energyfill" id="energyFill"></div></div>
@@ -92,9 +86,16 @@
       <div class="itembar" id="itemBar"></div>
        </div>
        <div class="colR">
+      <div class="timerwrap">
+        <span class="timer-emoji" aria-hidden="true">⏰</span>
+        <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+        <span class="timernum" id="timerNum">20s</span>
+      </div>
+
+
       <div class="qbox" id="qbox">
         <div class="goldtag" id="goldTag" style="display:none">💛 CÂU HỎI VÀNG — SÁT THƯƠNG ×2! 💛</div>
-        <div class="qtext" id="questionTxt"></div>
+        <h2 class="qtext" id="questionTxt" tabindex="-1"></h2>
         <div class="qsvg" id="questionSvg"></div>
       </div>
       <div class="thinkbar" id="thinkBar"><i></i></div>
@@ -118,11 +119,13 @@
       <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Rương quà">🎁</span></div>
       <h1 id="bossWinTitle">HẠ GỤC BOSS!</h1>
       <p class="sub" id="bossWinSub"></p>
+      <section class="learning-recap" data-learning-recap aria-label="Điều em vừa học"></section>
       <div class="stats">
         <div class="stat"><div class="num" id="bossWinStars">0</div><div class="lbl">⭐ SAO VỪA NHẬN</div></div>
       </div>
-      <div style="margin-top:20px;max-width:520px;margin-left:auto;margin-right:auto">
-        <button class="btn big" onclick="SFX.open();openShop('next')">🛒 VÀO CỬA HÀNG MUA SẮM</button>
+      <div class="result-actions">
+        <button class="btn big green" id="continueAdventure" onclick="SFX.click();nextBossGo()">Tiếp tục hành trình →</button>
+        <button class="btn" onclick="SFX.open();openShop('next')">Ghé cửa hàng</button>
       </div>
     </div>
   </div>
@@ -149,6 +152,7 @@
       <div class="result-badge-wrap"><span class="result-symbol" id="seTrophy" aria-hidden="true">🏅</span></div>
       <h1 id="seTitle">HẾT GIỜ!</h1>
       <p class="sub" id="seRank"></p>
+      <section class="learning-recap" data-learning-recap aria-label="Điều em vừa học"></section>
       <div class="stats">
         <div class="stat"><div class="num" id="seScore">0</div><div class="lbl">ĐIỂM</div></div>
         <div class="stat"><div class="num" id="seCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
@@ -168,6 +172,7 @@
       <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Cúp vô địch">🏆</span></div>
       <h1>NHÀ VÔ ĐỊCH TƯ DUY!</h1>
       <p class="sub">Em đã chinh phục cả 10 boss của Đấu Trường Tư Duy! Quá đỉnh!</p>
+      <section class="learning-recap" data-learning-recap aria-label="Điều em vừa học"></section>
       <div class="stats">
         <div class="stat"><div class="num" id="stCorrect">0</div><div class="lbl">CÂU ĐÚNG</div></div>
         <div class="stat"><div class="num" id="stWrong">0</div><div class="lbl">CÂU SAI</div></div>
@@ -175,7 +180,7 @@
         <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">COMBO MAX</div></div>
         <div class="stat"><div class="num" id="stCoins">0</div><div class="lbl">XU CÒN LẠI 💰</div></div>
       </div>
-      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();goHome()">🏠 CHƠI LẠI</button></div>
+      <div style="max-width:520px;margin:0 auto"><button class="btn big" onclick="SFX.click();goHome()">🏠 VỀ TRANG CHỦ</button></div>
     </div>
   </div>
 
@@ -183,8 +188,9 @@
   <div class="screen" id="defeat">
     <div class="card">
       <div class="result-badge-wrap"><span class="result-symbol" role="img" aria-label="Luyện tập thêm">🌱</span></div>
-      <h1>ÔI KHÔNG!</h1>
+      <h1>THỬ LẠI, EM SẼ LÀM ĐƯỢC!</h1>
       <p class="sub">Câu đố tư duy khó mà! Thử lại là quen tay ngay! 💪</p>
+      <section class="learning-recap" data-learning-recap aria-label="Điều em vừa học"></section>
       <div class="stats">
         <div class="stat"><div class="num" id="stCorrect2">0</div><div class="lbl">CÂU ĐÚNG</div></div>
         <div class="stat"><div class="num" id="stWrong2">0</div><div class="lbl">CÂU SAI</div></div>

@@ -22,6 +22,9 @@
     const typingBest=Number(records.typing?.bestScore)||0;
     const stars=Number(data.profile?.stars)||0;
     if($('profileStars'))$('profileStars').textContent=stars;
+    if($('profileBadge'))$('profileBadge').textContent=stars>=60?'Vương miện tư duy · 60 sao':stars>=30?'Nhà khám phá · 30 sao':stars>=10?'Ngôi sao chăm học · 10 sao':'Mỗi câu đúng là một bước tiến';
+    const skills=Object.entries(data.learning?.skills||{}).filter(([,v])=>v.attempts>0).sort((a,b)=>b[1].attempts-a[1].attempts);
+    if($('profileLearning'))$('profileLearning').textContent=skills.length?`${TYPE_LABEL[skills[0][0]]||'Toán'}: tự làm đúng ${skills[0][1].correct}/${skills[0][1].attempts} câu`:'Bắt đầu một lượt để khám phá điều mới.';
     // Ô hero trang chủ giống hệt nhau dù là lượt chơi đầu hay lượt 50 — cho
     // icon đổi theo tổng sao (đã tính sẵn cho #profileStars) để người chơi
     // quay lại thấy ngay hành trình của mình, không cần đọc số.
@@ -38,8 +41,20 @@
     if(progress){
       const total=(typeof BOSSES!=='undefined'&&BOSSES.length)||10;
       const cleared=Math.max(0,Math.min(total,Number(data.adventure?.cleared ?? -1)+1));
-      progress.innerHTML=`Đã hạ <b>${cleared}/${total}</b> boss<i></i>`;
+      progress.innerHTML=`<span>Đã vượt <b>${cleared}/${total}</b> boss</span><i></i>`;
       progress.style.setProperty('--done',(cleared/total*100)+'%');
+      const next=Math.min(total,Math.max(cleared+1,(Number(data.adventure?.bossIndex)||0)+1));
+      if($('adventureAction'))$('adventureAction').textContent=cleared===total?'Chơi lại boss cuối →':data.adventure?.active?`Tiếp tục · Boss ${next}/${total} →`:'Bắt đầu hành trình →';
+      const track=$('journeyTrack');
+      if(track){
+        track.replaceChildren();
+        for(let i=0;i<total;i++){
+          const stop=document.createElement('span');stop.className=i<cleared?'done':i===next-1?'current':'';
+          stop.textContent=i<cleared?'✓':String(i+1);stop.title=BOSSES[i].name;
+          if(i===next-1&&cleared<total)stop.setAttribute('aria-current','step');
+          track.append(stop);
+        }
+      }
     }
   };
 

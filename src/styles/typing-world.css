@@ -1,0 +1,142 @@
+/* Gõ Chữ Vui — isolated forest palette, spell dock and journey layout. */
+#typingGame{--spell-ink:#234d46;--spell-muted:#54736c;--spell-leaf:#237c61;--spell-mint:#e6f4ed;--spell-paper:#fffdf4;--spell-line:#aec9bc;--spell-gold:#efc469}
+#typingGame .typing-world{background:var(--spell-paper);color:var(--spell-ink);padding:20px 24px;border:1px solid var(--spell-line)}
+#typingGame .game-topbar{margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--spell-line)}
+#typingGame .game-topbar h1{font-size:28px;color:var(--spell-ink)}
+#typingGame .eyebrow{color:var(--spell-muted);font-size:11px;line-height:1.5}
+#typingGame .icon-btn{border:1px solid var(--spell-line);box-shadow:0 3px 0 #d3e1d8;color:var(--spell-ink);background:#fff}
+#typingGame .btn{border:1px solid var(--spell-line);border-radius:12px;box-shadow:0 3px 0 #cfddd3;background:#fff;color:var(--spell-ink);min-height:46px;padding:10px 14px;font:800 15px var(--font-body);text-transform:none}
+#typingGame .btn.green{background:var(--spell-leaf);border-color:var(--spell-leaf);color:white;box-shadow:0 3px 0 #174f3e}
+#typingGame :is(button,input,select,summary):focus-visible{outline:3px solid #b87325;outline-offset:3px}
+#typingGame :is(button,input,select){min-width:0}
+#typingGame .typing-setup{max-width:none;margin:0;padding:0}
+#typingGame .spell-preparation{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr);gap:28px;align-items:start}
+#typingGame .spell-journey{min-width:0}
+#typingGame .spell-scene{position:relative;display:flex;align-items:center;min-height:230px;padding:26px;background:var(--spell-mint);border-radius:24px 24px 64px 24px;isolation:isolate;overflow:hidden}
+#typingGame .spell-scene:after{content:'';position:absolute;width:210px;height:90px;background:#c4dfbc;border-radius:50%;right:-10px;bottom:-30px;z-index:-1}
+#typingGame .spell-intro{flex:1;min-width:0}
+#typingGame .spell-intro h2{font:900 clamp(28px,2.8vw,42px)/1.12 var(--font-display);color:var(--spell-ink);margin:10px 0 12px}
+#typingGame .spell-intro p{font-size:15px;line-height:1.6;max-width:30ch;color:var(--spell-muted)}
+#typingGame .spell-guide{width:clamp(130px,15vw,220px);height:auto;flex:none;align-self:end;overflow:visible}
+#typingGame .spell-scene-spark{position:absolute;right:24px;top:18px;font-size:38px;color:#997128}
+#typingGame .spell-map-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:20px 0 12px}
+#typingGame h3{font:800 17px var(--font-body);color:var(--spell-ink)}
+#typingGame #typingJourneyProgress{font-size:13px;color:var(--spell-muted)}
+#typingGame .typing-map{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin:0;padding:0}
+#typingGame .typing-map .mapnode{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:60px;padding:6px 2px;border:1px solid var(--spell-line);border-radius:12px;background:white;box-shadow:none;color:var(--spell-ink);font-size:13px;line-height:1.3;transform:none}
+#typingGame .typing-map .mapnode .em{display:none}
+#typingGame .typing-map .mapnode .tierlbl{display:none}
+#typingGame .typing-map .mapnode.picked{background:var(--spell-leaf);color:white;border-color:var(--spell-leaf);outline:2px solid var(--spell-gold);outline-offset:2px}
+#typingGame .typing-map .mapnode.locked{opacity:1;background:#f0f1e9;color:#6d7a72;border-style:dashed}
+#typingGame .spell-stage-preview{display:flex;align-items:center;gap:16px;margin-top:18px;min-height:95px;padding:12px 0;border-bottom:1px solid var(--spell-line)}
+#typingGame #typingSelectedArt{width:76px;flex:none}#typingGame #typingSelectedArt svg{width:76px;height:76px;overflow:visible}
+#typingGame .spell-stage-preview h3{margin:3px 0 6px;font-size:19px}
+#typingGame .spell-stage-preview p{font-size:14px;line-height:1.5;color:var(--spell-muted)}
+#typingGame .spell-settings{padding:22px;border:1px solid var(--spell-line);border-radius:20px;background:#fff;min-width:0}
+#typingGame .spell-settings h2{font-size:22px;margin:0 0 20px;color:var(--spell-ink)}
+#typingGame .spell-language{border:0;padding:0;margin:0;min-width:0}
+#typingGame .spell-language legend{font-size:14px;font-weight:800}
+#typingGame .option-grid{display:grid;grid-template-columns:1fr 1fr;margin:10px 0 18px;gap:10px}
+#typingGame .option-card span{display:flex;flex-direction:column;align-items:start;gap:6px;min-height:88px;padding:12px;border:1px solid var(--spell-line);border-radius:12px;background:var(--spell-paper);box-shadow:none;transform:none}
+#typingGame .option-card b{font-size:16px}#typingGame .option-card small{font-size:12px;line-height:1.4;color:var(--spell-muted)}
+#typingGame .option-card input:checked+span{background:var(--spell-mint);border:2px solid var(--spell-leaf);padding:11px;box-shadow:none;transform:none}
+#typingGame .select-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:0;font-size:14px;color:var(--spell-ink)}
+#typingGame select{width:100%;min-height:44px;font-size:16px;border:1px solid var(--spell-line);color:var(--spell-ink);background-color:white}
+#typingGame .check-row{font-size:13px;display:flex;gap:8px;align-items:center;line-height:1.4;margin-top:14px}
+#typingGame .check-row[hidden]{display:none}#typingGame .check-row input{flex:none}
+#typingGame .spell-help{font-size:13px;line-height:1.6;color:var(--spell-muted);margin:14px 0}
+#typingGame .typing-launch{display:grid;grid-template-columns:1fr;gap:10px;margin:16px 0 0}
+#typingGame .typing-launch .btn{font-size:16px;min-height:48px}
+#typingGame .typing-dictionary-status{min-height:20px;margin:14px 0 0;font-size:12px;line-height:1.5;color:var(--spell-muted)}
+#typingGame .spell-manage{border-top:1px solid var(--spell-line);margin-top:14px;padding-top:6px}
+#typingGame summary{cursor:pointer;font-size:13px;font-weight:700;padding:10px 0}
+#typingGame .typing-campaign-status{font-size:12px;line-height:1.5;margin-top:10px}
+#typingGame .spell-manage .effects-setting{justify-content:start;margin-bottom:12px}
+#typingGame .spell-manage .effects-setting select{width:auto}
+#typingGame .spell-runbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;font-size:15px;font-variant-numeric:tabular-nums}
+#typingGame .spell-lives{color:#a34255;font-size:20px}
+#typingGame .spell-wave-progress{height:4px;background:#dce8dc;border-radius:4px;margin:8px 0 12px;overflow:hidden}
+#typingGame .spell-wave-progress i{display:block;width:100%;height:100%;background:var(--spell-leaf);transform:scaleX(0);transform-origin:left}
+#typingGame .typing-play{margin:0}
+#typingGame .typing-battlefield{height:clamp(250px,calc(100dvh - 380px),490px);min-height:0;border:1px solid #abcaba;border-radius:20px;background:#e5f3eb;box-shadow:none}
+#typingGame .typing-battlefield:before{display:none}
+#typingGame .spell-forest{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#typingGame .spell-forest i{position:absolute;bottom:-60px;left:12%;width:35%;height:110px;background:#c5dfb9;border-radius:50%}
+#typingGame .spell-forest i:nth-child(2){left:48%;bottom:-45px;background:#d2e6c5;width:48%}
+#typingGame .spell-forest i:nth-child(3){left:85%;height:130px;background:#b4d4ba}
+#typingGame .typing-gate{width:12%;min-width:36px;max-width:95px;border-right:1px dashed #83ac93;background:#d0e7d4;box-shadow:none}
+#typingGame .typing-gate>span{width:100%;filter:none}
+#typingGame .typing-gate svg{width:100%;height:auto}
+#typingGame .typing-gate i{display:none}
+#typingGame .lane-lines{left:12%}#typingGame .lane-lines i{border-color:#c1d8c9}
+#typingGame .typing-monster{max-width:min(260px,62%);gap:3px}
+#typingGame .typing-monster .monster-emoji{font-size:38px;animation:none;filter:none}
+#typingGame .typing-monster.boss .monster-emoji{font-size:46px}
+#typingGame .typing-monster .monster-name{font-size:11px;max-width:100%;line-height:1.2}
+#typingGame .typing-monster .monster-word{font:800 clamp(17px,1.6vw,24px)/1.25 var(--font-body);padding:7px 12px;background:#fffef8;color:var(--spell-ink);border:2px solid #779987;box-shadow:0 3px 0 #bfd5c4;border-radius:10px;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+#typingGame .typing-monster .monster-meaning{display:none}
+#typingGame .typing-monster.locked .monster-word{border-color:var(--spell-leaf);box-shadow:0 0 0 3px #b5dbc7}
+#typingGame .typing-monster .monster-hp{position:static;width:80%;height:5px;margin-top:3px;background:#c8d9ce}
+#typingGame .typing-monster.near-gate .monster-word{border-color:#bc5261}
+#typingGame .wave-banner{font-size:24px;line-height:1.25;max-width:85%;width:max-content;background:var(--spell-paper);color:var(--spell-ink);text-shadow:none;padding:12px 18px;border-radius:14px;border:1px solid var(--spell-line)}
+#typingGame .spell-dock{margin-top:12px;padding:14px 18px;background:#fff;border:1px solid var(--spell-line);border-radius:16px}
+#typingGame .spell-target{display:flex;align-items:baseline;gap:12px;min-width:0;min-height:28px;flex-wrap:wrap}
+#typingGame #typingTargetWord{font:800 22px var(--font-body);overflow-wrap:anywhere;color:var(--spell-ink)}
+#typingGame #typingTargetMeaning{font-size:13px;color:var(--spell-muted);overflow-wrap:anywhere}
+#typingGame .typing-input-wrap{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding:0;margin:10px 0 0;background:none}
+#typingGame .typing-input-wrap input{width:100%;border:2px solid #759985;border-radius:10px;padding:10px 12px;min-height:48px;background:var(--spell-paper);color:var(--spell-ink);font:700 20px var(--font-body);box-shadow:none}
+#typingGame .typing-input-wrap input.wrong{border-color:#b33b50;background:#fff1f1}
+#typingGame .typing-input-wrap button{box-shadow:none;border:1px solid var(--spell-line);background:var(--spell-mint);font-size:22px;padding:0;border-radius:10px}
+#typingGame .typing-tip{margin-top:8px;text-align:left;font-size:13px;font-weight:500;line-height:1.4;color:var(--spell-muted);min-height:18px}
+#typingGame .spell-bottom{display:flex;align-items:start;justify-content:space-between;gap:14px;margin-top:10px}
+#typingGame .learn-toast{display:block;flex:1;min-height:20px;text-align:left;font-size:13px;font-weight:500;color:var(--spell-ink);line-height:1.45}
+#typingGame .spell-metrics{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--spell-muted);font-variant-numeric:tabular-nums}
+#typingGame .spell-pause{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--spell-mint);padding:20px;text-align:center}
+#typingGame .spell-pause[hidden]{display:none}#typingGame .spell-pause>span{font-size:36px}#typingGame .spell-pause p{max-width:40ch;font-size:14px;line-height:1.5}
+#typingGame .spell-pause .btn{width:min(280px,100%)}
+#typingGame .game-result{max-width:980px;margin:20px auto;padding:0;border:0;background:none;box-shadow:none;text-align:left}
+#typingGame .spell-result-top{display:flex;align-items:center;gap:24px}#typingGame .spell-result-top>svg{width:140px;flex:none}
+#typingGame .spell-result-top h2{font-size:30px;line-height:1.2;margin:8px 0;color:var(--spell-ink)}
+#typingGame .spell-result-top p{font-size:15px;font-weight:500;line-height:1.6}
+#typingGame #typingResultIcon{font-size:36px;margin-left:auto}
+#typingGame .result-stats{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:24px 0}
+#typingGame .result-stats>div{padding:12px 8px;background:#fff;border:1px solid var(--spell-line);box-shadow:none;text-align:center;border-radius:12px}
+#typingGame .result-stats b{font-size:26px;color:var(--spell-ink)}#typingGame .result-stats small{font-size:12px;line-height:1.4;color:var(--spell-muted)}
+#typingGame .spell-reflection{border-block:1px solid var(--spell-line);padding:18px 0;margin-bottom:20px}
+#typingGame .spell-reflection>p{font-size:14px;font-weight:500;line-height:1.5;margin:8px 0 14px}
+#typingGame .spell-word-review{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#typingGame .spell-word-review>div{padding-left:12px;border-left:3px solid #abc9b5;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+#typingGame .spell-word-review b{display:block}#typingGame .spell-word-review .needs-practice{border-color:#bb795c}
+#typingGame .result-actions{justify-content:start}#typingGame #typingShareStatus{font-size:13px;margin-top:12px}
+@media(min-width:1700px){#typingGame .spell-preparation{max-width:1500px;margin:auto}#typingGame .spell-scene{min-height:320px}}
+@media(max-width:900px){#typingGame .spell-preparation{grid-template-columns:1fr;gap:22px}#typingGame .spell-settings{padding:20px}#typingGame .spell-scene{min-height:200px}#typingGame .spell-intro p{max-width:40ch}#typingGame .spell-guide{width:170px}#typingGame .result-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){
+ #typingGame .typing-world{padding:12px}
+ #typingGame .game-topbar{grid-template-columns:44px minmax(0,1fr) auto;gap:8px;margin-bottom:12px;padding-bottom:10px}
+ #typingGame .game-topbar h1{font-size:22px}#typingGame .game-topbar .eyebrow{font-size:9px}
+ #typingGame .spell-scene{padding:18px;min-height:190px;border-radius:18px 18px 40px 18px}
+ #typingGame .spell-intro h2{font-size:28px}#typingGame .spell-intro p{font-size:13px;line-height:1.5}
+ #typingGame .spell-guide{width:100px;margin-right:-8px}
+ #typingGame .spell-scene .eyebrow{font-size:9px}#typingGame .spell-scene-spark{font-size:24px;right:16px}
+ #typingGame .typing-map{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+ #typingGame .typing-map .mapnode{min-height:44px}
+ #typingGame .spell-map-heading{margin-top:16px}#typingGame .spell-map-heading h3{font-size:16px}
+ #typingGame .spell-stage-preview{gap:10px}#typingGame .spell-stage-preview h3{font-size:17px}
+ #typingGame .spell-settings{padding:16px}
+ #typingGame .spell-runbar{font-size:12px;gap:8px;flex-wrap:wrap}#typingGame .spell-combo{display:none}
+ #typingGame .typing-battlefield{height:clamp(170px,calc(var(--visual-height,100dvh) - 350px),330px);border-radius:14px}
+ #typingGame .typing-monster .monster-emoji{font-size:30px}#typingGame .typing-monster.boss .monster-emoji{font-size:34px}
+ #typingGame .typing-monster .monster-word{font-size:18px;padding:6px 10px}
+ #typingGame .spell-dock{padding:10px 12px;margin-top:8px}
+ #typingGame .spell-target{gap:4px 10px}#typingGame .spell-target .eyebrow{font-size:9px}
+ #typingGame #typingTargetWord{font-size:19px}#typingGame #typingTargetMeaning{font-size:12px;max-width:100%}
+ #typingGame .typing-input-wrap{margin-top:7px}#typingGame .typing-input-wrap input{font-size:18px}
+ #typingGame .typing-tip{font-size:12px}
+ #typingGame .spell-bottom{flex-direction:column;gap:6px}#typingGame .spell-metrics{gap:12px}
+ #typingGame .spell-result-top{gap:12px}#typingGame .spell-result-top>svg{width:76px}#typingGame .spell-result-top h2{font-size:24px}#typingGame #typingResultIcon{display:none}
+ #typingGame .spell-word-review{grid-template-columns:1fr 1fr}#typingGame .result-stats{gap:6px}#typingGame .result-stats b{font-size:22px}
+ #typingGame .result-actions{display:grid;grid-template-columns:1fr 1fr}
+ #typingGame .spell-pause{padding:12px;gap:6px}#typingGame .spell-pause>span,#typingGame .spell-pause p{display:none}
+}
+@media(max-height:550px) and (max-width:640px){#typingGame .game-topbar{margin-bottom:4px;padding-bottom:4px}#typingGame .typing-battlefield{height:145px}#typingGame .spell-bottom{display:none}#typingGame .spell-target .eyebrow{display:none}#typingGame #typingTargetMeaning{display:none}}
+@media(prefers-reduced-motion:reduce){#typingGame .typing-monster,#typingGame .typing-monster *{animation:none!important}}

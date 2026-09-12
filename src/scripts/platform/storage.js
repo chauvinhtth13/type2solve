@@ -2,7 +2,7 @@
 (function createGameStorage(root) {
   'use strict';
 
-  const VERSION = 1;
+  const VERSION = 2;
   const STORAGE_KEY = 'dau-truong-tu-duy:save';
   const LEGACY_KEYS = ['dau-truong-tu-duy:v1', 'dttd-progress-v1'];
   const BLOCKED_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -62,7 +62,9 @@
           series: 0,
         },
       },
+      learning: { skills: {} },
       settings: {
+        effects: 'auto',
         sound: true,
         answerMode: 'mixed',
         typingLanguage: 'en',
@@ -184,6 +186,19 @@
     state.records.duel.series = wholeNumber(state.records.duel.series, 0);
 
 
+    if (!isPlainObject(state.learning)) state.learning = { skills: {} };
+    const skills = isPlainObject(state.learning.skills) ? state.learning.skills : {};
+    state.learning.skills = {};
+    Object.entries(skills).slice(0, 80).forEach(([key, value]) => {
+      if (!/^[a-z][a-z0-9]{0,23}$/.test(key) || BLOCKED_KEYS.has(key) || !isPlainObject(value)) return;
+      const attempts = Math.min(1000000, wholeNumber(value.attempts, 0));
+      state.learning.skills[key] = {
+        attempts,
+        correct: Math.min(attempts, wholeNumber(value.correct, 0)),
+        assisted: Math.min(attempts, wholeNumber(value.assisted, 0)),
+      };
+    });
+    state.settings.effects = ['auto', 'low', 'off'].includes(state.settings.effects) ? state.settings.effects : 'auto';
     state.settings.sound = state.settings.sound !== false;
     state.settings.answerMode = ['mixed', 'choice', 'input'].includes(state.settings.answerMode)
       ? state.settings.answerMode

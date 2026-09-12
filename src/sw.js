@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v18-playful-ui';
+const CACHE_VERSION = 'v19-typing-forest';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -13,6 +13,7 @@ const CORE_ASSETS = [
   './styles/app.css',
   './styles/games.css',
   './styles/theme-playful.css',
+  './styles/typing-world.css',
   './scripts/platform/storage.js',
   './scripts/engine/runtime.js',
   './scripts/app/background.js',
@@ -31,6 +32,7 @@ const CORE_ASSETS = [
   './scripts/games/nim/index.js',
   './scripts/games/hanoi/rules.js',
   './scripts/games/hanoi/index.js',
+  './scripts/engine/experience.js',
   './scripts/app/bootstrap.js',
 ];
 

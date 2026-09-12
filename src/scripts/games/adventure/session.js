@@ -3,6 +3,13 @@ const savedAdventure=window.GameStorage?.load?.().adventure||{};
 let G={bossIndex:0,cleared:Number.isInteger(savedAdventure.cleared)?savedAdventure.cleared:-1};
 let timerId=null,timeLeft=0,timeTotal=0;
 let battleRunId=0;
+const combatTimers=GameRuntime.createSessionScheduler();
+function setBattlePhase(phase){G.phase=phase;document.body.dataset.battlePhase=phase;}
+function clearCombatEffects(){
+  combatTimers.clear();
+  document.querySelectorAll('.proj,.trail,.beam,.spark,.boom,.dmg,.healfx,.confetti,.comboPop,.flashOverlay,.goldrain,.ultText,.shock,.ray,.itemFly,.ripple,.phase2fx').forEach(el=>el.remove());
+  ['heroSprite','bossSprite','arena'].forEach(id=>$(id)?.classList.remove('cast-hero','cast-boss','hurt','hurt-hero','flashWhite','dash-hero','defeated','winHop','shake','shakeBig','morphing'));
+}
 const BASE_HERO_HP=130, BASE_HERO_ATK=14;
 
 function heroMaxHp(){return BASE_HERO_HP+(G.perks?.hp||0)*25}
@@ -26,6 +33,7 @@ function saveAdventureProgress(){
 }
 
 function startAdventure(){
+  window.LearningReview?.reset();
   const stored=window.GameStorage?.load?.().adventure||{};
   const cleared=Math.min(BOSSES.length-1,Math.max(-1,Number.isInteger(stored.cleared)?stored.cleared:G.cleared));
   const perks=cleanBag(stored.perks,['atk','hp','time','luck','def','gold'],20);
@@ -54,22 +62,18 @@ function showIntro(){
   if(b.arena)ie.classList.add('arena-'+b.arena);
   ie.classList.remove('introZoom');void ie.offsetWidth;ie.classList.add('introZoom');
   $('introName').textContent=b.name.toUpperCase();
-  /* Câu giới thiệu tính cách đứng TRƯỚC bảng chỉ số: trẻ vừa nhìn thấy con quái xong,
-     đọc ngay câu tả đúng cái nó vừa nhìn, rồi mới tới máu/sức đánh. */
-  $('introDesc').innerHTML=
-    (b.desc?`<span class="bossbio">${b.desc}</span>`:'')+
-    `❤️ Máu: <b>${b.hp}</b> &nbsp; ⚔️ Sức đánh: <b>${b.atk}</b> &nbsp; ⏰ Mỗi câu: <b>${b.time+(G.perks?.time||0)*3}s</b><br>
-     🏅 Cấp độ: <b>${RANKS[b.tier]}</b><br>
-     🎯 Cần trả lời đúng ít nhất <b>${b.minQ} câu</b> mới hạ được boss này!<br>
-     🔢 Mỗi câu có <b>${b.tier>=3?5:4} lựa chọn</b> — các đáp án sai đều rất "giống thật"!<br>
-     ✨ Đặc điểm: <b>${b.mechTxt}</b>`;
+  /* Mục tiêu và cơ chế luôn hiện; thông tin chi tiết mở theo nhu cầu. */
+  $('introDesc').innerHTML=`<p class="intro-objective">Trả lời đúng ${b.minQ} câu trở lên để vượt thử thách.</p>
+    <p>${b.mechTxt}</p><details class="intro-details"><summary>Tìm hiểu về boss</summary>
+    <p>${b.desc||''}</p><p>Máu: ${b.hp} · Sức đánh: ${b.atk} · Mỗi câu: ${b.time+(G.perks?.time||0)*3}s</p>
+    <p>Cấp độ: ${RANKS[b.tier]}</p></details>`;
   $('introCoins').textContent=G.coins||0;
   const bag=['potion','hint','freeze','shield','bomb'].reduce((s,k)=>s+(G.inv?.[k]||0),0);
   if(bag>0)$('introDesc').innerHTML+=`<br><span style="color:var(--green-ink)">🎒 Em đang mang <b>${bag} vật phẩm</b> — bấm nút vật phẩm ngay trên câu hỏi để dùng!</span>`;
   showScreen('intro');
 }
 function beginBattle(){
-  battleRunId++;
+  battleRunId++;clearCombatEffects();G.ending=false;G.advancing=false;
   const b=BOSSES[G.bossIndex];
   G.bossHp=b.hp;G.bossMaxHp=b.hp;G.locked=false;
   $('arena').className='arena '+b.arena;
@@ -90,7 +94,7 @@ function beginBattle(){
 }
 function retryBoss(){G.heroHp=heroMaxHp();G.streak=0;G.crit=false;beginBattle();}
 function goHome(){
-  battleRunId++;
+  battleRunId++;clearCombatEffects();setBattlePhase('idle');
   saveAdventureProgress();
   stopTimer();stopAmbient();
   clearInterval(G.blitzT);G.blitzT=null;
@@ -117,7 +121,7 @@ function goHome(){
 const RECORDS={blitz:0,surv:0};
 
 function baseRun(mode){
-  battleRunId++;
+  battleRunId++;clearCombatEffects();window.LearningReview?.reset();
   stopTimer();stopAmbient();clearInterval(G.blitzT);
   G={mode,bossIndex:0,cleared:G.cleared??-1,
      perks:{atk:0,hp:0,time:0,luck:0,def:0,gold:0},
@@ -165,7 +169,7 @@ function renderModeBar(){
   if(G.mode==='blitz'){
     const f=$('timerFill'),n=$('timerNum');
     const pct=G.timeLeftTotal/60*100;
-    f.style.width=pct+'%';n.textContent=Math.ceil(G.timeLeftTotal)+'s';
+    f.style.width='100%';f.style.transform='scaleX('+Math.max(0,Math.min(1,pct/100))+')';n.textContent=Math.ceil(G.timeLeftTotal)+'s';
     const warn=pct<25;f.classList.toggle('warn',warn);n.classList.toggle('warn',warn);
     $('battleCard').classList.toggle('danger',warn);
     $('levelBadge').textContent='⚡ Điểm: '+G.score;
@@ -175,6 +179,7 @@ function renderModeBar(){
 }
 function endRun(){
   if(!$('battle').classList.contains('active'))return;
+  G.ending=true;G.locked=true;setBattlePhase('results');
   stopTimer();stopAmbient();clearInterval(G.blitzT);clearTimeout(G.thinkT);
   const isBlitz=G.mode==='blitz';
   const key=isBlitz?'blitz':'surv';
@@ -199,19 +204,15 @@ function endRun(){
   $('seStreak').textContent=G.bestStreak;
   $('seBest').textContent=RECORDS[key];
   $('seAgain').onclick=()=>{SFX.click();isBlitz?startBlitz():startSurvival()};
-  if(isRecord&&G.score>0){SFX.win();confetti(50);}else SFX.defeat();
   showScreen('scoreEnd');
+  if(isRecord&&G.score>0){SFX.win();confetti(30);}else SFX.defeat();
 }
 /* đổi quái + tăng độ khó trong chế độ sinh tồn */
 function survAdvance(){
   if(!$('battle').classList.contains('active')||G.mode!=='surv')return;
   const boss=$('bossSprite');
-  boss.classList.add('morphing');
-  setTimeout(()=>{
-    const count=(typeof ART_SKIN_COUNT!=='undefined'?ART_SKIN_COUNT:10);
-    applySkin(boss,{spriteIndex:ri(0,count-1)});
-    boss.classList.remove('morphing');
-  },400);
+  const count=(typeof ART_SKIN_COUNT!=='undefined'?ART_SKIN_COUNT:10);
+  applySkin(boss,{spriteIndex:ri(0,count-1)});
   G.tier=Math.min(5,G.tier+1);
   const themes=['','night','lava','ice'];
   const th=pick(themes);
@@ -220,6 +221,8 @@ function survAdvance(){
   comboPopup('🔥 QUÁI MỚI — KHÓ HƠN!');
 }
 function askRestart(){
+  if($('restartModal').classList.contains('on'))return;
+  G.resumePhase=G.phase;combatTimers.pause();setBattlePhase('paused');
   SFX.open();
   // dừng mọi đồng hồ để bé đọc menu mà không bị boss đánh
   G.pausedTime=(timerId&&!G.locked)?timeLeft:null;
@@ -234,6 +237,8 @@ function askRestart(){
   $('restartModal').classList.add('on');
 }
 function closeRestart(){
+  if(!$('restartModal').classList.contains('on'))return;
+  setBattlePhase(G.resumePhase||'question');combatTimers.resume();
   SFX.click();
   $('restartModal').classList.remove('on');
   G.locked=G.pauseLocked||false;
@@ -277,12 +282,14 @@ function doRestart(){
 const BUSY_SCREENS=['battle','typingGame','sudokuGame','duelGame','nimGame','hanoiGame'];
 /* Hỏi lại mỗi lần thay vì nhớ một lần: người dùng có thể đổi cài đặt hệ điều hành
    giữa chừng mà không tải lại trang. */
-function REDUCED_MOTION(){return window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches}
+function REDUCED_MOTION(){return window.GameExperience?.quality()==='off'||Boolean(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}
 /* Đổi màn: phần THAY ĐỔI DOM tách riêng để View Transitions gọi lại được.
    Trả về phần tử màn để nhánh gọi còn chuyển tiêu điểm. */
 function swapScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const screen=$(id);screen.classList.add('active');
+  window.LearningReview?.renderRecap(screen);
+  document.body.dataset.screen=id;
   document.body.classList.toggle('fx-quiet',BUSY_SCREENS.includes(id));
   return screen;
 }
@@ -292,20 +299,11 @@ function focusScreen(screen){
   window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 function showScreen(id){
-  /* Người tắt hiệu ứng, hoặc trình duyệt chưa có API: đổi thẳng như cũ.
-     KHÔNG await ở đây — tiêu điểm phải nhảy ngay, người dùng bàn phím không
-     được chờ hết 380ms hoạt hình mới đọc được tiêu đề màn mới. */
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce||typeof document.startViewTransition!=='function'){
-    const screen=swapScreen(id);
-    requestAnimationFrame(()=>focusScreen(screen));
-    return;
-  }
-  let screen=null;
-  const vt=document.startViewTransition(()=>{screen=swapScreen(id);});
-  /* Đặt tiêu điểm ngay khi DOM đã đổi (vt.ready), chứ không đợi vt.finished:
-     ảnh chụp chuyển tiếp chỉ là lớp phủ, nội dung thật đã sẵn sàng rồi. */
-  vt.ready.then(()=>focusScreen(screen)).catch(()=>{if(screen)focusScreen(screen);});
+  // DOM chuyển đồng bộ; hiệu ứng CSS không được quyết định màn hiện hành.
+  const previous=document.querySelector('.screen.active');
+  if(previous?.id!==id)clearCombatEffects();
+  const screen=swapScreen(id);
+  requestAnimationFrame(()=>{if(screen.classList.contains('active'))focusScreen(screen);});
 }
 
 /* ============ CỬA HÀNG ============ */
@@ -375,6 +373,8 @@ function buyItem(it){
 }
 
 function nextBossGo(){
+  if(G.advancing||G.bossIndex>=BOSSES.length-1||G.cleared<G.bossIndex)return;
+  G.advancing=true;
   G.cleared=Math.max(G.cleared,G.bossIndex);
   G.bossIndex++;
   G.heroHp=Math.min(heroMaxHp(),G.heroHp+40);

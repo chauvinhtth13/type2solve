@@ -105,3 +105,15 @@ Chỉ xóa khi tìm kiếm tĩnh không còn consumer, browser test không dùng
 không có đường gọi động từ handler HTML. Với API từng public trên `window`, xóa theo
 hai bước: chuyển caller sang interface mới, rồi xóa alias ở release kế tiếp sau khi
 test production bundle đã xanh.
+
+
+## Trải nghiệm và vòng đời chiến đấu
+
+Xem [bản cập nhật trải nghiệm](redesign.md). `GameRuntime.createSessionScheduler()`
+quản lý callback chiến đấu có thể tạm dừng, tiếp tục và hủy. Kết quả chấm, sát thương
+và phần thưởng được ghi nhận trước hiệu ứng. Chuyển màn là đồng bộ; hiệu ứng CSS
+không quyết định màn nào đang hoạt động.
+
+Schema lưu phiên bản 2 bổ sung `learning.skills` và `settings.effects`, giữ nguyên
+khóa lưu và tiến độ cũ. `LearningReview` chỉ giữ tối đa 100 câu gần đây trong bộ nhớ;
+ôn lại tối đa 5 câu khó không cộng sao hay sửa kỷ lục.

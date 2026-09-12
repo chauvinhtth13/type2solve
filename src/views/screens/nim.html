@@ -8,7 +8,7 @@
 
       <section class="nim-setup" id="nimSetup">
         <p class="sub">⚠️ Luật NGƯỢC với Nim thường: <b>ai bốc viên sỏi cuối cùng sẽ THUA!</b></p>
-        <div class="duel-setup-grid">
+        <div class="setup-columns"><div class="setup-roster"><h2 class="setup-heading">1. Chọn bạn đồng hành</h2>        <div class="duel-setup-grid">
           <div class="duel-player-card">
             <svg class="sprite duel-skin-preview" id="nimSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
             <div class="duel-skin-row">
@@ -32,7 +32,9 @@
           </div>
         </div>
 
-        <div class="nim-config">
+        <h2 class="maplbl">🏅 Số ván em đã hạ được máy</h2>
+        <div class="nim-records" id="nimRecords"></div>
+</div><div class="setup-options"><h2 class="setup-heading">2. Chọn thử thách</h2>        <div class="nim-config">
           <label class="select-row">Đối thủ
             <select id="nimOpponent" onchange="syncNimOpponent()">
               <option value="human" selected>👥 2 người cùng máy</option>
@@ -60,10 +62,10 @@
 
         <label class="nim-hint-toggle"><input type="checkbox" id="nimShowHint"> 💡 Hiện gợi ý thế cờ (đang thắng hay đang thua)</label>
 
-        <h2 class="maplbl">🏅 Số ván em đã hạ được máy</h2>
-        <div class="nim-records" id="nimRecords"></div>
 
-        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>
+
+        <div class="setup-launch"><button class="btn big green" type="button" onclick="startNim()">🪨 BẮT ĐẦU VÁN NIM</button></div>
+</div></div>
       </section>
 
       <section class="nim-play" id="nimPlay" hidden>

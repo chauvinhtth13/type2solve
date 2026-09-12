@@ -183,3 +183,21 @@ test('GameRuntime.reducedMotion dùng matchMedia fallback và ưu tiên REDUCED_
 
   assert.equal(loadRuntime().runtime.reducedMotion(), false);
 });
+
+
+test('Session scheduler preserves remaining delay, pauses new tasks and cancels on exit', () => {
+  let clock = 0;
+  const { runtime, timers } = loadRuntime({ globals: { performance: { now: () => clock } } });
+  const scheduler = runtime.createSessionScheduler();
+  let hits = 0;
+  scheduler.later(() => hits++, 100);
+  clock = 40; scheduler.pause(); scheduler.pause();
+  assert.equal(timers.pending.size, 0);
+  scheduler.later(() => hits += 10, 30);
+  clock = 500; scheduler.resume(); scheduler.resume();
+  assert.deepEqual([...timers.pending.values()].map(t => t.delay), [60, 30]);
+  timers.fire([...timers.pending.keys()][0]);
+  assert.equal(hits, 1); assert.equal(scheduler.size, 1);
+  scheduler.clear(); scheduler.resume();
+  assert.equal(timers.pending.size, 0); assert.equal(scheduler.size, 0);
+});

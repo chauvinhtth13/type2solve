@@ -90,6 +90,40 @@
     return Object.freeze({ timers: timers, later: later, clear: clear });
   }
 
+  function createSessionScheduler() {
+    const tasks = new Set();
+    let paused = false;
+    const now = () => global.performance.now();
+    function arm(task) {
+      task.started = now();
+      task.id = global.setTimeout(() => { tasks.delete(task); task.callback(); }, task.remaining);
+    }
+    function later(callback, delay = 0) {
+      const task = { callback, remaining: Math.max(0, delay), id: null, started: 0 };
+      tasks.add(task);
+      if (!paused) arm(task);
+      return task;
+    }
+    function pause() {
+      if (paused) return;
+      paused = true;
+      tasks.forEach(task => {
+        global.clearTimeout(task.id);
+        task.remaining = Math.max(0, task.remaining - (now() - task.started));
+      });
+    }
+    function resume() {
+      if (!paused) return;
+      paused = false;
+      tasks.forEach(arm);
+    }
+    function clear() {
+      tasks.forEach(task => global.clearTimeout(task.id));
+      tasks.clear(); paused = false;
+    }
+    return Object.freeze({ later, pause, resume, clear, get size() { return tasks.size; } });
+  }
+
   global.ri = ri;
   global.pick = pick;
   global.shuffle = shuffle;
@@ -104,5 +138,6 @@
     setExclusiveSections: setExclusiveSections,
     reducedMotion: reducedMotion,
     createTimerRegistry: createTimerRegistry,
+    createSessionScheduler: createSessionScheduler,
   });
 })(window);

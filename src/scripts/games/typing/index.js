@@ -78,59 +78,15 @@
   let tabKeyPressed = false;
   const pendingTimers = runtime.createTimerRegistry();
 
-  const MASCOT_SPRITES = {
-    idle: '🦉',
-    combo: '🤩',
-    urgent: '😯',
-    victory: '🥳',
-    gameover: '🙂'
-  };
-
-  const MASCOT_QUOTES = {
-    idle: [
-      'Bật mode tập trung, vào việc nào! 🚀',
-      'Não khởi động, tay sẵn sàng chưa? 🔥',
-      'Hôm nay gõ bao nhiêu WPM đây ta? 🤓'
-    ],
-    combo: [
-      'Tốc độ ánh sáng! ⚡',
-      'Tư duy mượt như lụa! ✨',
-      'Trí tuệ 10 điểm không có nhưng! 💯',
-      'Bàn phím cháy máy rồi bạn ơi! 🔥'
-    ],
-    urgent: [
-      'Sai một ly, gõ lại đi! 😅',
-      'Bình tĩnh hít sâu, lấy lại nhịp nào! 🧘‍♂️',
-      'Quái áp sát rồi, thần tốc lên! ⏰'
-    ],
-    victory: [
-      'Đỉnh nóc kịch trần! 👑',
-      'Kỷ lục mới - Tư duy siêu đỉnh! 🏆',
-      'Phù thủy bàn phím chính là bạn! 🧙‍♂️'
-    ],
-    gameover: [
-      'Thua keo này ta bày keo khác! 🥊',
-      'Bàn phím hơi trơn chút thôi, làm lại nào! 🎮'
-    ]
-  };
-
   const { byId, safeShowScreen } = runtime;
   const now = () => (global.performance && performance.now ? performance.now() : Date.now());
 
-  function updateMascotReaction(type, customText) {
-    const sprite = MASCOT_SPRITES[type] || MASCOT_SPRITES.idle;
-    const quotes = MASCOT_QUOTES[type] || MASCOT_QUOTES.idle;
-    const text = customText || quotes[Math.floor(Math.random() * quotes.length)];
-
-    const mainImg = byId('typingMascotImg');
-    const mainText = byId('mascotSpeechText');
-    if (mainImg) mainImg.textContent = sprite;
-    if (mainText) mainText.textContent = `"${text}"`;
-
-    const playImg = byId('playMascotImg');
-    const playText = byId('playSpeechText');
-    if (playImg) playImg.textContent = sprite;
-    if (playText) playText.textContent = text;
+  // Reactions describe a state once, rather than rewriting random text every frame.
+  function updateMascotReaction(type) {
+    if (state && state.reaction !== type) {
+      state.reaction = type;
+      byId('typingField').dataset.reaction = type;
+    }
   }
 
   function getRankTitle(wpm) {
@@ -140,21 +96,17 @@
     return '🐣 Tập Sự Phím Gõ';
   }
 
-  function copyShareCard() {
+  async function copyShareCard() {
     if (!lastRunResult) return;
-    const rankTitle = getRankTitle(lastRunResult.wpm);
-    const cardText = `⌨️ GÕ CHỮ DIỆT QUÁI — ĐẤU TRƯỜNG TƯ DUY\n`
-      + `🏆 Điểm: ${lastRunResult.score} | ⌨️ WPM: ${lastRunResult.wpm} | 🎯 Độ chính xác: ${lastRunResult.accuracy}%\n`
-      + `🔥 Combo cao nhất: ${lastRunResult.combo} | 🧙‍♂️ Danh hiệu: ${rankTitle}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(cardText).then(() => {
-        showLearnToast('📋 Đã sao chép Card Kết quả vào Clipboard!', 'success');
-      }).catch(() => {
-        showLearnToast('📋 Đã chuẩn bị Card Kết quả!', 'warning');
-      });
-    } else {
-      showLearnToast('📋 Đã tạo Card Kết quả!', 'success');
+    const result = lastRunResult;
+    const text = `GÕ CHỮ VUI · Khu rừng phép chữ\n${result.score} điểm · ${result.wpm} WPM · ${result.accuracy}% chính xác\n${result.words} từ đúng · Chuỗi cao nhất ${result.combo}`;
+    const status = byId('typingShareStatus');
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      status.textContent = 'Đã sao chép kết quả.';
+    } catch (_) {
+      status.textContent = 'Chưa sao chép được. Em có thể chọn và sao chép dòng này: ' + text;
     }
   }
   const playSound = runtime.safeSound;
@@ -400,7 +352,7 @@
     const isVietnamese = selected && selected.value === 'vi';
     assist.disabled = !isVietnamese;
     const row = assist.closest('label');
-    if (row) row.classList.toggle('disabled', !isVietnamese);
+    if (row) { row.classList.toggle('disabled', !isVietnamese); row.hidden = !isVietnamese; }
   }
 
   function applySavedSetup() {
@@ -437,6 +389,8 @@
       if (gate) gate.classList.remove('combo-hot', 'combo-blaze');
     }
     composing = false;
+    byId('typingPausePanel').hidden = true;
+    byId('typingField').querySelectorAll('.typing-spell,.typing-impact').forEach(el => el.remove());
     state = null;
   }
 
@@ -475,7 +429,8 @@
       if (preview) emoji.appendChild(preview);
       else emoji.textContent = index <= cleared ? '✅' : stage.emoji;
       const name = document.createElement('span');
-      name.textContent = `${index + 1}. ${stage.name}`;
+      name.textContent = String(index + 1);
+      name.setAttribute('aria-hidden', 'true');
       const info = document.createElement('span');
       info.className = 'tierlbl';
       const range = perWaveRange(stage.perWave);
@@ -483,7 +438,11 @@
         ? `${stage.waves} đợt · ${stage.waves * range.min} từ`
         : `${stage.waves} đợt · ${range.min}–${range.max} từ/đợt`;
 
-      node.append(emoji, name, document.createElement('br'), info);
+      node.append(emoji, name, info);
+      const marker = document.createElement('small');
+      marker.textContent = locked ? '·' : index <= cleared ? '✓' : '✦';
+      marker.setAttribute('aria-hidden', 'true');
+      node.append(marker);
       node.addEventListener('click', () => selectTypingStage(index));
       map.appendChild(node);
     });
@@ -494,7 +453,14 @@
     const button = byId('typingCampaignBtn');
     const stage = campaignStages()[selectedStage];
     if (!button || !stage) return;
-    button.textContent = `⚔️ VÀO CHẶNG ${selectedStage + 1}: ${stage.name.toUpperCase()}`;
+    button.textContent = `Bắt đầu chặng ${selectedStage + 1} →`;
+    byId('typingJourneyProgress').textContent = `${Math.max(0, clearedStage() + 1)}/10 đã qua`;
+    byId('typingSelectedNumber').textContent = `CHẶNG ${selectedStage + 1}`;
+    byId('typingSelectedName').textContent = stage.name;
+    const range = perWaveRange(stage.perWave);
+    byId('typingSelectedInfo').textContent = `${stage.waves} đợt · ${range.min}–${range.max} từ mỗi đợt · kết thúc bằng một bạn boss.`;
+    const art = buildBeast(stageSkin(selectedStage));
+    byId('typingSelectedArt').replaceChildren(...(art ? [art] : []));
   }
 
   function selectTypingStage(index) {
@@ -655,6 +621,7 @@
       elapsedMs: 0,
       lastFrame: frameNow,
       lastHudAt: 0,
+      wordsSeen: new Map(),
       raf: 0
     };
 
@@ -690,6 +657,10 @@
         ? 'Chế độ hỗ trợ đang bật: có thể gõ không dấu, nhưng gõ đủ dấu sẽ giúp em tiến bộ nhanh hơn!'
         : 'Gõ chữ đầu để khóa quái. Hãy gõ đúng cả dấu và khoảng trắng.')
       : 'Gõ chữ cái đầu để khóa quái, gõ hết từ là tung chưởng ngay.');
+    byId('typingPausePanel').hidden = true;
+    byId('typingLearnToast').textContent = '';
+    byId('typingShareStatus').textContent = '';
+    updateTargetDock();
     updateHud(true);
     updateMascotReaction('idle');
     beginWave(0);
@@ -797,8 +768,8 @@
     // Nhớ kích thước sân ngay tại lần đo này; castSpell dùng lại để quy % ra px
     // mà không phải chạm DOM lần nữa.
     if (state) { state.fieldW = width; state.fieldH = height; }
-    if (width >= 520 && height >= 500) return LANE_TOP;   // 3 làn cách nhau 30% chiều cao
-    if (height >= 380) return LANE_TOP_NARROW;            // 2 làn cách nhau 40%
+    if (width >= 520 && height >= 440) return LANE_TOP;   // 3 làn cách nhau 30% chiều cao
+    if (height >= 300) return LANE_TOP_NARROW;            // 2 làn cách nhau 40%
     return LANE_TOP_SINGLE;
   }
 
@@ -1041,7 +1012,7 @@
     const fieldWidth = field.clientWidth;
     if (!fieldWidth) return;                // sân chưa hiện: đo bây giờ là đo sai
     if (state) state.fieldW = fieldWidth;   // giữ số đo tươi kể cả sau khi xoay màn hình
-    const halfPercent = Math.min(24, (monster.element.offsetWidth / 2 / fieldWidth) * 100);
+    const halfPercent = (monster.element.offsetWidth / 2 / fieldWidth) * 100;
     monster.half = halfPercent;
     monster.minX = GATE_X + halfPercent;
     monster.maxX = 100 - halfPercent - 1;
@@ -1103,6 +1074,7 @@
     const current = state;
     if (!current || current.token !== sessionId || current.status !== 'running' || current.paused) return;
     const delta = Math.min(70, Math.max(0, timestamp - current.lastFrame));
+    global.GameExperience?.reportFrame(timestamp-current.lastFrame);
     current.lastFrame = timestamp;
     current.elapsedMs += delta;
 
@@ -1162,6 +1134,7 @@
     clearTargetIf(monster.id);
     state.combo = 0;
     state.missed += 1;
+    rememberWord(monster.item, true);
     state.lives -= 1;
     playSound('wrong');
     flashGate();
@@ -1206,6 +1179,7 @@
   function lockTarget(monster) {
     if (!state || !monster) return;
     state.targetId = monster.id;
+    updateTargetDock(monster);
     state.monsters.forEach(item => item.element && item.element.classList.toggle('locked', item.id === monster.id));
   }
 
@@ -1216,6 +1190,7 @@
     state.targetId = null;
     state.lastBuffer = '';
     state.wasWrong = false;
+    updateTargetDock();
     const input = byId('typingInput');
     if (input) {
       input.value = '';
@@ -1225,6 +1200,7 @@
 
   function unlockTarget() {
     if (!state) return;
+    updateTargetDock();
     state.monsters.forEach(monster => {
       if (monster.element) monster.element.classList.remove('locked', 'wrong');
       if (monster.wordElement) monster.wordElement.textContent = monster.item.text;
@@ -1250,6 +1226,7 @@
       monster.wordElement.appendChild(span);
     });
     monster.element.classList.toggle('wrong', !isPrefix);
+    updateTargetDock(monster, buffer);
   }
 
   function accountNewCharacters(previous, next, target) {
@@ -1306,6 +1283,7 @@
     if (!isPrefix) {
       if (!state.wasWrong) playSound('tick');
       state.wasWrong = true;
+      rememberWord(target.item, true);
       setTip(`Ký tự chưa khớp với “${target.item.text}”. Backspace để sửa, mục tiêu vẫn được khóa.`);
     } else {
       state.wasWrong = false;
@@ -1347,6 +1325,7 @@
   function hitMonster(monster) {
     if (!state || !monster || monster.dying || state.status !== 'running') return;
     const itemJustTyped = monster.item;
+    rememberWord(itemJustTyped, false);
     state.correctWords += 1;
     state.combo += 1;
     state.maxCombo = Math.max(state.maxCombo, state.combo);
@@ -1367,6 +1346,7 @@
     state.targetId = null;
     state.lastBuffer = '';
     state.wasWrong = false;
+    updateTargetDock();
     const input = byId('typingInput');
     if (input) {
       input.value = '';
@@ -1376,6 +1356,7 @@
 
     if (monster.boss) damageBoss(monster);
     else defeatMinion(monster);
+    updateTargetDock();
     updateHud(true);
     safeFocusInput();
   }
@@ -1449,7 +1430,7 @@
     };
     // WAAPI không chịu ảnh hưởng của override prefers-reduced-motion trong CSS,
     // nên phải tự kiểm tra: đặt thẳng chưởng vào đích rồi nổ, không bay.
-    const calm = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const calm = runtime.reducedMotion() || global.GameExperience?.quality() === 'off';
     if (calm) {
       spell.style.transform = `translate(${dx}px,${dy}px) scale(1.35)`;
       later(land, 60, token);
@@ -1527,6 +1508,7 @@
       stars,
       clearedStage: clearedNow ? stageIndex : -1
     };
+    lastRunResult = { ...result };
     const records = saveResultRecord(result);
     const isNewBest = result.score > records.old.bestScore;
     const lastStage = stageIndex === CAMPAIGN_STAGES - 1;
@@ -1552,10 +1534,10 @@
     const text = byId('typingResultText');
     if (icon) icon.textContent = won ? (clearedNow && lastStage ? '👑' : '🏆') : '🛡️';
     if (title) {
-      title.textContent = !won ? 'CỔNG CẦN ĐƯỢC SỬA!'
-        : clearedNow && lastStage ? 'EM LÀ CHÚA TỂ BÀN PHÍM!'
-        : clearedNow ? `HẠ GỤC ${state.config.stageName.toUpperCase()}!`
-        : 'BOSS TỪ VỰNG ĐÃ BỊ HẠ!';
+      title.textContent = !won ? 'Mình thử lại nhé!'
+        : clearedNow && lastStage ? 'Khu rừng đã xanh trở lại!'
+        : clearedNow ? `Đã qua chặng ${stageIndex + 1}!`
+        : 'Hoàn thành lượt luyện gõ!';
     }
     if (text) {
       const waves = totalWaves();
@@ -1580,6 +1562,10 @@
     }
     if (clearedNow && !lastStage) selectedStage = stageIndex + 1;
     renderResultStats(result, records.best);
+    renderReflection(result);
+    byId('typingRankBadge').textContent = getRankTitle(wpm);
+    byId('typingResultTitle').focus({ preventScroll: true });
+    byId('typingGame').querySelector('.typing-world').scrollTop = 0;
     drawCampaignMap();
     if (won) {
       playSound('win');
@@ -1621,6 +1607,12 @@
     const wave = byId('typingWave');
     if (lives) lives.textContent = String(Math.max(0, state.lives));
     if (score) score.textContent = String(state.score);
+    byId('typingAccuracy').textContent = `${currentAccuracy()}%`;
+    const seconds = Math.floor(state.elapsedMs / 1000);
+    byId('typingTimer').textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+    const quota = state.config.counts[state.waveIndex] || 1;
+    const completed = Math.max(0, state.spawned - activeMinionCount());
+    byId('typingWaveProgress').style.transform = `scaleX(${Math.min(1, completed / quota)})`;
     if (combo) combo.textContent = String(state.combo);
     if (wpm) wpm.textContent = String(currentWpm());
     if (wave) wave.textContent = String(state.waveIndex + 1);
@@ -1638,11 +1630,7 @@
     if (stageLabel && state.stageIndex !== null) {
       stageLabel.textContent = `${state.stageIndex + 1}/${CAMPAIGN_STAGES}`;
     }
-    if (force && combo) {
-      combo.classList.remove('pop');
-      void combo.offsetWidth;
-      combo.classList.add('pop');
-    }
+
   }
 
   function setTip(message) {
@@ -1688,13 +1676,15 @@
         pause.textContent = '▶️';
         pause.setAttribute('aria-label', 'Tiếp tục');
       }
-      showBanner('⏸️ TẠM DỪNG', '');
+      byId('typingPausePanel').hidden = false;
+      byId('typingPausePanel').querySelector('button').focus({ preventScroll: true });
       setTip('Quái vật đã đứng yên. Nhấn ▶️ khi em sẵn sàng.');
       playSound('open');
       return;
     }
 
     state.paused = false;
+    byId('typingPausePanel').hidden = true;
     state.status = 'running';
     state.lastFrame = now();
     if (input) input.disabled = false;
@@ -1713,6 +1703,66 @@
 
   function pauseTypingForVisibility() {
     if (state && state.status === 'running' && !state.paused) toggleTypingPause();
+  }
+
+  function updateTargetDock(monster, buffer = '') {
+    const word = byId('typingTargetWord');
+    const meaning = byId('typingTargetMeaning');
+    if (!word || !meaning) return;
+    word.textContent = '';
+    if (!monster) {
+      word.textContent = 'Chọn một từ';
+      meaning.textContent = 'Gõ chữ đầu để bắt đầu phép.';
+      return;
+    }
+    const typed = chars(buffer);
+    chars(monster.item.text).forEach((character, index) => {
+      const span = document.createElement('span');
+      span.textContent = character;
+      if (index < typed.length) span.style.color = charMatches(typed[index], character) ? '#237c61' : '#b33b50';
+      word.appendChild(span);
+    });
+    meaning.textContent = monster.item.meaning || monster.item.topic || '';
+  }
+
+  function clearTypingBuffer() {
+    if (!state || state.status !== 'running' || composing) return;
+    byId('typingInput').value = '';
+    state.lastBuffer = '';
+    unlockTarget();
+    safeFocusInput();
+    setTip('Đã xóa chữ. Gõ chữ đầu để chọn mục tiêu mới.');
+  }
+
+  function rememberWord(item, missed) {
+    if (!state || !item) return;
+    const key = normalizeText(item.text);
+    const old = state.wordsSeen.get(key);
+    // Keep a bounded session notebook; words needing practice take priority.
+    if (!old && state.wordsSeen.size >= 60) {
+      const disposable = [...state.wordsSeen].find(([, value]) => !value.missed);
+      if (!disposable) return;
+      state.wordsSeen.delete(disposable[0]);
+    }
+    state.wordsSeen.set(key, { text: item.text, meaning: item.meaning || '', missed: missed || !!old?.missed });
+  }
+
+  function renderReflection(result) {
+    const list = byId('typingWordReview');
+    list.replaceChildren();
+    byId('typingResultAdvice').textContent = result.accuracy >= 95
+      ? 'Em gõ rất cẩn thận! Hãy giữ độ chính xác này trước khi tăng nhịp độ.'
+      : 'Chọn nhịp chậm hơn và gõ từng chữ thật chắc. Những từ dưới đây sẽ giúp em luyện lại.';
+    const words = [...state.wordsSeen.values()].sort((a, b) => Number(b.missed) - Number(a.missed)).slice(0, 6);
+    for (const item of words) {
+      const row = document.createElement('div');
+      row.className = item.missed ? 'needs-practice' : '';
+      const title = document.createElement('b'); title.textContent = item.text;
+      const meaning = document.createElement('span'); meaning.textContent = item.meaning;
+      const label = document.createElement('small'); label.textContent = item.missed ? ' · Luyện lại' : ' · Đã gõ đúng';
+      row.append(title, meaning, label); list.append(row);
+    }
+    if (!words.length) list.textContent = 'Chưa có từ để ôn. Bắt đầu một lượt mới và thử gõ từ đầu tiên nhé.';
   }
 
   function bindEvents() {
@@ -1750,6 +1800,7 @@
   bindEvents();
 
   // API global được HTML gọi trực tiếp qua onclick/onsubmit.
+  global.clearTypingBuffer = clearTypingBuffer;
   global.openTypingGame = openTypingGame;
   global.startTypingRun = startTypingRun;
   global.startTypingCampaign = startTypingCampaign;

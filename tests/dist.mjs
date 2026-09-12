@@ -30,4 +30,11 @@ for (const [label, flag] of phases) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-console.log('\n✓ Hai phase browser E2E của dist đều đạt');
+const experience = spawnSync(process.execPath, ['tests/experience-browser.mjs'], {
+  cwd: root,
+  env: { ...process.env, DTTD_ROOT: distDir },
+  stdio: 'inherit',
+  windowsHide: true,
+});
+if (experience.status !== 0) process.exit(experience.status ?? 1);
+console.log('\n✓ Browser E2E và luồng trải nghiệm của dist đều đạt');

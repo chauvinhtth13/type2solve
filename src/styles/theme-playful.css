@@ -622,3 +622,369 @@ body[data-arena-theme=ice]{background:radial-gradient(circle at 8% 5%,rgba(143,2
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Hành trình học: ưu tiên đề bài, tiến độ có ý nghĩa và hiệu ứng có giới hạn. */
+:root{--motion-press:90ms;--motion-feedback:160ms;--motion-scene:180ms}
+h1,h2,h3{text-wrap:balance}.sub,.tile-desc{text-wrap:pretty}
+.badge,.stat,.timerwrap,.hptext,.journey-track{font-variant-numeric:tabular-nums}
+.screen.active{animation:learning-enter var(--motion-scene) ease-out}
+@keyframes learning-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.effects-setting{display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:var(--ink-3);flex-wrap:wrap}
+.effects-setting select{min-height:44px;max-width:100%;padding:6px 10px;font-size:14px}
+#home .tile-credit{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.journey-track{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;width:100%;margin-top:8px}
+.journey-track>span{display:grid;place-items:center;aspect-ratio:1;max-height:34px;border:1px solid #c9c2ff;border-radius:50%;font-size:13px;color:#fff}
+.journey-track .done{background:#ffdf8a;color:#24324a;border-color:#ffdf8a}
+.journey-track .current{outline:2px solid #ffdf8a;outline-offset:2px;font-weight:900}
+.mode-icon{width:1em;height:1em;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#home .world-icon,#home .mi{display:grid;place-items:center}
+#home .zone-heading{font-size:clamp(15px,1.2vw,22px)}
+#home .learning-mode small{font-size:clamp(13px,.95vw,17px);line-height:1.4}
+#home .learning-modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+#home .tile-more{grid-template-columns:repeat(2,minmax(0,1fr))}
+#home .zone-solo{grid-column:1/-1}#home .zone-versus{grid-column:1/-1}
+.result-actions{display:grid;gap:12px;max-width:520px;margin:18px auto 0}
+.learning-recap:empty{display:none}
+.learning-recap{margin:12px auto;padding:12px 16px;border-left:4px solid var(--green-ink);background:#edf8f2;max-width:560px;text-align:left;border-radius:0 12px 12px 0}
+.learning-recap p{font-size:16px;line-height:1.5;margin:0 0 6px}
+.learning-recap .btn{margin-top:6px;min-height:44px;font-size:15px}
+#battle .qtext{margin:0;line-height:1.4;letter-spacing:normal;text-wrap:pretty}
+#battle .timerwrap{margin:0 0 8px;flex:0 0 auto}
+#battle .ans{min-height:48px;transition:transform var(--motion-press) ease-out}
+#battle .answer-entry input{min-width:0;min-height:48px;font-size:20px}
+#battle .answer-submit,#battle .nextbtn{min-height:48px}
+#battle .topbar{gap:8px;align-items:center}
+#battle .minibtn{min-width:44px;min-height:44px}
+#battle .qbox{box-shadow:0 3px 0 #dce4ea}
+#battle .feedback{line-height:1.4}
+#battle .arena{isolation:isolate;overflow:hidden}
+#battle .arena.shake,#battle .arena.shakeBig{animation:arena-impact 180ms ease-out}
+@keyframes arena-impact{25%{transform:translateX(-3px)}65%{transform:translateX(2px)}100%{transform:translateX(0)}}
+#battle .screen-flash{display:none}
+.practice-card{max-width:820px;margin:auto;display:flex;flex-direction:column;gap:16px;text-align:left}
+.practice-card .qtext{font-size:clamp(24px,3vw,36px);line-height:1.4;margin:0}
+.practice-card .ans{min-height:48px;font-size:22px}
+.practice-card .explain:empty{display:none}
+.practice-card .game-topbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+.practice-card .game-topbar h1{font-size:26px}
+.practice-card #practiceNext{align-self:flex-start}
+body[data-battle-phase=paused] #battle *,body[data-battle-phase=paused] #battle *::before,body[data-battle-phase=paused] #battle *::after{animation-play-state:paused!important}
+body[data-effects=off] *,body[data-effects=off] *::before,body[data-effects=off] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+body[data-effects=off] .confetti,body[data-effects=off] .screenFlash,body[data-effects=off] .spark,body[data-effects=off] .vfx-particle{display:none}
+body[data-effects=low] .vfx-particle,body[data-effects=low] .vfx-corona,body[data-effects=low] .trail{display:none}
+body[data-effects=low] .sprite,body[data-effects=low] .vfx-ground-flora{animation:none!important}
+body[data-screen=battle] .vfx-ground-flora{animation:none}
+@media(min-width:900px){
+  #battle .battlegrid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+  #battle .colR{padding:8px 4px 0;min-width:0}
+  #battle .colL{min-width:0}
+}
+@media(min-width:1100px) and (max-height:820px){
+  #home .zone-solo{grid-column:1/4}#home .zone-versus{grid-column:4/6}
+  #home .learning-mode{display:flex;align-items:flex-start;flex-direction:column;min-height:130px;padding:10px;gap:6px}
+  #home .learning-mode small{font-size:13px}
+  #home .tile-flagship{grid-template-columns:auto 1fr 160px;min-height:130px}
+  #home .tile-flagship .tile-progress{grid-column:3;grid-row:1/3;width:100%}
+  #home .tile-flagship .journey-track{grid-column:3;grid-row:3;width:100%;gap:4px}
+  #home .journey-track>span{font-size:10px}
+  #home .tile-credit{padding:4px 10px;min-height:48px}
+  #home .tile-flagship .tile-desc,#home .tile-flagship .tile-cta,#home .quick-modes .tile-desc{font-size:13px}
+}
+@media(max-width:899px){
+  #battle .battlegrid{display:flex;flex-direction:column;gap:12px}
+  #battle .arena{height:180px;min-height:180px;margin:0}
+  #battle .fighter{bottom:12px}
+  #battle .sprite{width:105px;height:105px}
+  #battle .hprow{gap:12px;padding:8px}
+  #battle .colL{display:grid;grid-template-columns:1fr;gap:8px}
+  #battle .energywrap{margin:0}.itembar:has(.none){display:none}
+  #battle .qbox{padding:16px;min-height:0}
+  #battle .qtext{font-size:clamp(23px,4.5vw,32px)}
+  #battle .answers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #battle .answers.long-answers{grid-template-columns:1fr}
+  #battle .answers .ans{font-size:20px;padding:12px 8px;overflow-wrap:anywhere}
+  #battle .answer-toolbar{width:100%;font-size:13px}
+  #battle .answer-toolbar select{min-height:44px;max-width:100%}
+  #battle .answer-toolbar #answerModeHint{display:none}
+  #battle .energywrap .ultbtn{min-height:44px;font-size:14px}
+  #home .learning-modes{grid-template-columns:1fr}
+  #home .tile-more{grid-template-columns:1fr}
+  .practice-card .answers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.keyboard-open #battle .arena{height:90px;min-height:90px}
+  body.keyboard-open #battle .fighter{display:none}
+  body.keyboard-open #battle .energywrap,body.keyboard-open #battle .itembar{display:none}
+  body.keyboard-open #battle .answer-entry{scroll-margin-bottom:24px}
+}
+@media(max-width:480px){
+  .wrap{padding:8px max(8px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  #battle .card{padding:12px}
+  #battle .answer-entry{grid-template-columns:minmax(0,1fr)}
+  #battle .qsvg svg{max-width:100%;height:auto}
+  #home .learning-mode small{font-size:14px}
+  #home .tile-credit{justify-content:center}
+}
+
+#battle .timerfill,#battle .energyfill,#battle .hpfill,#battle .hpghost{transform-origin:left center;transition:transform 160ms ease-out}
+#battle .hpghost{transition:transform 300ms ease-out 100ms}
+#battle .flashOverlay{position:absolute;inset:0;pointer-events:none;animation:learning-enter 160ms ease-out reverse}
+body[data-effects=off] .flashOverlay,body[data-effects=low] .flashOverlay{display:none}
+
+/* Nhân vật rõ ở tiền cảnh, đường chân trời yên tĩnh. */
+#home .profile-strip>span{align-content:center;justify-content:center;gap:10px}
+#home .profile-strip b{font-size:clamp(28px,3vw,48px)}
+#home .profile-strip small{font-size:13px}
+#home .tile-flagship .tile-progress{justify-self:stretch;text-align:left}
+#home .tile-flagship .tile-progress b{font-size:inherit}
+#home .tile-flagship .tile-progress i{margin-top:6px}
+#home .tile-flagship .journey-track{max-width:460px}
+#battle .fighter-dais{display:none}
+#battle .fighter .sprite{width:clamp(120px,13vw,230px);height:auto;max-width:100%;filter:none}
+#battle .fighter{bottom:9%}
+#battle .arena::before{inset:36% -12% auto;height:45%;border-radius:50% 65% 0 0;background:#a5d1c0;opacity:.5;transform:rotate(-8deg)}
+#battle .arena::after{content:'';position:absolute;inset:auto -12% 16%;height:27%;background:#83bf91;opacity:.45;border-radius:60% 30% 0 0;transform:rotate(6deg);pointer-events:none}
+#battle .arena.night::before{background:#b4abdf}#battle .arena.night::after{background:#9db589}
+#battle .arena.lava::before{background:#ddba85}#battle .arena.lava::after{background:#c2a970}
+#battle .arena.ice::before{background:#a3d8e7}#battle .arena.ice::after{background:#a2cdd5}
+@media(min-width:1100px) and (max-height:820px){
+  #home .tile-flagship{grid-template-columns:auto minmax(0,1fr) 250px}
+  #home .tile-flagship .tile-progress{grid-row:1/2;font-size:14px}
+  #home .tile-flagship .journey-track{grid-row:2/4;align-self:center}
+  #home .journey-track>span{font-size:12px}
+  #home .tile-flagship .tile-desc{max-width:46ch}
+  #home .tile-credit{flex:0 0 auto}
+}
+@media(max-width:899px){
+  #battle .fighter .sprite{width:100px}
+  #battle .fighter{bottom:0}
+  #battle .hprow{position:relative;z-index:4}
+}
+
+.profile-learning{grid-column:1/-1;color:var(--ink-3);font-size:14px;margin:0;text-align:left}
+.profile-badge{font-size:13px;color:var(--green-ink);font-weight:700}
+#home .tile-flagship .tile-progress>span{display:block}
+#home .tile-flagship .tile-progress b{display:inline}
+.intro-objective{font-size:22px;line-height:1.5}
+.intro-details{margin:16px auto 0;font-size:15px;max-width:540px;text-align:left}
+.intro-details summary{cursor:pointer;min-height:44px;display:list-item;padding:12px;color:var(--purple-ink)}
+.intro-details p{line-height:1.5;margin:8px 12px}
+@media(min-width:900px) and (max-height:820px){
+  #bossWin .card,#victory .card,#defeat .card,#scoreEnd .card{padding:18px 24px;justify-content:center;gap:8px}
+  #bossWin .result-symbol,#victory .result-symbol,#defeat .result-symbol,#scoreEnd .result-symbol{font-size:64px}
+  #bossWin .result-badge-wrap,#victory .result-badge-wrap,#defeat .result-badge-wrap,#scoreEnd .result-badge-wrap{margin:0 auto 8px}
+  #bossWin h1,#victory h1,#defeat h1,#scoreEnd h1{font-size:30px;line-height:1.2}
+  #bossWin .stats,#victory .stats,#defeat .stats,#scoreEnd .stats{margin:12px auto;gap:8px}
+  .learning-recap{margin:8px auto;padding:10px 14px}
+  .learning-recap p{font-size:15px}
+  .result-actions{margin:8px auto 0;gap:10px}
+  .result-actions .btn{min-height:48px;padding:10px 18px;font-size:18px}
+  #home .home-bento{row-gap:7px}
+}
+@media(max-width:480px){
+  #battle .topbar{justify-content:space-between;gap:6px}
+  #battle .topbar .badge{font-size:13px;padding:5px 8px}
+  #battle .topbar #typeBadge{order:2}
+  #battle .topbar .answer-toolbar{order:3;width:auto;flex:1;justify-content:flex-end}
+  #battle .topbar .answer-toolbar select{font-size:13px;max-width:170px}
+  #battle .topbar .answer-toolbar label{display:none}
+  #battle .arena{height:150px;min-height:150px}
+  #battle .fighter .sprite{width:82px}
+  #battle .hpname,#battle .hptext{text-shadow:none;font-size:13px}
+}
+
+.screen:not(.active) *, .screen:not(.active) *::before, .screen:not(.active) *::after{animation-play-state:paused!important}
+
+#battle .hpname,#battle .hptext{color:var(--ink);text-shadow:none}
+@media(max-width:480px){
+  #battle .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto repeat(3,44px);gap:6px;align-items:center}
+  #battle .topbar #levelBadge{grid-column:1;grid-row:1;white-space:normal;line-height:1.3}
+  #battle .topbar #coinTxt{grid-column:2;grid-row:1;white-space:nowrap}
+  #battle .topbar #sndBtn{grid-column:3;grid-row:1}
+  #battle .topbar button[onclick="askRestart()"]{grid-column:4;grid-row:1}
+  #battle .topbar button[onclick="quickHome()"]{grid-column:5;grid-row:1}
+  #battle .topbar #typeBadge{grid-column:1/3;grid-row:2;white-space:normal;line-height:1.3;text-align:left}
+  #battle .topbar .answer-toolbar{grid-column:3/6;grid-row:2;width:100%;min-width:0;margin:0;display:flex}
+  #battle .topbar .answer-toolbar select{width:100%;max-width:100%;min-width:0;padding:6px;font-size:12px}
+  #battle .topbar #streakTxt,#battle .topbar #critTxt{grid-column:1/-1}
+  #battle .topbar #streakTxt:empty,#battle .topbar #critTxt:empty{display:none}
+  #battle .arena{height:180px;min-height:180px}
+}
+
+/* Bạn nhỏ kỳ ảo: dáng tròn, mắt sáng và chi tiết dễ nhận ra khi thu nhỏ. */
+.fantasy-character{--fantasy-outline:#4d4264;--fantasy-cream:#fff5dc;--fantasy-gold:#ffdc83;overflow:visible}
+.fantasy-character .fantasy-outlined{stroke:var(--art-dark,#4d4264);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:var(--art-main,#9fcf9c)}
+.fantasy-character .art-body{stroke-width:2.6}
+.fantasy-character .art-feet{fill:var(--art-main,#9fcf9c)}
+.fantasy-character .art-eye{fill:#34304e;stroke:none}
+.fantasy-character .eye-shine{fill:#fff;stroke:none}
+.fantasy-character .eye-glimmer{fill:#b6dce9;stroke:none}
+.fantasy-character .art-cheek{fill:#f49ba9;opacity:.8;stroke:none}
+.fantasy-character .art-mouth{stroke:#65485d;stroke-width:2.2;fill:none}
+.fantasy-character .art-soft-light{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;opacity:.45}
+.fantasy-character .art-shadow{fill:#49435e;opacity:.16}
+.fantasy-character .soft-detail,.fantasy-character .art-belly{fill:var(--art-soft,#e3f2d2);stroke:none}
+.fantasy-character .art-sparkles{fill:#ffda80;stroke:none;pointer-events:none}
+.fantasy-character .gold-charm,.fantasy-character .little-horn{fill:var(--fantasy-gold);stroke:#aa794a;stroke-width:1.8}
+.fantasy-character .shell{fill:#f3c5ad;stroke:#a6776b}
+.fantasy-character .shell-spiral{fill:none;stroke:#b18582;stroke-width:3}
+.fantasy-character .antenna{stroke:var(--art-dark);fill:none;stroke-width:3}
+.fantasy-character .antenna-tip{fill:var(--art-soft)}
+.fantasy-character .ear-inset{fill:none;stroke:var(--art-soft);stroke-width:5}
+.fantasy-character .patch{fill:#c3e6d8;stroke:#638e83;stroke-width:1.5}
+.fantasy-character .stitch{fill:none;stroke:#638e83;stroke-width:1.5}
+.fantasy-character .little-book{fill:#fff3d7;stroke:#99715d;stroke-width:2}
+.fantasy-character .book-page{fill:none;stroke:#bf9a74;stroke-width:1.5}
+.fantasy-character .belly-stripe,.fantasy-character .little-paw{fill:none;stroke:var(--art-dark);stroke-width:2;opacity:.55}
+.fantasy-character .fairy-wing{fill:#fbcddd;stroke:#bd7795}
+.fantasy-character .heart-charm{fill:#fff0df;stroke:#c77582;stroke-width:1.5}
+.fantasy-character .bat-wing{fill:#9e91c7;stroke:#625784}
+.fantasy-character .moon-collar{fill:#fff1d2;stroke:#af8770;stroke-width:1.7}
+.fantasy-character .ice-wing{fill:#d6f6f5;stroke:#77b3c9}
+.fantasy-character .wing-vein{fill:none;stroke:#96d4dd;stroke-width:1.5}
+.fantasy-character .ice-crystal{fill:#eefcff;stroke:#86b5c9;stroke-width:2}
+.fantasy-character .snow-charm{fill:none;stroke:#fff;stroke-width:2.5}
+.fantasy-character .sun-mane{fill:#f8b886;stroke:#b77f50}
+.fantasy-character .crown-gem{fill:#e99aab;stroke:none}
+.fantasy-character .wand-stick{fill:none;stroke:#8c6b58;stroke-width:4;stroke-linecap:round}
+.fantasy-character .leaf{fill:#cae7ad;stroke:#659b7b;stroke-width:1.7}
+.fantasy-character .mushroom-cap{fill:#9d92ce;stroke:#665986;stroke-width:2.5}
+.fantasy-character .cap-dot{fill:#fff0d9;stroke:none}
+.fantasy-character .pearl-crown{fill:#d7b9e3;stroke:#8b79af;stroke-width:1.8}
+.fantasy-character .pearl{fill:#fff8ec;stroke:#ae9ac4;stroke-width:1.5}
+.fantasy-character .fantasy-brows{display:none;fill:none;stroke:#735270;stroke-width:2;stroke-linecap:round}
+.fantasy-character.phase2 .fantasy-brows,.phase2 .fantasy-character .fantasy-brows{display:block}
+.fantasy-character .hero-cape{fill:#8e9cd6;stroke:#56638e;stroke-width:2.5}
+.fantasy-character .hero-cape-lining{fill:#f0c1c9;stroke:none}
+.fantasy-character .hero-robe{fill:#b3c7e7;stroke:#56638e;stroke-width:2.3}
+.fantasy-character .hero-robe-fold{fill:none;stroke:#819abe;stroke-width:1.5}
+.fantasy-character .hero-boots{fill:#7773a8;stroke:#524d75;stroke-width:2}
+.fantasy-character .hero-face,.fantasy-character .hero-ears,.fantasy-character .hero-paw{fill:#fff4de;stroke:#947969;stroke-width:2.3}
+.fantasy-character .hero-ear-inner{fill:none;stroke:#efb9be;stroke-width:5;stroke-linecap:round}
+.fantasy-character .hero-nose{fill:#d88f9a;stroke:none}
+.fantasy-character .hero-hat{fill:#8591c7;stroke:#565c91;stroke-width:2.3}
+.fantasy-character .hat-band{fill:#bdc6e7;stroke:none}
+.fantasy-character .hero-star{fill:#ffe196;stroke:#b78a53;stroke-width:1.8}
+.fantasy-character .hero-collar{fill:#eee6ff;stroke:#9186b7;stroke-width:1.6}
+.fantasy-character .hero-brooch{fill:#ffda80;stroke:#b38a54;stroke-width:1.5}
+
+.fantasy-character .charm-line{fill:none;stroke:#a47749;stroke-width:1.7;stroke-linecap:round}
+
+
+/* Setup layout: natural document flow prevents clipped flex children and nested scrollbars. */
+.learning-screen.active>.game-card{display:block;overflow-y:auto;overflow-x:hidden}
+.learning-screen .game-card>section:not([hidden]){display:block;overflow:visible;min-height:0}
+.learning-screen .game-topbar{margin-bottom:20px;grid-template-columns:auto minmax(0,1fr) auto}
+.learning-screen .game-topbar>*{min-width:0}
+.learning-screen .game-topbar>:last-child{grid-column:auto}
+.learning-screen .game-topbar h1{line-height:1.15}
+.learning-screen .game-topbar .home-btn{min-height:44px}
+.game-card:has(#duelSetup:not([hidden])) #duelSeries{display:none}
+.setup-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start;margin:20px auto;max-width:1100px}
+.setup-columns>*{min-width:0}
+.setup-heading{font:800 18px var(--font-body);margin:0 0 16px;color:var(--ink)}
+.setup-options{padding:20px;background:#f4f8fa;border-radius:18px}
+.setup-options .select-row,.typing-setup .select-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:0;font-size:15px}
+.setup-options select,.typing-setup select{width:100%;min-width:0;max-width:100%;min-height:44px;font-size:16px}
+.setup-options .duel-setup-selects,.setup-options .nim-config{grid-template-columns:minmax(0,1fr);width:100%;max-width:none;margin:0;gap:16px}
+.setup-launch{width:100%;max-width:520px;margin:20px auto 0}
+.setup-launch>.btn{width:100%;min-height:48px;font-size:17px;padding:12px}
+.setup-guide{max-width:1100px;margin:16px auto;padding:0;border:1px solid #cad6df;border-radius:14px;background:#f8fbfd;box-shadow:none}
+.setup-guide:before{display:none}
+.setup-guide summary{cursor:pointer;padding:14px 16px;font-weight:800;font-size:15px;color:var(--ink)}
+.setup-guide ol{margin:0;padding:0 24px 18px 40px}
+.setup-guide li{font-size:14px;line-height:1.6}
+.setup-roster .duel-setup-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:0;align-items:start}
+.setup-roster .duel-vs{display:none}
+.setup-roster .duel-player-card{min-width:0;padding:16px 10px;gap:12px;border:1px solid #d9e2e8;border-radius:18px;background:#fff9ed}
+.setup-roster .duel-player-card:nth-child(3){background:#f1f8f9}
+.setup-roster .duel-skin-preview{width:112px;height:112px;flex:none}
+.setup-roster .duel-skin-row{display:grid;grid-template-columns:44px 44px;gap:8px;justify-content:center}
+.setup-roster .duel-skin-row span{grid-column:1/-1;grid-row:1;text-align:center;font-size:12px}
+.setup-roster .duel-skin-row .icon-btn{width:44px;height:44px}
+.setup-roster .duel-player-card input{min-width:0;width:100%;max-width:100%;min-height:44px;font-size:16px;padding:8px 4px}
+.setup-options .nim-piles-fieldset{width:100%;min-width:0;margin:16px 0 0;padding:12px}
+.setup-options .nim-pile-inputs{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.setup-options .nim-pile-input input{min-width:0;min-height:44px}
+.setup-options .nim-hint-toggle{justify-content:flex-start;font-size:14px;line-height:1.5}
+.setup-options .nim-hint-toggle input{flex:none}
+.setup-options .maplbl{font-size:14px;margin-top:18px}
+.setup-options .nim-records,.setup-options .hanoi-records{width:100%;max-width:100%;margin:10px 0;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.setup-options .hanoi-records>div,.setup-options .nim-records>div{min-width:0}
+.hanoi-intro .hanoi-hero{width:132px;height:132px;margin:0 auto 16px;flex:none}
+.hanoi-intro .sub{font-size:16px;line-height:1.6;text-align:center;margin:0}
+.hanoi-intro .setup-guide{margin-top:20px}
+.typing-setup .typing-bento-grid{grid-template-columns:180px minmax(0,1fr);gap:20px}
+.typing-setup .mascot-panel{padding:20px 12px;align-self:start}
+.typing-setup .mascot-avatar-wrap{display:grid;justify-items:center;gap:16px}
+.typing-setup .mascot-img{width:100px;font-size:72px}
+.typing-setup .speech-bubble{padding:12px;font-size:14px;line-height:1.5}
+.typing-setup .mascot-identity{margin-top:16px;text-align:center}
+.typing-setup .mascot-identity h3{font-size:17px}
+.typing-setup .mascot-role{font-size:13px}
+.typing-setup .setup-panel{padding:20px}
+.typing-setup h2{font-size:22px}
+.typing-setup .option-grid{margin:14px 0;gap:12px}
+.typing-setup .option-card span{display:flex;flex-direction:column;align-items:flex-start;padding:14px;gap:6px}
+.typing-setup .option-card b{font-size:16px}
+.typing-setup .option-card small{font-size:13px;line-height:1.4}
+.typing-setup .setup-row{margin-top:16px;gap:14px}
+.typing-setup .check-row{font-size:14px;flex-wrap:wrap}
+.typing-setup .typing-launch{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.typing-setup .typing-launch .btn{min-height:48px;font-size:14px;padding:10px}
+.typing-setup .typing-dictionary-status{font-size:13px;line-height:1.5}
+.typing-progress-tools{margin:16px 0}
+.typing-progress-tools .typing-reset-btn{margin:0 16px;max-width:calc(100% - 32px);font-size:13px}
+.typing-progress-tools .typing-campaign-status{margin:12px 16px;font-size:13px}
+.typing-setup .maplbl{font-size:14px;margin-top:16px}
+.typing-setup .typing-map{gap:8px}
+.typing-setup .typing-map .mapnode{padding:8px 5px;font-size:12px;line-height:1.4}
+.typing-setup .typing-map .tierlbl{font-size:11px}
+.sudoku-setup>p{max-width:640px;margin:10px auto 20px;line-height:1.6}
+.sudoku-level-card span{min-width:0}
+.sudoku-level-card small,.sudoku-level-card em{line-height:1.45}
+.duel-alloc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.duel-alloc-btn{min-width:44px;min-height:44px}
+@media(max-width:900px){
+ .setup-columns{gap:20px}
+ .typing-setup .typing-bento-grid{grid-template-columns:minmax(0,1fr)}
+ .typing-setup .mascot-panel{display:none}
+ .sudoku-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:640px){
+ .learning-screen .game-topbar{grid-template-columns:44px minmax(0,1fr) auto;gap:10px;margin-bottom:16px}
+ .learning-screen .game-topbar .home-btn{width:44px;min-width:44px;padding:0}
+ .learning-screen .game-topbar .home-btn span{display:none}
+ .learning-screen .game-topbar h1{font-size:20px}
+ .learning-screen .game-topbar .eyebrow{font-size:10px}
+ .learning-screen .game-topbar .quick-settings-bar{gap:4px}
+ .learning-screen .game-topbar .icon-btn{width:44px;height:44px;min-width:44px}
+ .learning-screen .game-topbar .duel-series{grid-column:1/-1;white-space:normal}
+ .setup-columns{grid-template-columns:minmax(0,1fr);margin:16px 0}
+ .setup-options{padding:16px}
+ .setup-roster .duel-skin-preview{width:88px;height:88px}
+ .setup-roster .duel-player-card{padding:12px 8px}
+ .setup-heading{font-size:16px;margin-bottom:12px}
+ .typing-setup .setup-panel{padding:14px}
+ .typing-setup .option-grid,.typing-setup .typing-launch{grid-template-columns:minmax(0,1fr)}
+ .typing-setup .typing-map{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .typing-setup .setup-row{display:grid;grid-template-columns:minmax(0,1fr)}
+ .typing-setup .check-row{align-items:center}
+ .duel-alloc-grid{grid-template-columns:minmax(0,1fr)}
+ .sudoku-level-card span{grid-template-columns:minmax(0,1fr);gap:4px}
+ .sudoku-level-card i{grid-row:auto;font-size:24px}
+ .sudoku-level-card small,.sudoku-level-card em{font-size:12px}
+ .sudoku-setup-footer{flex-direction:column;align-items:stretch}
+ .hanoi-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .hanoi-controls .btn{min-width:0;padding:10px 6px}
+}
+
+.setup-options .select-row{margin:0}
+.setup-roster .nim-records{width:100%;max-width:100%;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+.setup-roster>.maplbl{font-size:14px;margin-top:20px}
+.typing-setup .campaign-map-wrap .typing-map{margin:0;padding:0 12px 16px}
+.learning-screen .typing-play{margin-top:0}
+@media(min-width:1100px) and (max-height:820px){
+ .learning-screen .game-topbar{margin-bottom:14px}
+ .setup-columns{margin-top:14px;margin-bottom:14px}
+ .setup-options{padding:16px}
+ .setup-options .nim-config{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+}

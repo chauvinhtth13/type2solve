@@ -14,7 +14,7 @@
     color:colors[index%colors.length],
     type:index%3,
   }));
-  const reduced=window.GameRuntime?.reducedMotion?.()||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let reduced=window.GameRuntime?.reducedMotion?.()||matchMedia('(prefers-reduced-motion: reduce)').matches;
   let width=0,height=0,raf=0,last=0;
 
   function resize(){
@@ -48,7 +48,7 @@
      Sudoku). Bỏ vế .fx-quiet thì canvas vẫn vẽ 30 khung/giây ngay giữa trận,
      tranh đúng khung hình mà cờ này sinh ra để nhường. */
   function nenDuocChay(){
-    return !reduced&&!document.hidden&&!document.body.classList.contains('fx-quiet');
+    return !reduced&&window.GameExperience?.quality()!=='low'&&!document.hidden&&!document.body.classList.contains('fx-quiet');
   }
   function dongBoVongVe(){
     if(nenDuocChay()){if(!raf)raf=requestAnimationFrame(tick);}
@@ -56,6 +56,7 @@
   }
   addEventListener('resize',resize,{passive:true});
   document.addEventListener('visibilitychange',dongBoVongVe);
+  document.addEventListener('effects:change',()=>{reduced=window.GameRuntime.reducedMotion();dongBoVongVe();draw(0);});
   /* .fx-quiet do file khác bật/tắt nên không có sự kiện để nghe — theo dõi
      thẳng thuộc tính class của <body>. */
   new MutationObserver(dongBoVongVe)
@@ -92,11 +93,12 @@ const ambientTimers=new Set();
 function startAmbient(theme,arenaId='arena'){
   stopAmbient();
   drawGround(theme,arenaId);
-  if(window.GameRuntime?.reducedMotion())return;
+  if(window.GameRuntime?.reducedMotion()||window.GameExperience?.quality()==='low')return;
   const arena=document.getElementById(arenaId);
   if(!arena)return;
 
   const spawn=()=>{
+    if(document.hidden||window.GameRuntime?.reducedMotion()||window.GameExperience?.quality()==='low'||document.body.dataset.battlePhase==='paused')return;
     const d=document.createElement('div');
     d.className=`vfx-particle vfx-${theme==='lava'?'ember':theme==='ice'?'snow':theme==='night'?'wisp':'stardust'}`;
     d.style.left=ri(3,94)+'%';

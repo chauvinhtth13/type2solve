@@ -1,26 +1,49 @@
-<!-- Nhân vật vector phẳng, nhẹ và thân thiện với học sinh tiểu học. -->
-<template id="tplBeast"><svg viewBox="0 0 120 120" class="beast-art battler-token" aria-hidden="true">
+<!-- Bạn đồng hành kỳ ảo: mọi chi tiết nằm trong khung SVG 120×120. -->
+<template id="tplBeast"><svg viewBox="0 0 120 120" class="beast-art battler-token fantasy-character" aria-hidden="true">
   <g class="beast-root">
-    <ellipse class="art-shadow" cx="60" cy="106" rx="35" ry="7" />
-    <path class="art-ear art-ear-left" d="M31 44 22 20 47 35Z" />
-    <path class="art-ear art-ear-right" d="m89 44 9-24-25 15Z" />
-    <path class="art-body" d="M24 62c0-28 15-43 36-43s36 15 36 43v19c0 20-15 30-36 30S24 101 24 81Z" />
-    <circle class="art-belly" cx="60" cy="78" r="21" />
-    <circle class="art-eye" cx="47" cy="57" r="5" /><circle class="art-eye" cx="73" cy="57" r="5" />
-    <circle class="art-eye-dot" cx="49" cy="55" r="1.5" /><circle class="art-eye-dot" cx="75" cy="55" r="1.5" />
-    <path class="art-mouth" d="M50 69q10 9 20 0" />
-    <circle class="art-cheek" cx="39" cy="69" r="4" /><circle class="art-cheek" cx="81" cy="69" r="4" />
+    <ellipse class="art-shadow" cx="60" cy="108" rx="34" ry="5"/>
+    <g class="art-back fantasy-outlined"></g>
+    <g class="art-feet fantasy-outlined"><ellipse cx="44" cy="103" rx="12" ry="6"/><ellipse cx="77" cy="103" rx="12" ry="6"/></g>
+    <path class="art-body" d="M27 65Q25 34 60 33Q95 34 93 65L94 80Q94 104 60 104Q26 104 26 80Z"/>
+    <ellipse class="art-belly" cx="60" cy="86" rx="22" ry="14"/>
+    <path class="art-soft-light" d="M36 54Q36 43 47 42"/>
+    <g class="art-head fantasy-outlined"></g>
+    <g class="fantasy-face">
+      <ellipse class="art-eye" cx="47" cy="64" rx="6" ry="8"/><ellipse class="art-eye" cx="73" cy="64" rx="6" ry="8"/>
+      <circle class="eye-shine" cx="45" cy="61" r="2.4"/><circle class="eye-shine" cx="71" cy="61" r="2.4"/>
+      <circle class="eye-glimmer" cx="49" cy="67" r="1"/><circle class="eye-glimmer" cx="75" cy="67" r="1"/>
+      <ellipse class="art-cheek" cx="36" cy="75" rx="7" ry="4"/><ellipse class="art-cheek" cx="84" cy="75" rx="7" ry="4"/>
+      <path class="art-mouth" d="M54 76Q60 83 66 76"/>
+      <path class="fantasy-brows" d="m41 51 10 3m18 0 10-3"/>
+    </g>
+    <g class="art-accessory fantasy-outlined"></g>
+    <g class="art-sparkles"><path d="m104 34 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/><circle cx="15" cy="49" r="2"/></g>
   </g>
 </svg></template>
 
-<template id="tplHero"><svg viewBox="0 0 120 120" class="hero-art battler-token" aria-hidden="true">
+<template id="tplHero"><svg viewBox="0 0 120 120" class="hero-art battler-token fantasy-character" aria-hidden="true">
   <g class="hero-root">
-    <ellipse class="art-shadow" cx="60" cy="106" rx="35" ry="7" />
-    <path class="hero-cape" d="M31 62Q36 26 60 24t29 38l9 39H22Z" />
-    <circle class="hero-face" cx="60" cy="53" r="27" />
-    <path class="hero-hair" d="M35 50q1-27 25-27 23 0 26 25-12-7-23-15-8 11-28 17Z" />
-    <circle class="art-eye" cx="50" cy="56" r="4" /><circle class="art-eye" cx="70" cy="56" r="4" />
-    <path class="art-mouth" d="M52 67q8 7 16 0" />
-    <path class="hero-star" d="m60 75 4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1Z" />
+    <ellipse class="art-shadow" cx="59" cy="110" rx="33" ry="5"/>
+    <path class="hero-cape" d="M34 67Q17 83 19 103Q36 110 53 100L84 105Q95 92 83 68Z"/>
+    <path class="hero-cape-lining" d="M33 81 24 101 42 99Z"/>
+    <g class="hero-boots fantasy-outlined"><path d="M40 98v8q-12 1-11 6h23V99Z"/><path d="M66 99v13h22q1-5-11-6v-8Z"/></g>
+    <path class="hero-robe" d="M37 72Q57 62 77 73L83 102Q60 111 32 102Z"/>
+    <path class="hero-robe-fold" d="M53 85 49 103m16-18 5 18"/>
+    <g class="hero-ears fantasy-outlined"><path d="M35 45Q13 29 19 15Q27 6 35 23L45 41Z"/><path d="M68 39Q69 9 80 11Q94 16 79 45Z"/></g>
+    <path class="hero-ear-inner" d="M32 34Q22 21 24 18m51 17 4-16"/>
+    <path class="hero-face" d="M30 55Q28 32 56 32Q86 32 87 55L89 65Q86 86 58 86Q29 84 27 65Z"/>
+    <g class="fantasy-face">
+      <ellipse class="art-eye" cx="45" cy="61" rx="5.5" ry="7"/><ellipse class="art-eye" cx="70" cy="61" rx="5.5" ry="7"/>
+      <circle class="eye-shine" cx="43" cy="58" r="2"/><circle class="eye-shine" cx="68" cy="58" r="2"/>
+      <ellipse class="art-cheek" cx="35" cy="71" rx="6" ry="3.5"/><ellipse class="art-cheek" cx="80" cy="71" rx="6" ry="3.5"/>
+      <path class="hero-nose" d="m55 68 3 3 3-3Z"/><path class="art-mouth" d="M52 74q6 6 12 0"/>
+    </g>
+    <g class="hero-hat fantasy-outlined"><path d="M35 40Q47 13 61 9Q65 26 83 34L83 41Z"/><path class="hat-band" d="m40 30 36-1 7 9-48 5Z"/><path d="M27 40Q57 29 91 40Q88 49 60 47Q31 49 27 40Z"/></g>
+    <path class="hero-star" d="m61 17 2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1Z"/>
+    <path class="hero-collar" d="m35 80 21 9 23-9-10 14-13-5-13 5Z"/>
+    <circle class="hero-brooch" cx="56" cy="89" r="4"/>
+    <g class="hero-wand fantasy-outlined"><path class="wand-stick" d="m98 64-6 38"/><path class="hero-star" d="m102 46 3 8 8 2-7 5 1 9-8-4-7 5 1-9-6-5 9-2Z"/><circle class="eye-shine" cx="101" cy="57" r="2"/></g>
+    <path class="hero-paw" d="M79 85q9-7 13-1 4 7-6 11Z"/>
+    <g class="art-sparkles"><path d="m13 63 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z"/><circle cx="107" cy="82" r="2"/></g>
   </g>
 </svg></template>

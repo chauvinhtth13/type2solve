@@ -78,7 +78,7 @@ $('answerInput')?.addEventListener('compositionend',()=>{answerComposition=false
 if($('answerModeSelect'))$('answerModeSelect').value=answerMode;
 function battleLater(callback,delay){
   const runId=battleRunId;
-  return setTimeout(()=>{
+  return combatTimers.later(()=>{
     if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
     callback();
   },delay);
@@ -100,6 +100,7 @@ function makeFreshQuestion(tier){
   return cand;
 }
 function newQuestion(){
+  clearCombatEffects();setBattlePhase('question');G.assisted=false;
   G.locked=false;
   const b=BOSSES[G.bossIndex];
   const tier=G.mode==='blitz'?(G.correct<5?1:G.correct<11?2:G.correct<18?3:4)
@@ -114,7 +115,7 @@ function newQuestion(){
   $('goldTag').style.display=isGolden?'block':'none';
   $('goldTag').textContent=(G.mode==='blitz'||G.mode==='surv')
     ?'💛 CÂU HỎI VÀNG — ĐIỂM ×3! 💛':'💛 CÂU HỎI VÀNG — SÁT THƯƠNG ×2! 💛';
-  if(isGolden){SFX.gold();setTimeout(goldRain,120);}
+  if(isGolden){SFX.gold();combatTimers.later(goldRain,120);}
   qb.style.animation='none';void qb.offsetWidth;qb.style.animation='';
   const qt=$('questionTxt');
   qt.textContent=currentQ.q;
@@ -129,7 +130,9 @@ function newQuestion(){
   const box=$('answers'),form=$('answerForm'),input=$('answerInput'),submit=$('answerSubmit');
   G.typedAnswer=shouldTypeAnswer(currentQ);
   box.innerHTML='';box.className='answers'+(currentQ.three?' three':'')+(currentQ.choices.length===5?' five':'');
+  box.classList.toggle('long-answers',currentQ.choices.some(v=>String(v).length>18));
   box.hidden=G.typedAnswer;form.hidden=!G.typedAnswer;
+  input.inputMode=/^\d+$/.test(String(currentQ.ans))?'numeric':/^\d+[.,]\d+$/.test(String(currentQ.ans))?'decimal':'text';
   input.value='';input.className='';input.placeholder='Nhập kết quả rồi nhấn Enter…';input.disabled=true;submit.disabled=true;
   if(!G.typedAnswer)currentQ.choices.forEach((v,i)=>{
     const btn=document.createElement('button');
@@ -165,7 +168,7 @@ function stopTimer(){if(timerId){clearInterval(timerId);timerId=null;}$('battleC
 function renderTimer(){
   const f=$('timerFill'),n=$('timerNum');
   const pct=timeLeft/timeTotal*100;
-  f.style.width=pct+'%';n.textContent=Math.ceil(timeLeft)+'s';
+  f.style.width='100%';f.style.transform='scaleX('+Math.max(0,Math.min(1,pct/100))+')';n.textContent=Math.ceil(timeLeft)+'s';
   const warn=pct<30;
   f.classList.toggle('warn',warn);n.classList.toggle('warn',warn);
   $('battleCard').classList.toggle('danger',warn);
@@ -185,6 +188,7 @@ function revealCorrect(){
 }
 function answer(btn,val){
   if(G.locked)return;
+  setBattlePhase('resolving');window.LearningReview?.record(currentQ,isCorrectAnswer(val),G.assisted);
   G.locked=true;
   if(G.mode!=='blitz')stopTimer();
   lockAnswers();
@@ -218,7 +222,7 @@ function answer(btn,val){
     addEnergy(isGolden?ENERGY_GOLD:ENERGY_GAIN);
     fb.textContent=msg;fb.classList.add('good');
     showExplain();
-    if(G.streak>=2)comboPopup('🔥 COMBO x'+G.streak+'!');
+    if(G.streak===3||G.streak===5||G.streak%10===0)comboPopup('🔥 COMBO x'+G.streak+'!');
     if(critNow)comboPopup('💥 CHÍ MẠNG!');
     const luckChance=Math.min(.65,0.2*(1+(G.perks?.luck||0)));
     if(Math.random()<luckChance&&G.heroHp<heroMaxHp()){
@@ -259,17 +263,17 @@ function modeAnswer(btn,val,fb){
       msg+=' ⏱️+'+gained.toFixed(1).replace('.',',')+'s';
     }
     fb.textContent=msg;fb.className='feedback good';
-    if(G.streak>=2)comboPopup('🔥 COMBO x'+G.streak+'!');
+    if(G.streak===3||G.streak===5||G.streak%10===0)comboPopup('🔥 COMBO x'+G.streak+'!');
     // hoạt ảnh đánh trúng
-    hero.classList.add('cast-hero');setTimeout(()=>hero.classList.remove('cast-hero'),400);
+    hero.classList.add('cast-hero');combatTimers.later(()=>hero.classList.remove('cast-hero'),400);
     battleLater(()=>shootProjectile('heroSprite','bossSprite',pick(HERO_PROJ),false,to=>{
       boss.classList.add('hurt');boss.classList.add('flashWhite');SFX.hit();
       sparkBurst(to.x,to.y,['✦','✨','⭐'],9);
       showDmg('+'+pts+' 🏆','#1c9c5b','right',isGolden);
-      setTimeout(()=>{boss.classList.remove('hurt');boss.classList.remove('flashWhite')},450);
+      combatTimers.later(()=>{boss.classList.remove('hurt');boss.classList.remove('flashWhite')},450);
     }),160);
     // sinh tồn: cứ 6 câu đúng lại đổi quái và tăng độ khó
-    if(G.mode==='surv'&&G.correct%6===0)battleLater(survAdvance,700);
+    if(G.mode==='surv'&&G.correct%6===0)survAdvance();
   }else{
     btn.classList.add('wrong');revealCorrect();SFX.wrong();
     G.wrong++;G.streak=0;
@@ -282,7 +286,7 @@ function modeAnswer(btn,val,fb){
     else{G.lives--;msg+=` 💔 Mất 1 mạng — còn ${Math.max(0,G.lives)} mạng!`;}
     fb.textContent=msg;fb.className='feedback bad';
     shake(false);
-    hero.classList.add('hurt-hero');setTimeout(()=>hero.classList.remove('hurt-hero'),450);
+    hero.classList.add('hurt-hero');combatTimers.later(()=>hero.classList.remove('hurt-hero'),450);
     showDmg(G.mode==='blitz'?'−5s':'−1 ❤️','#e0364f','left');
   }
   showExplain();renderModeBar();updateHUD();
@@ -293,6 +297,7 @@ function modeAnswer(btn,val,fb){
 
 function onTimeout(){
   if(G.locked)return;
+  setBattlePhase('resolving');window.LearningReview?.record(currentQ,false,G.assisted);
   G.locked=true;lockAnswers();revealCorrect();SFX.wrong();
   if(G.mode==='surv'){
     G.timeout++;G.wrong++;G.streak=0;G.lives--;
@@ -342,29 +347,31 @@ function ripple(btn,e){
   r.style.width=r.style.height=size+'px';
   r.style.left=((e&&e.clientX?e.clientX-rect.left:rect.width/2)-size/2)+'px';
   r.style.top=((e&&e.clientY?e.clientY-rect.top:rect.height/2)-size/2)+'px';
-  btn.appendChild(r);setTimeout(()=>r.remove(),600);
+  btn.appendChild(r);combatTimers.later(()=>r.remove(),600);
 }
 function screenFlash(){
+  if(REDUCED_MOTION()||window.GameExperience?.quality()!=='standard')return;
   const d=document.createElement('div');d.className='flashOverlay';
-  document.body.appendChild(d);setTimeout(()=>d.remove(),400);
+  $('arena').appendChild(d);combatTimers.later(()=>d.remove(),180);
 }
 function goldRain(){
+  if(REDUCED_MOTION()||window.GameExperience?.quality()!=='standard')return;
   const qb=$('qbox');
   for(let i=0;i<12;i++){
     const s=document.createElement('div');s.className='goldrain';
     s.textContent=pick(['⭐','✨','💛','🌟']);
     s.style.left=ri(2,95)+'%';s.style.top='0';
     s.style.animationDelay=(i*0.08)+'s';
-    qb.appendChild(s);setTimeout(()=>s.remove(),1600);
+    qb.appendChild(s);combatTimers.later(()=>s.remove(),1600);
   }
 }
 function itemFly(icon){
   const d=document.createElement('div');d.className='itemFly';d.textContent=icon;
   d.style.left='calc(50% - 17px)';d.style.top='45%';
-  document.body.appendChild(d);setTimeout(()=>d.remove(),950);
+  document.body.appendChild(d);combatTimers.later(()=>d.remove(),950);
 }
-function showNextBtn(){$('nextBtn').style.display='block';}
-function proceedNext(){SFX.click();$('nextBtn').style.display='none';newQuestion();}
+function showNextBtn(){setBattlePhase('feedback');$('nextBtn').style.display='block';}
+function proceedNext(){if(!G.locked||G.ending||$('restartModal').classList.contains('on')||$('nextBtn').style.display!=='block')return;SFX.click();$('nextBtn').style.display='none';newQuestion();}
 const ENERGY_MAX=100, ENERGY_GAIN=18, ENERGY_GOLD=30;
 function addEnergy(v){
   G.energy=Math.min(ENERGY_MAX,(G.energy||0)+v);
@@ -374,7 +381,7 @@ function addEnergy(v){
 function renderEnergy(){
   const f=$('energyFill');if(!f)return;
   const pct=(G.energy||0)/ENERGY_MAX*100;
-  f.style.width=pct+'%';
+  f.style.width='100%';f.style.transform='scaleX('+Math.max(0,Math.min(1,pct/100))+')';
   // Rỗng thì không có gì để nhìn: gắn cờ cho CSS dừng hẳn animation nền,
   // thay vì chạy vô hạn suốt trận trên một phần tử bề rộng 0.
   f.classList.toggle('charging',pct>0);
@@ -389,17 +396,21 @@ function useUltimate(){
   const arena=$('arena'),hero=$('heroSprite'),boss=$('bossSprite');
   const cap=dmgCap();
   const dmg=Math.round(cap*1.5);
+  const remaining=timeLeft,total=timeTotal;stopTimer();setBattlePhase('resolving');
+  G.bossHp=Math.max(0,G.bossHp-dmg);G.stunned=true;G.coins+=15;
+  updateBars();updateHUD();saveAdventureProgress();
+  if(G.bossHp<=0){bossDefeated();return;}
   // --- màn trình diễn ---
   SFX.crit();screenFlash();
   hero.classList.add('cast-hero');
   const txt=document.createElement('div');txt.className='ultText';txt.textContent='⚡ SIÊU CHƯỞNG! ⚡';
-  arena.appendChild(txt);setTimeout(()=>txt.remove(),1250);
+  arena.appendChild(txt);combatTimers.later(()=>txt.remove(),1250);
   const sw=document.createElement('div');sw.className='shock';
-  arena.appendChild(sw);setTimeout(()=>sw.remove(),950);
-  [0,1,2].forEach(i=>setTimeout(()=>{
+  arena.appendChild(sw);combatTimers.later(()=>sw.remove(),950);
+  [0,1,2].forEach(i=>combatTimers.later(()=>{
     const r=document.createElement('div');r.className='ray';
     r.style.top=(38+i*11)+'%';
-    arena.appendChild(r);setTimeout(()=>r.remove(),850);
+    arena.appendChild(r);combatTimers.later(()=>r.remove(),850);
     SFX.shoot();
   },i*130));
   battleLater(()=>{
@@ -408,9 +419,7 @@ function useUltimate(){
     boomAt(to.x,to.y);sparkBurst(to.x,to.y,['💥','⭐','✨','⚡','🌟'],22);
     shake(true);SFX.hit();screenFlash();
     showDmg('−'+dmg,'#8d6bff','right',true);
-    G.bossHp=Math.max(0,G.bossHp-dmg);
-    G.stunned=true;   // boss choáng, bỏ lượt phản đòn kế tiếp
-    G.coins+=15;
+
     updateBars();hpHitFx('bossHp');updateHUD();
     checkPhase2();
     battleLater(()=>{
@@ -421,7 +430,7 @@ function useUltimate(){
         const fb=$('feedback');
         fb.textContent=`⚡ Siêu chưởng gây ${dmg} sát thương! Boss CHOÁNG, bỏ lượt phản đòn! +15💰`;
         fb.className='feedback good';
-        G.locked=false;renderEnergy();
+        G.locked=false;setBattlePhase('question');if(!G.frozen)startTimer(remaining,total);renderEnergy();
       }
     },600);
   },520);
@@ -433,9 +442,9 @@ function modeUltimate(){
   const arena=$('arena');
   SFX.crit();screenFlash();shake(true);
   const txt=document.createElement('div');txt.className='ultText';
-  arena.appendChild(txt);setTimeout(()=>txt.remove(),1250);
+  arena.appendChild(txt);combatTimers.later(()=>txt.remove(),1250);
   const sw=document.createElement('div');sw.className='shock';
-  arena.appendChild(sw);setTimeout(()=>sw.remove(),950);
+  arena.appendChild(sw);combatTimers.later(()=>sw.remove(),950);
   const to=spriteCenter('bossSprite');
   sparkBurst(to.x,to.y,['💥','⭐','✨','⚡','🌟'],20);
   if(G.mode==='blitz'){
@@ -461,18 +470,11 @@ function checkPhase2(){
   const arena=$('arena'),boss=$('bossSprite');
   SFX.bossRoar();shake(true);screenFlash();
   const fx=document.createElement('div');fx.className='phase2fx';
-  arena.appendChild(fx);setTimeout(()=>fx.remove(),1150);
-  boss.classList.add('morphing');
-  battleLater(()=>{
-    /* KHÔNG ghi textContent vào đây: #bossSprite là <svg>, textContent xoá sạch mọi
-       nút con nên con quái BIẾN MẤT hẳn phần còn lại của phiên (paintBoss chỉ đặt
-       biến CSS, không dựng lại hình). Hoá dạng = tô lại bảng màu nổi giận. */
-    applySkin(boss,rageArt(bossArt(b)));
-    boss.classList.add('phase2');
-    boss.classList.remove('morphing');
-    $('bossMech').textContent='🔥 GIAI ĐOẠN 2';
-    comboPopup('🔥 BOSS BIẾN HÌNH!');
-  },520);
+  arena.appendChild(fx);combatTimers.later(()=>fx.remove(),1150);
+  applySkin(boss,rageArt(bossArt(b)));
+  boss.classList.add('phase2');
+  $('bossMech').textContent='⚡ Giai đoạn 2';
+
 }
 
 function updateHUD(){
@@ -529,7 +531,7 @@ function useItem(id){
     const btns=[...document.querySelectorAll('.ans')].filter(b=>!b.disabled);
     const wrongs=btns.filter(b=>String(b.textContent)!==String(currentQ.ans));
     if(wrongs.length<2){flashMsg('💡 Không còn đáp án để xoá!');return;}
-    G.inv.hint--;SFX.item();itemFly('💡');
+    G.assisted=true;G.inv.hint--;SFX.item();itemFly('💡');
     shuffle(wrongs).slice(0,2).forEach(b=>{b.disabled=true;b.classList.add('dimmed');});
     flashMsg('💡 Đã xoá 2 đáp án sai!');
   }
@@ -574,7 +576,7 @@ function showExplain(){
 function comboPopup(txt){
   const arena=$('arena');
   const d=document.createElement('div');d.className='comboPop';d.textContent=txt;
-  arena.appendChild(d);setTimeout(()=>d.remove(),1000);
+  arena.appendChild(d);combatTimers.later(()=>d.remove(),1000);
 }
 
 /* ============ HIỆU ỨNG CHIẾN ĐẤU NHẸ ============ */
@@ -598,12 +600,16 @@ function spriteCenter(id){
   return {x:r.left-a.left+r.width/2, y:r.top-a.top+r.height/2};
 }
 function shake(big){
-  const c=$('battleCard');
+  if(REDUCED_MOTION()||window.GameExperience?.quality()==='low')return;
+  const c=$('arena');
   c.classList.remove('shake','shakeBig');void c.offsetWidth;
   c.classList.add(big?'shakeBig':'shake');
 }
 function sparkBurst(x,y,count=12,kind='arcane'){
   const arena=$('arena');
+  if(Array.isArray(count)){count=Number(kind)||12;kind='arcane';}
+  const budget=window.GameExperience?.budget()??60;
+  count=Math.max(0,Math.min(count,budget-arena.querySelectorAll('.spark,.trail').length));
   for(let i=0;i<count;i++){
     const s=document.createElement('div');
     s.className=`spark spark-${kind}`;
@@ -611,16 +617,17 @@ function sparkBurst(x,y,count=12,kind='arcane'){
     const ang=Math.random()*Math.PI*2,dist=ri(25,85);
     s.style.setProperty('--dx',Math.cos(ang)*dist+'px');
     s.style.setProperty('--dy',Math.sin(ang)*dist+'px');
-    arena.appendChild(s);setTimeout(()=>s.remove(),700);
+    arena.appendChild(s);combatTimers.later(()=>s.remove(),700);
   }
 }
 function boomAt(x,y,kind='arcane'){
+  if(REDUCED_MOTION())return;
   const arena=$('arena');
   const bm=document.createElement('div');
   bm.className=`boom boom-${kind}`;
   bm.innerHTML='<div class="vfx-ring"></div><div class="vfx-burst-core"></div><div class="vfx-cross-flare"></div>';
   bm.style.left=(x-28)+'px';bm.style.top=(y-28)+'px';
-  arena.appendChild(bm);setTimeout(()=>bm.remove(),550);
+  arena.appendChild(bm);combatTimers.later(()=>bm.remove(),550);
 }
 /* Đường cong cubic-bezier(.3,0,.7,1) — bám sát chưởng khí không đụng layout thrashing */
 function projEase(t){
@@ -634,47 +641,17 @@ function projEase(t){
   return ((ay*u+by)*u+cy)*u;
 }
 function shootProjectile(fromId,toId,spellKind,dark,onHit){
-  const arena=$('arena');
-  const from=spriteCenter(fromId),to=spriteCenter(toId);
-  const dx=to.x-from.x;
-  const kind=typeof spellKind==='string'&&ELEMENTAL_SPELLS[spellKind]?spellKind:(dark?getBossSpellType(G.bossIndex):'arcane');
-  const spellDef=ELEMENTAL_SPELLS[kind]||ELEMENTAL_SPELLS.arcane;
-  const p=document.createElement('div');
-  p.className=`proj ${spellDef.className}`+(dark?' dark':'');
-  p.innerHTML=spellDef.html;
+  const arena=$('arena'),from=spriteCenter(fromId),to=spriteCenter(toId);
+  if(REDUCED_MOTION()){onHit(to);return;}
+  const kind=typeof spellKind==='string'&&ELEMENTAL_SPELLS[spellKind]?spellKind:'arcane';
+  const p=document.createElement('div');p.className='proj '+ELEMENTAL_SPELLS[kind].className;
+  p.innerHTML=ELEMENTAL_SPELLS[kind].html;
   p.style.left=(from.x-20)+'px';p.style.top=(from.y-20)+'px';
-  arena.appendChild(p);SFX.shoot();
-  const trailBg=dark?`radial-gradient(circle, ${spellDef.glow}b3, transparent 70%)`
-                    :`radial-gradient(circle, rgba(255,220,80,.85), rgba(0,242,254,.6) 50%, transparent 75%)`;
-  const t0=performance.now();
-  let trailN=0;
-  const trailId=REDUCED_MOTION()?null:setInterval(()=>{
-    const t=document.createElement('div');
-    t.className='trail '+(dark?'trail-dark':'trail-light');
-    t.style.left=(from.x-10+dx*projEase(Math.min(1,(performance.now()-t0)/450)))+'px';
-    t.style.top=(from.y-10)+'px';
-    t.style.width='20px';t.style.height='20px';
-    t.style.background=trailBg;
-    arena.appendChild(t);setTimeout(()=>t.remove(),450);
-    if(++trailN>8)clearInterval(trailId);
-  },48);
-  requestAnimationFrame(()=>{p.style.transform=`translateX(${dx}px) scale(1.25)`;});
-  setTimeout(()=>{if(trailId)clearInterval(trailId);p.remove();boomAt(to.x,to.y,kind);onHit(to);},460);
+  p.style.transition='transform 180ms ease-out';arena.appendChild(p);SFX.shoot();
+  combatTimers.later(()=>{p.style.transform=`translate(${to.x-from.x}px,${to.y-from.y}px)`;},16);
+  combatTimers.later(()=>{p.remove();boomAt(to.x,to.y,kind);onHit(to);},200);
 }
-function shootBeam(onHit){
-  const arena=$('arena');
-  const from=spriteCenter('heroSprite'),to=spriteCenter('bossSprite');
-  const beam=document.createElement('div');beam.className='beam';
-  beam.style.left=from.x+'px';beam.style.top=(from.y-17)+'px';
-  beam.style.width=(to.x-from.x)+'px';
-  arena.appendChild(beam);SFX.crit();
-  setTimeout(()=>{
-    boomAt(to.x,to.y,'arcane');
-    sparkBurst(to.x,to.y,16,'arcane');
-    onHit(to);
-    setTimeout(()=>beam.remove(),200);
-  },350);
-}
+function shootBeam(onHit){shootProjectile('heroSprite','bossSprite','arcane',false,onHit);}
 function healEffect(){
   const c=spriteCenter('heroSprite'),arena=$('arena');
   showDmg('+10 HP','#2ed573','left',true);
@@ -682,7 +659,7 @@ function healEffect(){
     const h=document.createElement('div');h.className='healfx vfx-heal-orb';
     h.style.left=(c.x-24+ri(0,48))+'px';h.style.top=(c.y-10+ri(0,30))+'px';
     h.style.animationDelay=(i*0.1)+'s';
-    arena.appendChild(h);setTimeout(()=>h.remove(),1200);
+    arena.appendChild(h);combatTimers.later(()=>h.remove(),1200);
   }
 }
 function showDmg(text,color,side,crit){
@@ -690,72 +667,34 @@ function showDmg(text,color,side,crit){
   const d=document.createElement('div');
   d.className='dmg'+(crit?' crit':'');d.textContent=text;d.style.color=color;
   d.style[side]=(18+Math.random()*10)+'%';d.style.top='40%';
-  arena.appendChild(d);setTimeout(()=>d.remove(),1000);
+  arena.appendChild(d);combatTimers.later(()=>d.remove(),1000);
 }
 function heroAttack(dmg,crit){
+  // Chấm kết quả ngay; hiệu ứng chỉ trình bày trạng thái đã xác định.
+  G.bossHp=Math.max(0,G.bossHp-dmg);updateBars();checkPhase2();saveAdventureProgress();
   const hero=$('heroSprite'),boss=$('bossSprite');
-  const runId=battleRunId;
   hero.classList.add('cast-hero');
-  setTimeout(()=>hero.classList.remove('cast-hero'),400);
-  if(crit){hero.classList.add('dash-hero');setTimeout(()=>hero.classList.remove('dash-hero'),520);}
-  const onHit=(to)=>{
-    if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    boss.classList.add('hurt','flashWhite');
-    shake(crit);SFX.hit();
-    sparkBurst(to.x,to.y,crit?18:10,'arcane');
-    showDmg('−'+dmg,'#e0364f','right',crit);
-    G.bossHp=Math.max(0,G.bossHp-dmg);updateBars();hpHitFx('bossHp');checkPhase2();
-    setTimeout(()=>{
-      boss.classList.remove('hurt','flashWhite');
-      if(G.bossHp<=0)bossDefeated();else showNextBtn();
-    },500);
-  };
-  setTimeout(()=>{
-    if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    if(crit)shootBeam(onHit);
-    else shootProjectile('heroSprite','bossSprite','arcane',false,onHit);
-  },200);
+  shootProjectile('heroSprite','bossSprite','arcane',false,to=>{
+    boss.classList.add('hurt','flashWhite');SFX.hit();shake(crit);
+    sparkBurst(to.x,to.y,crit?18:8,'arcane');showDmg('−'+dmg,'var(--red-ink)','right',crit);
+  });
+  if(G.bossHp<=0){bossDefeated();return;}
+  battleLater(()=>{hero.classList.remove('cast-hero');boss.classList.remove('hurt','flashWhite');showNextBtn();},REDUCED_MOTION()?0:360);
 }
 function bossAttack(dmg,drain){
-  const hero=$('heroSprite'),boss=$('bossSprite');
-  const b=BOSSES[G.bossIndex];
-  const runId=battleRunId;
-  const spellType=getBossSpellType(G.bossIndex);
-  boss.classList.add('cast-boss');
-  setTimeout(()=>boss.classList.remove('cast-boss'),400);
-  setTimeout(()=>{
-    if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    shootProjectile('bossSprite','heroSprite',spellType,true,(to)=>{
-      if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-      if(dmg===0){
-        sparkBurst(to.x,to.y,12,'arcane');SFX.perk();
-        showDmg('🛡️ CHẶN!','#1c9c5b','left',true);
-      }else{
-        hero.classList.add('hurt-hero','flashWhite');
-        shake(false);SFX.hit();
-        sparkBurst(to.x,to.y,10,spellType);
-        showDmg('−'+dmg,'#e0364f','left');
-      }
-      G.heroHp=Math.max(0,G.heroHp-dmg);
-      if(dmg>0)hpHitFx('heroHp');
-      if(drain){
-        G.bossHp=Math.min(G.bossMaxHp,G.bossHp+Math.round(dmg/2));
-        showDmg('+'+Math.round(dmg/2)+' HP','#8d2f4f','right');
-      }
-      updateBars();
-      setTimeout(()=>{
-        hero.classList.remove('hurt-hero','flashWhite');
-        if(G.heroHp<=0){
-          if(G.inv.revive>0){ // 🔮 bùa hồi sinh
-            G.inv.revive--;G.heroHp=50;updateBars();updateHUD();
-            healEffect();SFX.heal();
-            showDmg('🔮 HỒI SINH!','#8d6bff','left',true);
-            showNextBtn();
-          }else heroDefeated();
-        }else showNextBtn();
-      },500);
-    });
-  },200);
+  G.heroHp=Math.max(0,G.heroHp-dmg);
+  if(drain)G.bossHp=Math.min(G.bossMaxHp,G.bossHp+Math.round(dmg/2));
+  let revived=false;
+  if(G.heroHp<=0&&G.inv.revive>0){G.inv.revive--;G.heroHp=50;revived=true;}
+  updateBars();updateHUD();saveAdventureProgress();
+  const hero=$('heroSprite'),boss=$('bossSprite');boss.classList.add('cast-boss');
+  shootProjectile('bossSprite','heroSprite',getBossSpellType(G.bossIndex),true,to=>{
+    hero.classList.add('hurt-hero');sparkBurst(to.x,to.y,8);SFX.hit();
+    showDmg(dmg?'−'+dmg:'🛡️ CHẶN!',dmg?'var(--red-ink)':'var(--green-ink)','left');
+    if(revived)showDmg('HỒI SINH!','var(--purple-ink)','left',true);
+  });
+  if(G.heroHp<=0){heroDefeated();return;}
+  battleLater(()=>{hero.classList.remove('hurt-hero');boss.classList.remove('cast-boss');showNextBtn();},REDUCED_MOTION()?0:360);
 }
 function hpHitFx(which){
   const bar=$(which).parentElement;
@@ -771,17 +710,18 @@ function updateBars(){
   const heroPct=Math.max(0,G.heroHp/heroMaxHp()*100);
   const bossPct=Math.max(0,G.bossHp/G.bossMaxHp*100);
 
-  $('heroHp').style.width=heroPct+'%';
+  $('heroHp').style.width='100%';$('heroHp').style.transform='scaleX('+heroPct/100+')';
   $('heroHpTxt').textContent=G.heroHp+'/'+heroMaxHp();
-  $('bossHp').style.width=bossPct+'%';
+  $('bossHp').style.width='100%';$('bossHp').style.transform='scaleX('+bossPct/100+')';
   $('bossHpTxt').textContent=G.bossHp+'/'+G.bossMaxHp;
 
   const hGhost=$('heroHpGhost');
-  if(hGhost){setTimeout(()=>{if(hGhost)hGhost.style.width=heroPct+'%';},320);}
+  if(hGhost){hGhost.style.width='100%';hGhost.style.transform='scaleX('+heroPct/100+')';}
   const bGhost=$('bossHpGhost');
-  if(bGhost){setTimeout(()=>{if(bGhost)bGhost.style.width=bossPct+'%';},320);}
+  if(bGhost){bGhost.style.width='100%';bGhost.style.transform='scaleX('+bossPct/100+')';}
 }
 function confetti(n){
+  n=Math.max(0,Math.min(n,(window.GameExperience?.budget()??60)-document.querySelectorAll('.confetti').length));
   const emojis=['🎉','⭐','✨','🎊','💛','💙','💜'];
   for(let i=0;i<n;i++){
     const c=document.createElement('div');c.className='confetti';
@@ -791,49 +731,39 @@ function confetti(n){
     c.style.animationDelay=(Math.random()*0.8)+'s';
     c.style.fontSize=ri(14,28)+'px';
     document.body.appendChild(c);
-    setTimeout(()=>c.remove(),5000);
+    combatTimers.later(()=>c.remove(),5000);
   }
 }
 function bossDefeated(){
-  stopTimer();stopAmbient();SFX.win();confetti(40);
-  const runId=battleRunId;
-  $('bossSprite').classList.add('defeated');
-  $('heroSprite').classList.add('winHop');
-  setTimeout(()=>{
-    if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    $('bossSprite').classList.remove('defeated');
-    $('heroSprite').classList.remove('winHop');
-    const newlyCleared=G.bossIndex>G.cleared;
-    G.cleared=Math.max(G.cleared,G.bossIndex);
-    if(newlyCleared)window.GameStorage?.addStars?.(G.bossIndex===BOSSES.length-1?10:2+BOSSES[G.bossIndex].tier);
-    if(G.bossIndex===BOSSES.length-1){
-      saveAdventureProgress();
-      $('stCorrect').textContent=G.correct;
-      $('stWrong').textContent=G.wrong;
-      $('stGold').textContent=G.goldHit;
-      $('stStreak').textContent=G.bestStreak;
-      $('stCoins').textContent=G.coins;
-      confetti(60);showScreen('victory');
+  if(G.ending)return;
+  G.ending=true;G.locked=true;clearTimeout(G.thinkT);G.thinkT=null;lockAnswers();setBattlePhase('results');stopTimer();stopAmbient();SFX.win();
+  const newlyCleared=G.bossIndex>G.cleared;
+  G.cleared=Math.max(G.cleared,G.bossIndex);
+  if(newlyCleared)GameStorage.addStars(G.bossIndex===BOSSES.length-1?10:2+BOSSES[G.bossIndex].tier);
+  const finalBoss=G.bossIndex===BOSSES.length-1;
+  const reward=finalBoss?0:50+BOSSES[G.bossIndex].tier*20;
+  G.coins+=reward;saveAdventureProgress();
+  // Rewards are committed before the cancellable celebration.
+  $('bossSprite').classList.add('defeated');$('heroSprite').classList.add('winHop');
+  battleLater(()=>{
+    if(finalBoss){
+      $('stCorrect').textContent=G.correct;$('stWrong').textContent=G.wrong;
+      $('stGold').textContent=G.goldHit;$('stStreak').textContent=G.bestStreak;$('stCoins').textContent=G.coins;
+      showScreen('victory');
     }else{
-      const reward=50+BOSSES[G.bossIndex].tier*20;
-      G.coins+=reward;
-      saveAdventureProgress();
       $('bossWinStars').textContent=newlyCleared?2+BOSSES[G.bossIndex].tier:0;
-      $('bossWinTitle').textContent='HẠ GỤC '+BOSSES[G.bossIndex].name.toUpperCase()+'!';
-      $('bossWinSub').innerHTML='🎉 Nhận thưởng <b>+'+reward+' 💰</b> (em đang có <b>'+G.coins+' 💰</b>)<br>Boss tiếp theo: <b>'+BOSSES[G.bossIndex+1].name+'</b> ('+RANKS[BOSSES[G.bossIndex+1].tier]+')';
+      $('bossWinTitle').textContent='VƯỢT QUA '+BOSSES[G.bossIndex].name.toUpperCase()+'!';
+      $('bossWinSub').textContent=`Nhận ${reward} xu · Tiếp theo: ${BOSSES[G.bossIndex+1].name}`;
       showScreen('bossWin');
     }
-  },1300);
+    confetti(30);
+  },REDUCED_MOTION()?0:500);
 }
 function heroDefeated(){
-  stopTimer();stopAmbient();SFX.defeat();
-  const runId=battleRunId;
-  setTimeout(()=>{
-    if(runId!==battleRunId||!$('battle').classList.contains('active'))return;
-    $('stCorrect2').textContent=G.correct;
-    $('stWrong2').textContent=G.wrong;
-    $('stTimeout2').textContent=G.timeout;
-    $('defeatCoins').textContent=G.coins;
-    showScreen('defeat');
-  },700);
+  if(G.ending)return;
+  G.ending=true;G.locked=true;clearTimeout(G.thinkT);G.thinkT=null;lockAnswers();setBattlePhase('results');stopTimer();stopAmbient();SFX.defeat();
+  battleLater(()=>{
+    $('stCorrect2').textContent=G.correct;$('stWrong2').textContent=G.wrong;$('stTimeout2').textContent=G.timeout;
+    $('defeatCoins').textContent=G.coins;showScreen('defeat');
+  },REDUCED_MOTION()?0:360);
 }

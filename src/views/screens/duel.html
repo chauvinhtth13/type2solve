@@ -10,7 +10,7 @@
       <!-- ===== 1. CHUẨN BỊ ===== -->
       <section class="duel-setup" id="duelSetup">
         <p class="sub">Thay phiên trả lời câu hỏi để hành động — ai hết máu trước sẽ thua ván đó!</p>
-        <div class="duel-setup-grid">
+        <div class="setup-columns"><div class="setup-roster"><h2 class="setup-heading">1. Chọn bạn đồng hành</h2>        <div class="duel-setup-grid">
           <div class="duel-player-card">
             <svg class="sprite duel-skin-preview" id="duelSkinPreview1" viewBox="0 0 120 120" role="img" aria-label="Nhân vật người chơi 1" data-art="tplBeast"></svg>
             <div class="duel-skin-row">
@@ -36,18 +36,9 @@
 
         <!-- Hướng dẫn chơi hiện NGAY ở màn chuẩn bị: trẻ phải biết luật TRƯỚC khi
              chia điểm, vì chia điểm chính là quyết định chiến thuật đầu tiên. -->
-        <div class="duel-howto">
-          <h2>📖 Luật chơi</h2>
-          <ol>
-            <li>Mỗi người chia <b>100 điểm chỉ số</b> vào ⚔️ Tấn công / 🛡️ Phòng thủ / ❤️ Máu.</li>
-            <li>Đến lượt mình, trả lời <b>đúng</b> câu hỏi thì được chọn 1 trong 4 hành động: <b>Tấn công · Phòng thủ · Hồi máu · Tích nộ</b>. Trả lời <b>sai</b> thì mất lượt.</li>
-            <li>Thanh <b>Nộ</b> đầy 100% sẽ mở khoá <b>⚡ Tuyệt kỹ</b>: bỏ qua câu hỏi, đánh rất mạnh và xuyên 40% giáp.</li>
-            <li>Đòn thường có xác suất <b>💥 chí mạng ×1,5</b>. Mỗi ván chỉ <b>hồi máu được 3 lần</b>.</li>
-            <li>Hết một ván: người thắng <b>+100 điểm</b>, người thua <b>+50 điểm</b> để lội ngược dòng, rồi cả hai nâng cấp trước ván sau.</li>
-          </ol>
-        </div>
 
-        <div class="duel-setup-selects">
+
+</div><div class="setup-options"><h2 class="setup-heading">2. Chọn thử thách</h2>        <div class="duel-setup-selects">
           <label class="select-row">Thể thức
             <select id="duelBestOf">
               <option value="1">BO1 — ăn ngay 1 ván</option>
@@ -66,7 +57,16 @@
           </label>
         </div>
         <p class="duel-played" id="duelPlayed"></p>
-        <div style="max-width:520px;margin:14px auto 0"><button class="btn big green" type="button" onclick="startDuel()">🎯 CHIA ĐIỂM CHỈ SỐ</button></div>
+        <div class="setup-launch"><button class="btn big green" type="button" onclick="startDuel()">🎯 CHIA ĐIỂM CHỈ SỐ</button></div>
+</div></div><details class="duel-howto setup-guide"><summary>📖 Cách chơi &amp; mẹo</summary>
+          <ol>
+            <li>Mỗi người chia <b>100 điểm chỉ số</b> vào ⚔️ Tấn công / 🛡️ Phòng thủ / ❤️ Máu.</li>
+            <li>Đến lượt mình, trả lời <b>đúng</b> câu hỏi thì được chọn 1 trong 4 hành động: <b>Tấn công · Phòng thủ · Hồi máu · Tích nộ</b>. Trả lời <b>sai</b> thì mất lượt.</li>
+            <li>Thanh <b>Nộ</b> đầy 100% sẽ mở khoá <b>⚡ Tuyệt kỹ</b>: bỏ qua câu hỏi, đánh rất mạnh và xuyên 40% giáp.</li>
+            <li>Đòn thường có xác suất <b>💥 chí mạng ×1,5</b>. Mỗi ván chỉ <b>hồi máu được 3 lần</b>.</li>
+            <li>Hết một ván: người thắng <b>+100 điểm</b>, người thua <b>+50 điểm</b> để lội ngược dòng, rồi cả hai nâng cấp trước ván sau.</li>
+          </ol>
+        </details>
       </section>
 
       <!-- ===== 2. PHÂN BỔ CHỈ SỐ (dùng cả lúc đầu lẫn giữa các ván) ===== -->
@@ -75,7 +75,7 @@
         <p class="duel-alloc-note" id="duelAllocNote" aria-live="polite"></p>
         <div class="duel-alloc-grid" id="duelAllocGrid"></div>
         <p class="duel-alloc-cap" id="duelAllocCap"></p>
-        <div style="max-width:520px;margin:14px auto 0">
+        <div class="setup-launch">
           <button class="btn big green" type="button" id="duelAllocDone" onclick="confirmDuelAlloc()">⚔️ VÀO TRẬN!</button>
         </div>
       </section>

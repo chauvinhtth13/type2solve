@@ -1,0 +1,12 @@
+<section class="screen" id="practice">
+  <div class="card practice-card">
+    <header class="game-topbar"><button class="btn" onclick="LearningReview.leave()">← Quay lại</button><h1>Cùng luyện lại</h1><span class="badge" id="practiceProgress"></span></header>
+    <p class="sub">Không tính giờ, không mất máu. Đọc lời giải rồi thử lại từng câu nhé.</p>
+    <h2 class="qtext" id="practiceQuestion" tabindex="-1"></h2>
+    <div class="qsvg" id="practiceVisual"></div>
+    <div class="answers" id="practiceAnswers"></div>
+    <p class="feedback" id="practiceFeedback" role="status"></p>
+    <div class="explain show" id="practiceExplanation"></div>
+    <button class="btn big green" id="practiceNext" onclick="LearningReview.next()" hidden>Câu tiếp theo →</button>
+  </div>
+</section>

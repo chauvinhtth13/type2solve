@@ -48,7 +48,7 @@ async function createHarness() {
 {
   const { api, events, storage } = await createHarness();
   const initial = api.load();
-  assert.equal(initial.version, 1);
+  assert.equal(initial.version, 2);
   assert.equal(initial.profile.stars, 0);
   assert.ok(storage.getItem(api.KEY));
 
@@ -65,7 +65,7 @@ async function createHarness() {
 
   storage.setItem(api.KEY, '{damaged json');
   assert.doesNotThrow(() => api.load());
-  assert.equal(api.load().version, 1);
+  assert.equal(api.load().version, 2);
 }
 
 {
@@ -78,3 +78,23 @@ async function createHarness() {
 }
 
 console.log('✓ GameStorage: schema, migration, corruption fallback, cloning and one change event');
+
+{
+  const { api, storage } = await createHarness();
+  storage.setItem(api.KEY, JSON.stringify({ version: 1, profile: { stars: 42 }, adventure: { cleared: 4, coins: 99, inv: { hint: 2 } }, settings: { sound: false }, records: { hanoi: { wins: 3 } } }));
+  const state = api.load();
+  assert.equal(state.version, 2);
+  assert.equal(state.profile.stars, 42);
+  assert.equal(state.adventure.coins, 99);
+  assert.equal(state.adventure.inv.hint, 2);
+  assert.equal(state.records.hanoi.wins, 3);
+  assert.equal(state.settings.sound, false);
+  assert.equal(state.settings.effects, 'auto');
+  assert.deepEqual(JSON.parse(JSON.stringify(state.learning.skills)), {});
+  const normalized = api.save({ learning: { skills: { arith: { attempts: 3, correct: 20, assisted: -1 }, geo: null, bad_key: { attempts: 9 } } }, settings: { effects: 'invalid' } });
+  assert.equal(normalized.learning.skills.arith.correct, 3);
+  assert.equal(normalized.learning.skills.arith.assisted, 0);
+  assert.equal(normalized.learning.skills.geo, undefined);
+  assert.equal(normalized.learning.skills.bad_key, undefined);
+  assert.equal(normalized.settings.effects, 'auto');
+}
