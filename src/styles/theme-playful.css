@@ -992,3 +992,14 @@ body[data-effects=off] .flashOverlay,body[data-effects=low] .flashOverlay{displa
 /* Secondary record text remains readable on light setup panels. */
 .nim-records small,.hanoi-records small{opacity:1;color:#43536a}
 .learning-screen .icon-btn:disabled{opacity:1;background:#e9edf1;color:#465566;border-color:#7b8997}
+
+/* Gameplay contrast: labels must survive empty meters, disabled controls and coloured pieces. */
+:root{color-scheme:light}
+.ragetxt{color:#182638;text-shadow:none;background:#fffdf4;width:max-content;min-width:30px;left:50%;right:auto;transform:translateX(-50%);padding:0 3px}
+.hanoi-disk{color:#101820;text-shadow:none}
+.duel-alloc-btn:disabled,.duel-action:disabled,.sudoku-tool-grid button:disabled,#sudokuCheckBtn:disabled{
+ opacity:1;color:#435268;background:#e5eaf0;border-color:#7b8997;cursor:not-allowed;
+}
+.duel-player-card.is-ai input{opacity:1;color:#435268;background:#e5eaf0;border-color:#7b8997}
+.duel-player-card input::placeholder,.nim-pile-input input::placeholder{color:#526174;opacity:1}
+select option{background:#fff;color:#24324a}

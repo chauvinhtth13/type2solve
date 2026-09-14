@@ -113,6 +113,8 @@ try {
   await send('Runtime.enable');
   await send('Log.enable');
   await send('Page.enable');
+  await send('DOM.enable');
+  await send('CSS.enable');
   await send('Page.navigate', { url: `http://127.0.0.1:${httpPort}/index.html` });
   for (let i = 0; i < 80; i++) {
     if (await evaluate('document.readyState') === 'complete') break;
@@ -124,29 +126,42 @@ try {
   await send('Emulation.setDeviceMetricsOverride',{width:1366,height:768,deviceScaleFactor:1,mobile:false});
   const folder=join(root,'artifacts','contrast');await mkdir(folder,{recursive:true});
   const report=[];
-  for(const [name,action] of [['home','goHome()'],['typing','openTypingGame()'],['typing-play','openTypingGame();startTypingRun()'],['sudoku','openSudokuGame()'],['duel','openDuelGame()'],['nim','openNimGame()'],['hanoi','openHanoiGame()'],['battle','startAdventure();beginBattle();stopTimer();clearTimeout(G.thinkT)']]){
-    await evaluate(`goHome();${action}`);await sleep(1700);
+  const pseudo=process.env.CONTRAST_PSEUDO;
+  if(process.env.CONTRAST_MOBILE)await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  for(const [name,action] of [
+    ['home','goHome()'],['typing','openTypingGame();document.querySelector("#typingSetup details").open=true'],
+    ['typing-play','openTypingGame();startTypingRun()'],['typing-pause','openTypingGame();await startTypingRun();toggleTypingPause()'],
+    ['sudoku','openSudokuGame()'],['sudoku-play','openSudokuGame();startSudoku()'],
+    ['duel','openDuelGame()'],['duel-alloc','openDuelGame();startDuel()'],
+    ['duel-play','openDuelGame();startDuel();DuelGame.setAllocForTest(0,{atk:34,def:33,hp:33});DuelGame.setAllocForTest(1,{atk:34,def:33,hp:33});confirmDuelAlloc()'],
+    ['nim','openNimGame()'],['nim-ai','openNimGame();document.getElementById("nimOpponent").value="hard";syncNimOpponent()'],['nim-play','openNimGame();startNim()'],
+    ['hanoi','openHanoiGame()'],['hanoi-play','openHanoiGame();document.getElementById("hanoiDisks").value="7";startHanoi()'],
+    ['intro','startAdventure()'],['battle','startAdventure();beginBattle();stopTimer();clearTimeout(G.thinkT)'],
+    ['battle-input','startAdventure();beginBattle();setAnswerMode("input");stopTimer();clearTimeout(G.thinkT)'],
+    ['pause','startAdventure();beginBattle();askRestart()']]){
+    await evaluate(`(async()=>{goHome();${action}})()`);await sleep(1700);
     if(name==='typing-play')await evaluate(`(()=>{const word=document.querySelector('.typing-monster .monster-word');if(word){const text=word.textContent;const input=document.getElementById('typingInput');input.value=text.slice(0,1);input.dispatchEvent(new Event('input'));}const monster=document.querySelector('.typing-monster');if(monster){const label=document.createElement('strong');label.className='monster-name';label.textContent='Boss · kiểm tra màu';monster.prepend(label);}})()`);
+    if(pseudo){const doc=await send('DOM.getDocument');const {nodeIds}=await send('DOM.querySelectorAll',{nodeId:doc.root.nodeId,selector:'.screen.active button:not(:disabled),.screen.active select,.screen.active input:not(:disabled)'});for(const nodeId of nodeIds)await send('CSS.forcePseudoState',{nodeId,forcedPseudoClasses:[pseudo]});}
     const results=await evaluate(`(()=>{
       function rgb(s){return (s.match(/[\\d.]+/g)||[]).map(Number)}
       function blend(a,b){const alpha=a[3]??1;return a.slice(0,3).map((c,i)=>c*alpha+b[i]*(1-alpha))}
       function lum(c){return c.slice(0,3).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0)}
-      const root=document.querySelector('.screen.active'),out=[];
+      const root=document.body,out=[];
       for(const e of root.querySelectorAll('*')){
-        if(e.closest('svg,[hidden]')||!e.getBoundingClientRect().width||!e.getBoundingClientRect().height||!Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim()))continue;
-        const cs=getComputedStyle(e);if(cs.visibility==='hidden')continue;
+        if(e.closest('svg,[hidden],option,script,style')||!e.getBoundingClientRect().width||!e.getBoundingClientRect().height||(!e.matches('input,select')&&!Array.from(e.childNodes).some(n=>n.nodeType===3&&n.textContent.trim())))continue;
+        const cs=getComputedStyle(e);if(cs.visibility==='hidden'||e.matches('input[type=radio],input[type=checkbox]'))continue;
         let bg=[255,255,255],chain=[],gradient=false;for(let n=e;n;n=n.parentElement)chain.unshift(n);
         for(const n of chain){const ns=getComputedStyle(n);const c=rgb(ns.backgroundColor);if(ns.backgroundImage!=='none')gradient=true;if(c.length)bg=blend(c,bg)}
-        let fg=blend(rgb(cs.color),bg);let opacity=chain.reduce((x,n)=>x*Number(getComputedStyle(n).opacity),1);if(opacity<.05)continue;fg=fg.map((x,i)=>x*opacity+bg[i]*(1-opacity));
+        let fg=blend(rgb(e.matches('input')&&!e.value&&e.placeholder?getComputedStyle(e,'::placeholder').color:cs.color),bg);let opacity=chain.reduce((x,n)=>x*Number(getComputedStyle(n).opacity),1);if(opacity<.05)continue;fg=fg.map((x,i)=>x*opacity+bg[i]*(1-opacity));
         const a=lum(fg),b=lum(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05),size=parseFloat(cs.fontSize),threshold=size>=24||(size>=18.66&&parseInt(cs.fontWeight)>=700)?3:4.5;
-        if(ratio<threshold)out.push({id:e.id,cls:typeof e.className==='string'?e.className:'',text:e.textContent.trim().slice(0,65),fg:cs.color,bg:cs.backgroundColor,ratio:+ratio.toFixed(2),threshold,opacity,gradient,disabled:!!e.closest(':disabled')});
+        if(ratio<threshold)out.push({id:e.id,cls:typeof e.className==='string'?e.className:'',text:(e.value||e.placeholder||e.textContent).trim().slice(0,65),fg:cs.color,bg:cs.backgroundColor,ratio:+ratio.toFixed(2),threshold,opacity,gradient,disabled:!!e.closest(':disabled')});
       }return out;
     })()`);
     report.push({name,results});console.log(name,JSON.stringify(results));
     if(process.env.CHECK_CONTRAST==='1')assert(results.length===0,name+' visible text contrast');
-    const shot=await send('Page.captureScreenshot',{format:'png'});await writeFile(join(folder,name+'.png'),Buffer.from(shot.data,'base64'));
+    const shot=await send('Page.captureScreenshot',{format:'png'});await writeFile(join(folder,name+'-'+(pseudo||'normal')+(process.env.CONTRAST_MOBILE?'-mobile':'')+'.png'),Buffer.from(shot.data,'base64'));
   }
-  await writeFile(join(folder,'report.json'),JSON.stringify(report,null,2));
+  await writeFile(join(folder,`report-${pseudo||'normal'}${process.env.CONTRAST_MOBILE?'-mobile':''}.json`),JSON.stringify(report,null,2));
   assert(runtimeErrors.length===0,runtimeErrors.join(' | ')||'No runtime errors');
 } finally {
   try { socket?.close(); } catch {}

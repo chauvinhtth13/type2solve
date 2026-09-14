@@ -205,3 +205,17 @@ Browser suite được chia phase trong runner production để mỗi tiến tr�
 hữu hạn; hai phase dùng cùng file assertion và tổng hợp lại bao phủ toàn bộ suite.
 Không còn lỗi đã biết từ static, unit, source E2E hoặc dist E2E tại thời điểm chốt
 báo cáo.
+
+
+## Bổ sung: tương phản từ cài đặt đến gameplay
+
+Lần đo trước chỉ quét text node ở tám màn và bỏ qua input/select; không đủ để kết luận mọi chữ đã rõ. Đã mở rộng `scripts/audit-contrast.mjs` sang 18 trạng thái, gồm cài đặt mở rộng, gameplay Sudoku/Duel/Nim/Hanoi, chia điểm, đối thủ máy, nhập đáp án và pause. Kiểm tra thêm giá trị/placeholder của input, select và pseudo-state hover/active.
+
+Lỗi xác minh và sửa:
+- Phần trăm thanh Nộ trắng trên thanh nền sáng: dùng chữ tối trên nhãn nền sáng riêng, không phụ thuộc phần thanh đã đầy.
+- Nút chia điểm bị khóa và công cụ Sudoku: bỏ opacity thấp, dùng nền xám và chữ tối; vẫn giữ thuộc tính disabled.
+- Tên đối thủ máy Nim: bỏ opacity 0.5, đặt màu placeholder rõ.
+- Số trên bảy đĩa Hanoi: bỏ alpha 0.55; dùng #101820, kể cả đĩa tím.
+- Cố định color-scheme sáng và cặp màu option của select. Tăng phiên bản service-worker nguồn để cập nhật cache stylesheet.
+
+Bằng chứng: `artifacts/contrast-active.log`, `artifacts/contrast-hover-mobile.log`, ảnh và JSON trong `artifacts/contrast/`. `npm run verify` đạt; build cuối được tạo lại sau điều chỉnh màu số Hanoi. Phép đo dùng computed style và compositing các lớp màu, không thay thế kiểm tra pixel với ảnh/gradient, emoji hoặc xác nhận WCAG toàn sản phẩm.

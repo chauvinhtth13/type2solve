@@ -75,3 +75,11 @@ Thiết kế lại riêng toàn bộ màn chuẩn bị, gameplay, tạm dừng v
 Source owners: `src/views/screens/typing.html`, `src/styles/typing-world.css`, `src/scripts/games/typing/index.js`, `src/scripts/games/typing/content.js`. Styles riêng được load sau theme chung và đưa vào offline cache; không thêm thư viện hoặc ảnh tải ngoài.
 
 Kiểm thử riêng: `npm run test:typing`. Suite kiểm tra setup/play/pause ở laptop, tablet, điện thoại 320/390px và viewport thấp 390×500; IME, nhập sai, sửa/xóa mục tiêu, timer, accuracy, review, clipboard thành công/thất bại, thắng chiến dịch và chuyển chặng. Ảnh nằm trong `artifacts/typing-forest/`. Viewport thấp là mô phỏng; vẫn cần kiểm tra bàn phím hệ thống trên thiết bị thật.
+
+
+### Chỉnh tương phản chữ và nút
+
+- Gõ Chữ Vui dùng chữ chính xanh đen `#193047`, chữ phụ `#43566b`, nút chính xanh đậm `#185b45` với chữ trắng; nút phụ nền trắng, viền rõ. Chặng đang chọn dùng nền xanh lam đậm để phân biệt với nút bắt đầu.
+- Sửa tên boss vàng nhạt còn sót từ theme cũ; nhãn boss có nền sáng riêng và chữ tối. Các ký tự đúng, đang gõ, chưa gõ và sai có cặp màu nền/chữ riêng; lỗi vẫn được gạch chân.
+- Bỏ giảm opacity cho nút tạm dừng bị khóa và nhãn kỷ lục Nim/Hanoi; trạng thái disabled vẫn được giữ bằng thuộc tính native.
+- `scripts/audit-contrast.mjs` kiểm tra màu computed trên tám màn đại diện và lưu `artifacts/contrast/report.json`. Đây là phép đo chữ trên các lớp nền màu, không phải chứng nhận WCAG đầy đủ: gradient, hình ảnh, emoji và mọi trạng thái động vẫn cần kiểm tra thị giác.
