@@ -75,7 +75,6 @@
   let dictionaryPromise = null;
   let launchId = 0;
   let lastRunResult = null;
-  let tabKeyPressed = false;
   const pendingTimers = runtime.createTimerRegistry();
 
   const { byId, safeShowScreen } = runtime;
@@ -372,6 +371,7 @@
     if (state && state.raf) global.cancelAnimationFrame(state.raf);
     global.removeEventListener('resize', onFieldResize);
     global.removeEventListener('orientationchange', onFieldResize);
+    global.visualViewport?.removeEventListener('resize', onFieldResize);
     global.clearTimeout(resizeTimer);
     clearLocalTimers();
     const monsters = byId('typingMonsters');
@@ -642,10 +642,12 @@
     setSectionVisibility('typingPlay', false);
     // Đo sau khi sân đấu đã hiện, nếu không clientWidth bằng 0.
     // Mỗi làn chỉ giữ một con: nhiều hơn số làn là chữ chắc chắn đè lên nhau.
+    byId('typingGame').style.setProperty('--visual-height', `${global.visualViewport?.height || global.innerHeight}px`);
     state.lanes = laneLayout();
     state.maxActive = Math.min(state.config.maxActive, state.lanes.length);
     global.addEventListener('resize', onFieldResize);
     global.addEventListener('orientationchange', onFieldResize);
+    global.visualViewport?.addEventListener('resize', onFieldResize);
     const pause = byId('typingPauseBtn');
     if (pause) {
       pause.disabled = false;
@@ -664,6 +666,7 @@
     updateHud(true);
     updateMascotReaction('idle');
     beginWave(0);
+    byId('typingGame').querySelector('.typing-world').scrollTop = 0;
     safeFocusInput();
     state.lastFrame = now();
     state.raf = global.requestAnimationFrame(frameLoop);
@@ -775,6 +778,7 @@
 
   let resizeTimer = 0;
   function onFieldResize() {
+    byId('typingGame').style.setProperty('--visual-height', `${global.visualViewport?.height || global.innerHeight}px`);
     global.clearTimeout(resizeTimer);
     resizeTimer = global.setTimeout(remeasureField, 150);   // gom cả loạt sự kiện kéo cửa sổ
   }
@@ -791,6 +795,7 @@
     if (!state || state.status !== 'running') return;
     const field = byId('typingField');
     if (!field || !field.clientWidth) return;
+    byId('typingGame').style.setProperty('--visual-height', `${global.visualViewport?.height || global.innerHeight}px`);
     state.lanes = laneLayout();
     state.maxActive = Math.min(state.config.maxActive, state.lanes.length);
     state.monsters.forEach(monster => {
@@ -1553,7 +1558,7 @@
     if (nextBtn) {
       const hasNext = clearedNow && !lastStage;
       nextBtn.hidden = !hasNext;
-      if (hasNext) nextBtn.textContent = `⚔️ CHẶNG ${stageIndex + 2}: ${campaignStages()[stageIndex + 1].name}`;
+      if (hasNext) nextBtn.textContent = `Chặng ${stageIndex + 2} tiếp theo →`;
     }
     const retryBtn = byId('typingRetryBtn');
     if (retryBtn) {

@@ -196,25 +196,25 @@
      * engine tự đọc theo và không cần đổi dòng code nào.
      */
     campaign: [
-      { emoji: '🐛', name: 'Sâu Tri Thức Arcane',    desc: 'Linh vật phát sáng ma thuật bò qua dãy phím ngọc. Nhịp chuyển động chậm rãi — khởi đầu lý tưởng để em làm quen vị trí ngón tay.',
+      { emoji: '🐛', name: 'Sora · Vườn khởi đầu',    desc: 'Ốc sên Sora chờ em ở khu vườn đầu tiên. Gõ từng chữ để làm quen với phép màu.',
         waves: 3,  perWave: CAMPAIGN_PER_WAVE, gap: 2600, speed: 2.6, level: 1, armor: 2 },
-      { emoji: '👻', name: 'Bóng Ma Ảo Ảnh Starlight', desc: 'Lạc lối trong dải ngân hà, rình rập lúc em nhập phím vội vã để biến hóa từ ngữ.',
+      { emoji: '👻', name: 'Sparky · Đồi tia chớp', desc: 'Tinh linh Sparky mang những từ mới đến ngọn đồi. Giữ nhịp gõ đều nhé.',
         waves: 5,  perWave: CAMPAIGN_PER_WAVE, gap: 2450, speed: 3.0, level: 1, armor: 2 },
-      { emoji: '🦇', name: 'Dơi Âm Thanh Tinh Tú',   desc: 'Đôi cánh ma thuật đập sóng âm vũ trụ, làm rung chuyển nhịp gõ của em.',
+      { emoji: '🦇', name: 'Stitchwork · Thư viện lá',   desc: 'Gấu bông Stitchwork mở thư viện lá. Cùng khám phá những từ quen thuộc.',
         waves: 7,  perWave: CAMPAIGN_PER_WAVE, gap: 2300, speed: 3.4, level: 1, armor: 3 },
-      { emoji: '🐍', name: 'Xà Thần Ngôn Ngữ',       desc: 'Thần xà ngọc bích trườn qua ký tự rune, kiểm tra độ chính xác của từng dấu thanh.',
+      { emoji: '🐍', name: 'Ignis · Hang lửa ấm',       desc: 'Rồng con Ignis sưởi ấm hang nhỏ. Gõ cẩn thận trước khi tăng tốc.',
         waves: 9,  perWave: CAMPAIGN_PER_WAVE, gap: 2150, speed: 3.8, level: 2, armor: 3 },
-      { emoji: '🦂', name: 'Bọ Cạp Khắc Dấu Hào Quang', desc: 'Càng vàng rực rỡ và ngòi bộc phát hào quang, thử thách bản lĩnh gõ đúng chính tả.',
+      { emoji: '🦂', name: 'Vex · Vườn kẹo ngọt', desc: 'Tiểu quỷ Vex mời em đến vườn kẹo. Đọc kỹ từ trước khi tung phép.',
         waves: 11, perWave: CAMPAIGN_PER_WAVE, gap: 2000, speed: 4.2, level: 2, armor: 3 },
-      { emoji: '🦑', name: 'Mực Thần Cổ Đại',         desc: 'Xúc tu ma thuật ngọc bích quấn quanh cú pháp, thử thách tư duy sắp xếp từ ngữ.',
+      { emoji: '🦑', name: 'Nocturne · Hồ trăng',         desc: 'Dơi Nocturne bay bên hồ trăng. Giữ sự tập trung khi từ dài hơn.',
         waves: 13, perWave: CAMPAIGN_PER_WAVE, gap: 1850, speed: 4.6, level: 2, armor: 4 },
-      { emoji: '🐲', name: 'Hỏa Long Từ Vựng',       desc: 'Long tinh rực lửa bảo hộ kho tàng từ vựng cao cấp. Múa cánh bộc phá hào quang!',
+      { emoji: '🐲', name: 'Glacius · Rừng tuyết',       desc: 'Rồng tuyết Glacius trông coi rừng băng. Từng ký tự đúng sẽ mở lối.',
         waves: 15, perWave: CAMPAIGN_PER_WAVE, gap: 1700, speed: 5.0, level: 3, armor: 4 },
-      { emoji: '👹', name: 'Quỷ Thần Tốc Độ Sol',    desc: 'Bộc phát năng lượng mặt trời, thách thức em đạt tốc độ gõ kỷ lục mà vẫn giữ vững độ chính xác.',
+      { emoji: '👹', name: 'Sol-Kahn · Đồng nắng',    desc: 'Sư tử Sol-Kahn đợi em ở đồng nắng. Kết hợp tốc độ và độ chính xác.',
         waves: 17, perWave: CAMPAIGN_PER_WAVE, gap: 1550, speed: 5.4, level: 3, armor: 4 },
-      { emoji: '🐉', name: 'Thần Long Thái Dương',   desc: 'Thần long vũ trụ uy nghi. Mỗi lớp giáp rune là một thử thách gõ câu trường kỳ trọn vẹn.',
+      { emoji: '🐉', name: 'Lumiel · Làng nấm',   desc: 'Pháp sư Lumiel mở cửa làng nấm. Em đã sẵn sàng cho những từ khó hơn.',
         waves: 19, perWave: CAMPAIGN_PER_WAVE, gap: 1400, speed: 5.8, level: 3, armor: 5 },
-      { emoji: '🌌', name: 'Chúa Tể Bàn Phím Vũ Trụ', desc: 'Kẻ trị vì vương quốc tư duy ngôn ngữ. Hạ gục hắn để khẳng định ngôi vị Huyền Thoại Bàn Phím!',
+      { emoji: '🌌', name: 'Leviator · Đảo ngọc', desc: 'Bạch tuộc Leviator giữ viên ngọc cuối hành trình. Cùng hoàn thành thử thách nhé.',
         waves: 21, perWave: CAMPAIGN_PER_WAVE, gap: 1300, speed: 6.3, level: 3, armor: 5 }
     ]
   };

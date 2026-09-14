@@ -58,3 +58,20 @@ Verified issues and changes:
 Validation: `npm run verify` passed, including unit/static checks, production browser gameplay tests, and experience checks. The layout survey passed 76 screen/viewport combinations without horizontal overflow or runtime errors. Default setup screens fit the 1366×768 laptop viewport. Longer content on phones and expanded instructions intentionally scroll vertically; this is not a claim that every game fits without scrolling.
 
 Reproduce the visual survey with `LAYOUT_PHASE=after node scripts/audit-layouts.mjs` (PowerShell: `$env:LAYOUT_PHASE='after'; node scripts/audit-layouts.mjs`). Screenshots and geometry reports are saved under `artifacts/layouts/after/`; release output is in `artifacts/layout-release-check.log`. Browser emulation does not replace physical-device testing.
+
+
+## Gõ Chữ Vui — Khu rừng phép chữ (14/09/2026)
+
+Thiết kế lại riêng toàn bộ màn chuẩn bị, gameplay, tạm dừng và kết quả:
+
+- Máy tính: khung hành trình và thỏ pháp sư Mây bên trái, ngôn ngữ/nhịp độ/nút chơi bên phải. Điện thoại ưu tiên phần chuẩn bị và nút bắt đầu; hành trình nằm ngay phía dưới.
+- Bản đồ có 10 nút chặng, trạng thái chọn/khóa/hoàn thành và phần xem trước. Tên, mô tả chặng khớp bộ nhân vật fantasy. Giữ nguyên số đợt, phạm vi từ mỗi đợt, luật mở khóa và hồ sơ đã lưu.
+- Sân chơi dùng màu xanh rừng dịu, nhân vật SVG và nhãn từ rõ. HUD chính: đợt, tim, điểm, chuỗi. WPM, chính xác và thời gian nằm ở hàng phụ.
+- Vùng gõ hiển thị từ đang khóa và nghĩa ngay cạnh input; gõ đủ sẽ tự tung phép. Có nút xóa để đổi mục tiêu, giữ nguyên hỗ trợ IME tiếng Việt và lựa chọn không dấu.
+- Tạm dừng có bảng cố định, nút tiếp tục và về chọn chặng. Resize của visualViewport cập nhật kích thước sân khi bàn phím di động xuất hiện.
+- Kết quả có thống kê thật, lời khuyên theo độ chính xác và tối đa 6 từ để ôn. Sổ từ trong lượt giới hạn 60 mục, ưu tiên từ sai/bỏ lỡ, không thêm dữ liệu riêng tư vào lưu trữ.
+- Sửa đồng hồ/độ chính xác HUD không cập nhật, dữ liệu sao chép kết quả bị thiếu, thông báo clipboard thất bại không trung thực và lời thoại bị ghi lại mỗi khung hình. Bỏ forced-layout để nháy số combo; chuyển động phép tôn trọng cài đặt tắt hiệu ứng.
+
+Source owners: `src/views/screens/typing.html`, `src/styles/typing-world.css`, `src/scripts/games/typing/index.js`, `src/scripts/games/typing/content.js`. Styles riêng được load sau theme chung và đưa vào offline cache; không thêm thư viện hoặc ảnh tải ngoài.
+
+Kiểm thử riêng: `npm run test:typing`. Suite kiểm tra setup/play/pause ở laptop, tablet, điện thoại 320/390px và viewport thấp 390×500; IME, nhập sai, sửa/xóa mục tiêu, timer, accuracy, review, clipboard thành công/thất bại, thắng chiến dịch và chuyển chặng. Ảnh nằm trong `artifacts/typing-forest/`. Viewport thấp là mô phỏng; vẫn cần kiểm tra bàn phím hệ thống trên thiết bị thật.
