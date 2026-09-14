@@ -1,5 +1,5 @@
 /* Gõ Chữ Vui — isolated forest palette, spell dock and journey layout. */
-#typingGame{--spell-ink:#234d46;--spell-muted:#54736c;--spell-leaf:#237c61;--spell-mint:#e6f4ed;--spell-paper:#fffdf4;--spell-line:#aec9bc;--spell-gold:#efc469}
+#typingGame{--spell-ink:#193047;--spell-muted:#43566b;--spell-leaf:#185b45;--spell-mint:#e6f4ed;--spell-paper:#fffdf4;--spell-line:#667d8c;--spell-gold:#efc469}
 #typingGame .typing-world{background:var(--spell-paper);color:var(--spell-ink);padding:20px 24px;border:1px solid var(--spell-line)}
 #typingGame .game-topbar{margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--spell-line)}
 #typingGame .game-topbar h1{font-size:28px;color:var(--spell-ink)}
@@ -27,7 +27,7 @@
 #typingGame .typing-map .mapnode .em{display:none}
 #typingGame .typing-map .mapnode .tierlbl{display:none}
 #typingGame .typing-map .mapnode.picked{background:var(--spell-leaf);color:white;border-color:var(--spell-leaf);outline:2px solid var(--spell-gold);outline-offset:2px}
-#typingGame .typing-map .mapnode.locked{opacity:1;background:#f0f1e9;color:#6d7a72;border-style:dashed}
+#typingGame .typing-map .mapnode.locked{opacity:1;background:#e9edf1;color:#465566;border-style:dashed}
 #typingGame .spell-stage-preview{display:flex;align-items:center;gap:16px;margin-top:18px;min-height:95px;padding:12px 0;border-bottom:1px solid var(--spell-line)}
 #typingGame #typingSelectedArt{width:76px;flex:none}#typingGame #typingSelectedArt svg{width:76px;height:76px;overflow:visible}
 #typingGame .spell-stage-preview h3{margin:3px 0 6px;font-size:19px}
@@ -166,3 +166,27 @@
  #typingGame .result-stats{margin:18px 0}
  #typingGame .spell-reflection{padding:14px 0;margin-bottom:14px}
 }
+
+/* Explicit foreground/background pairs for every typing interaction state. */
+#typingGame .btn:not(.green),#typingGame .icon-btn{background:#fff;color:var(--spell-ink);border-color:#667d8c}
+#typingGame .btn.green{background:#185b45;color:#fff;border-color:#185b45}
+#typingGame .btn.green:hover:not(:disabled){background:#104633;color:#fff}
+#typingGame .btn:not(.green):hover:not(:disabled),#typingGame .icon-btn:hover:not(:disabled){background:#e5edf5;color:#193047;border-color:#435d78}
+#typingGame .btn:disabled,#typingGame .icon-btn:disabled{opacity:1;background:#e9edf1;color:#465566;border-color:#7b8997;cursor:not-allowed}
+#typingGame .typing-map .mapnode.picked{background:#234f78;color:#fff;border-color:#234f78;outline-color:#9c6517}
+#typingGame .typing-map .mapnode.picked>span,#typingGame .typing-map .mapnode.picked>small{color:inherit}
+#typingGame .typing-map .mapnode.locked>span,#typingGame .typing-map .mapnode.locked>small{color:#465566}
+#typingGame .option-card b{color:#193047}
+#typingGame .option-card input:checked+span{background:#e3f1e8;border-color:#185b45}
+#typingGame .typing-monster .monster-name{color:#193047;background:#fffdf4;border:1px solid #667d8c;border-radius:6px;padding:3px 7px;text-shadow:none;white-space:normal}
+#typingGame .typing-monster .monster-word{background:#fff;color:#193047;border-color:#536e83}
+#typingGame .typing-monster .monster-word .pending{color:#193047}
+#typingGame .typing-monster .monster-word .typed{color:#17603e;background:#e1f3e8}
+#typingGame .typing-monster .monster-word .current{color:#382700;background:#ffda72}
+#typingGame .typing-monster .monster-word .wrong-char{color:#8b1531;background:#ffe2e8}
+#typingGame .typing-monster.wrong .monster-word,#typingGame .typing-monster.near-gate .monster-word{border-color:#9d2442;background:#fff4f6;color:#193047}
+#typingGame .typing-input-wrap button{color:#193047;background:#e5edf5;border-color:#667d8c}
+#typingGame .typing-input-wrap input::placeholder{color:#526174;opacity:1}
+#typingGame .typing-input-wrap input:disabled{opacity:1;background:#e9edf1;color:#465566}
+#typingGame .spell-metrics,#typingGame .typing-tip,#typingGame #typingTargetMeaning{color:#43566b}
+#typingGame .spell-lives{color:#95243f}

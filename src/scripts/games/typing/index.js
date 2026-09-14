@@ -1724,7 +1724,7 @@
     chars(monster.item.text).forEach((character, index) => {
       const span = document.createElement('span');
       span.textContent = character;
-      if (index < typed.length) span.style.color = charMatches(typed[index], character) ? '#237c61' : '#b33b50';
+      if (index < typed.length) span.style.color = charMatches(typed[index], character) ? '#17603e' : '#8b1531';
       word.appendChild(span);
     });
     meaning.textContent = monster.item.meaning || monster.item.topic || '';

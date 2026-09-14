@@ -988,3 +988,7 @@ body[data-effects=off] .flashOverlay,body[data-effects=low] .flashOverlay{displa
  .setup-options{padding:16px}
  .setup-options .nim-config{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 }
+
+/* Secondary record text remains readable on light setup panels. */
+.nim-records small,.hanoi-records small{opacity:1;color:#43536a}
+.learning-screen .icon-btn:disabled{opacity:1;background:#e9edf1;color:#465566;border-color:#7b8997}
