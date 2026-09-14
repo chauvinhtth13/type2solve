@@ -125,6 +125,13 @@ try {
   async function capture(name){await sleep(150);const shot=await send('Page.captureScreenshot',{format:'png'});await writeFile(join(folder,name+'.png'),Buffer.from(shot.data,'base64'));}
   async function fits(name){const m=await evaluate(`(()=>{const c=document.querySelector('#typingGame>.card'),r=c.getBoundingClientRect();return [...c.querySelectorAll('button,input,select')].filter(e=>{const b=e.getBoundingClientRect();return b.width&&b.height&&!e.closest('[hidden]')&&(b.left<r.left-1||b.right>r.right+1)}).map(e=>e.id||e.textContent)})()`);assert(!m.length,name+' controls fit: '+JSON.stringify(m));}
   await evaluate(`GameStorage.updateSettings({effects:'off'});openTypingGame()`);
+  for(const scheme of ['light','dark']){
+    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:scheme}]});
+    const pairs=await evaluate(`['.game-topbar','.spell-intro','.spell-map-heading','.spell-stage-preview'].map(selector=>{const e=document.querySelector('#typingGame '+selector),c=getComputedStyle(e);return {selector,bg:c.backgroundColor,fg:c.color}})`);
+    assert(pairs.every(p=>['rgb(255, 253, 244)','rgb(230, 244, 237)'].includes(p.bg)&&p.fg==='rgb(25, 48, 71)'), 'Named reading surfaces have explicit light backgrounds in '+scheme+' mode');
+    await capture('reading-surfaces-'+scheme);
+  }
+
   for(const [width,height] of [[1366,768],[768,1024],[390,844],[320,740],[390,500]]){
     await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:width<600});
     await evaluate(`openTypingGame();document.querySelector('#typingGame>.card').scrollTop=0`);await fits('Setup '+width);await capture('setup-'+width+'-'+height);

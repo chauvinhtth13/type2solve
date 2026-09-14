@@ -190,3 +190,21 @@
 #typingGame .typing-input-wrap input:disabled{opacity:1;background:#e9edf1;color:#465566}
 #typingGame .spell-metrics,#typingGame .typing-tip,#typingGame #typingTargetMeaning{color:#43566b}
 #typingGame .spell-lives{color:#95243f}
+
+/* Keep the entire reading surface explicit, including sections that were transparent. */
+#typingGame{color-scheme:only light}
+#typingGame .typing-world{
+ --spell-paper:#fffdf4;--spell-ink:#193047;--spell-muted:#43566b;
+ background:#fffdf4;color:#193047;
+}
+#typingGame .game-topbar,#typingGame .spell-journey,#typingGame .spell-map-heading,
+#typingGame .spell-stage-preview,#typingGame .spell-runbar,#typingGame .spell-bottom,
+#typingGame .game-result,#typingGame .spell-reflection{background:#fffdf4;color:#193047}
+#typingGame .spell-scene,#typingGame .spell-intro,#typingGame .spell-pause{background:#e6f4ed;color:#193047}
+#typingGame .spell-settings,#typingGame .spell-dock{background:#fff;color:#193047}
+#typingGame .game-topbar h1,#typingGame .spell-intro h2,#typingGame .spell-map-heading h3,
+#typingGame #typingSelectedName,#typingGame .spell-settings h2,#typingGame .spell-pause h2,
+#typingGame #typingResultTitle,#typingGame .spell-reflection h3{color:#193047;text-shadow:none}
+#typingGame .game-topbar .eyebrow,#typingGame .spell-intro .eyebrow,#typingGame .spell-intro p,
+#typingGame #typingJourneyProgress,#typingGame #typingSelectedNumber,#typingGame #typingSelectedInfo,
+#typingGame .spell-pause p,#typingGame #typingResultText,#typingGame #typingResultAdvice{color:#43566b;opacity:1}
