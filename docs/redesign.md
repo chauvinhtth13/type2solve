@@ -83,3 +83,10 @@ Kiểm thử riêng: `npm run test:typing`. Suite kiểm tra setup/play/pause �
 - Sửa tên boss vàng nhạt còn sót từ theme cũ; nhãn boss có nền sáng riêng và chữ tối. Các ký tự đúng, đang gõ, chưa gõ và sai có cặp màu nền/chữ riêng; lỗi vẫn được gạch chân.
 - Bỏ giảm opacity cho nút tạm dừng bị khóa và nhãn kỷ lục Nim/Hanoi; trạng thái disabled vẫn được giữ bằng thuộc tính native.
 - `scripts/audit-contrast.mjs` kiểm tra màu computed trên tám màn đại diện và lưu `artifacts/contrast/report.json`. Đây là phép đo chữ trên các lớp nền màu, không phải chứng nhận WCAG đầy đủ: gradient, hình ảnh, emoji và mọi trạng thái động vẫn cần kiểm tra thị giác.
+
+
+## Forest diorama presentation — 2026-09-15
+
+Gõ Chữ Vui now uses a layered SVG landscape: distant hills, tree silhouettes, a mushroom cottage, winding trail, foreground plants and a magical gate. Five two-stage palettes provide garden, sunset, moon, frost and pearl variations. Existing cute SVG characters gain breathing, ear movements and a short wand-casting gesture; gameplay positions and word labels retain their existing geometry.
+
+Implementation follows the local frontend-design and fixing-motion-performance skills. `forest-scene.js` owns decorative construction and lifecycle, while typing-world.css owns the palettes and transform/opacity animation. No additional engine or frame loop is installed. Gameplay pause, leaving the game, hidden documents and effects preferences stop or reduce motion. Text surfaces remain opaque and independent of scenery colors. Browser checks cover responsive layouts, input composition, campaign completion, palette selection and animation shutdown. This is an upgrade to the typing game's presentation, not a renderer migration for all game modes.

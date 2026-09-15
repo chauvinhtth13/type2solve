@@ -367,6 +367,7 @@
   }
 
   function stopRuntime() {
+    global.ForestScene?.setRunning(false);
     sessionId += 1;
     if (state && state.raf) global.cancelAnimationFrame(state.raf);
     global.removeEventListener('resize', onFieldResize);
@@ -674,6 +675,8 @@
 
   function beginWave(index) {
     if (!state || state.status !== 'running') return;
+    global.ForestScene?.setStage(state.stageIndex);
+    global.ForestScene?.setRunning(true);
     state.waveIndex = index;
     state.spawned = 0;
     state.bossSpawned = false;
@@ -1417,6 +1420,7 @@
   function castSpell(monster, points) {
     const field = byId('typingField');
     if (!field || !monster.element || !state) return;
+    global.ForestScene?.cast();
     const token = state.token;
     const spell = document.createElement('span');
     spell.className = 'typing-spell';
@@ -1465,6 +1469,7 @@
 
   function scheduleEnd(won, delay) {
     if (!state || state.status !== 'running') return;
+    global.ForestScene?.setRunning(false);
     state.status = 'ending';
     if (state.raf) global.cancelAnimationFrame(state.raf);
     const token = state.token;
@@ -1673,6 +1678,7 @@
     const pause = byId('typingPauseBtn');
     const input = byId('typingInput');
     if (!state.paused) {
+      global.ForestScene?.setRunning(false);
       state.paused = true;
       state.status = 'paused';
       if (state.raf) global.cancelAnimationFrame(state.raf);
@@ -1688,6 +1694,7 @@
       return;
     }
 
+    global.ForestScene?.setRunning(true);
     state.paused = false;
     byId('typingPausePanel').hidden = true;
     state.status = 'running';

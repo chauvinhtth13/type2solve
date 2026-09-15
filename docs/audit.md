@@ -219,3 +219,10 @@ Lỗi xác minh và sửa:
 - Cố định color-scheme sáng và cặp màu option của select. Tăng phiên bản service-worker nguồn để cập nhật cache stylesheet.
 
 Bằng chứng: `artifacts/contrast-active.log`, `artifacts/contrast-hover-mobile.log`, ảnh và JSON trong `artifacts/contrast/`. `npm run verify` đạt; build cuối được tạo lại sau điều chỉnh màu số Hanoi. Phép đo dùng computed style và compositing các lớp màu, không thay thế kiểm tra pixel với ảnh/gradient, emoji hoặc xác nhận WCAG toàn sản phẩm.
+
+
+## Other-game layout review — 2026-09-15
+
+Screenshots exposed a Nim regression missed by horizontal-only checks: the shared block-layout rule removed the flex context needed by a size-contained board, so its height collapsed and stones overlapped controls. The board now uses inline-size containment and natural content height, with wrapped rows on narrow screens. The layout audit also checks stone containment and separation from controls.
+
+The focused presentation layer `game-polish.css` adds compact mobile Sudoku controls, a shared SVG companion on setup, distinct Hanoi source/destination states, opaque combat HUD backgrounds, and per-game setup accents. Reading colors remain independent of arena themes. No gameplay rules or engine dependencies changed. Mobile setup/help screens may scroll vertically; scrolling is preferable to shrinking controls or clipping them.

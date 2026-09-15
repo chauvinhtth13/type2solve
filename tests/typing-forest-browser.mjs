@@ -139,6 +139,7 @@ try {
     await sleep(1700);await fits('Play '+width);await capture('play-'+width+'-'+height);
     const bounds=await evaluate(`(()=>{const f=document.getElementById('typingField').getBoundingClientRect();return [...document.querySelectorAll('.typing-monster .monster-word')].every(e=>{const r=e.getBoundingClientRect();return r.left>=f.left&&r.right<=f.right&&r.top>=f.top&&r.bottom<=f.bottom})})()`);assert(bounds,'Words fit arena '+width);
     await evaluate(`toggleTypingPause()`);await capture('pause-'+width+'-'+height);
+    assert(await evaluate(`document.getElementById('typingGame').dataset.forestMotion==='paused'&&(getComputedStyle(document.querySelector('.forest-motes')).animationPlayState==='paused'||getComputedStyle(document.querySelector('.forest-motes')).animationName==='none')`),'Scenery motion pauses '+width);
     const paused=await evaluate(`({time:document.getElementById('typingTimer').textContent,x:document.querySelector('.typing-monster')?.style.cssText})`);await sleep(350);
     assert(await evaluate(`!document.getElementById('typingPausePanel').hidden&&document.getElementById('typingTimer').textContent===${JSON.stringify(paused.time)}&&document.querySelector('.typing-monster')?.style.cssText===${JSON.stringify(paused.x)}`),'Pause freezes clock and monsters '+width);
     await evaluate(`leaveTypingGame()`);
@@ -174,6 +175,12 @@ try {
   assert(await evaluate(`!document.getElementById('typingPlay').hidden&&document.getElementById('typingStage').textContent==='2/10'`),'Next-stage action launches the correct stage');
   await evaluate(`leaveTypingGame()`);
 
+  await evaluate(`openTypingGame();startTypingRun();ForestScene.setStage(6)`);
+  assert(await evaluate(`document.getElementById('typingGame').dataset.biome==='frost'`),'Later stages select their scenery palette');
+  await evaluate(`const setting=document.querySelector('#typingGame [data-effects-setting]');setting.value='off';setting.dispatchEvent(new Event('change'))`);
+  assert(await evaluate(`getComputedStyle(document.querySelector('.forest-motes')).animationName==='none'`),'Effects off disables ambient animation');
+  await evaluate(`leaveTypingGame()`);
+  assert(await evaluate(`document.getElementById('typingGame').dataset.forestMotion==='paused'`),'Leaving gameplay stops decorative motion');
   assert(runtimeErrors.length===0,runtimeErrors.join(' | ')||'No typing runtime errors');
 } finally {
   try { socket?.close(); } catch {}

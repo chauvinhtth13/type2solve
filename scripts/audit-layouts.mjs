@@ -142,8 +142,13 @@ try {
     for(const [name,action] of screens) {
       await evaluate(`goHome();${action}`); await sleep(350);
       await evaluate(`document.querySelectorAll('.screen.active,.screen.active *').forEach(e=>{if(e.scrollHeight>e.clientHeight)e.scrollTop=0});window.scrollTo(0,0)`);
-      const metrics=await evaluate(`(()=>{const card=document.querySelector('.screen.active>.card');const cr=card.getBoundingClientRect(); const overflow=[...card.querySelectorAll('*')].filter(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.position!=='absolute'&&s.position!=='fixed'&&(r.right>cr.right+2||r.left<cr.left-2)}).map(e=>e.id||e.className).slice(0,12);return {scroll:card.scrollHeight-card.clientHeight,overflow,docOverflow:document.documentElement.scrollWidth>innerWidth+1};})()`);
+      const metrics=await evaluate(`(()=>{const card=document.querySelector('.screen.active>.card');const cr=card.getBoundingClientRect(); const overflow=[...card.querySelectorAll('*')].filter(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return e instanceof HTMLElement&&r.width>0&&r.height>0&&s.position!=='absolute'&&s.position!=='fixed'&&(r.right>cr.right+2||r.left<cr.left-2)}).map(e=>e.id||e.className).slice(0,12);return {scroll:card.scrollHeight-card.clientHeight,overflow,docOverflow:document.documentElement.scrollWidth>innerWidth+1};})()`);
       report.push({name,width,height,...metrics});
+      if(name==='nim-play' && process.env.LAYOUT_PHASE==='after') {
+        if(width===1366) assert(metrics.scroll===0,'Six-pile Nim board and actions fit laptop without scrolling');
+        assert(await evaluate(`(()=>{const board=document.getElementById('nimBoard').getBoundingClientRect(),controls=document.querySelector('.nim-controls').getBoundingClientRect();return controls.top>=board.bottom&&[...document.querySelectorAll('.nim-stone')].every(el=>{const r=el.getBoundingClientRect();return r.top>=board.top&&r.bottom<=board.bottom&&r.left>=board.left&&r.right<=board.right})})()`),`Nim stones stay inside board and above controls at ${width}px`);
+      }
+
       if(process.env.LAYOUT_PHASE==='after')assert(!metrics.docOverflow&&metrics.overflow.length===0,`${name} fits horizontally at ${width}px`);
       if(width===1366||width===390){const shot=await send('Page.captureScreenshot',{format:'png'});await writeFile(join(folder,`${name}-${width}.png`),Buffer.from(shot.data,'base64'));}
       console.log(name,width,JSON.stringify(metrics));

@@ -208,3 +208,36 @@
 #typingGame .game-topbar .eyebrow,#typingGame .spell-intro .eyebrow,#typingGame .spell-intro p,
 #typingGame #typingJourneyProgress,#typingGame #typingSelectedNumber,#typingGame #typingSelectedInfo,
 #typingGame .spell-pause p,#typingGame #typingResultText,#typingGame #typingResultAdvice{color:#43566b;opacity:1}
+
+/* Toy-diorama scenery: decorative palettes never supply text colors. */
+#typingGame{--forest-sky:#d6eee9;--forest-cloud:#fffdf0;--forest-far:#b5d9c7;--forest-ground:#d6e8c7;--forest-path:#f3e5bd;--forest-canopy:#6fa78b;--forest-light:#9fcca3;--forest-accent:#df9486}
+#typingGame[data-biome="sunset"]{--forest-sky:#f7decf;--forest-far:#d6b9ba;--forest-ground:#eadbbf;--forest-canopy:#b58896;--forest-light:#e6b4ad;--forest-accent:#d58657}
+#typingGame[data-biome="moon"]{--forest-sky:#d9dcef;--forest-far:#b1b6d8;--forest-ground:#d7d7e5;--forest-canopy:#878eaf;--forest-light:#b7c1e4;--forest-accent:#a58ac6}
+#typingGame[data-biome="frost"]{--forest-sky:#daedf4;--forest-far:#b3d0de;--forest-ground:#e8f1ec;--forest-canopy:#79aeb6;--forest-light:#cae9e7;--forest-accent:#97a7d9;--forest-path:#d0e3ed}
+#typingGame[data-biome="pearl"]{--forest-sky:#d7eeec;--forest-far:#abcfd0;--forest-ground:#dbe8d6;--forest-canopy:#6aaba9;--forest-light:#a8d5c2;--forest-accent:#d7a3b4}
+#typingGame .forest-landscape{display:block;width:100%;height:100%}
+#typingGame .typing-gate{background:transparent;border:0;overflow:visible}
+#typingGame .typing-gate .forest-portal{position:absolute;width:100%;height:160px;bottom:0;left:0}
+#typingGame .typing-gate>span{position:relative;z-index:1}
+#typingGame .lane-lines i{border-color:#597b7030}
+#typingGame .monster-emoji svg{overflow:visible}
+#typingGame .beast-root{transform-box:fill-box;transform-origin:center bottom;animation:forest-breathe 2.6s ease-in-out infinite}
+#typingGame .typing-monster:nth-child(2n) .beast-root{animation-delay:-1.3s}
+#typingGame .typing-monster:nth-child(3n) .beast-root{animation-duration:3.2s}
+#typingGame .hero-ears{transform-box:fill-box;transform-origin:center bottom;animation:forest-ears 4.8s ease-in-out infinite}
+#typingGame .hero-wand{transform-box:fill-box;transform-origin:center bottom}
+#typingGame .forest-motes{animation:forest-motes 5s ease-in-out infinite}
+#typingGame .typing-monster.locked .art-sparkles{animation:forest-motes 1s ease-in-out infinite}
+#typingGame .typing-spell{color:#fff4b0;text-shadow:0 2px 0 #526f72}
+#typingGame .typing-impact{color:#193047;background:#fff5d7;border:1px solid #9a7950;border-radius:12px;padding:4px 9px;font-size:16px;text-shadow:none}
+#typingGame[data-forest-motion="paused"] :is(.beast-root,.hero-ears,.forest-motes,.art-sparkles){animation-play-state:paused}
+body[data-effects="low"] #typingGame :is(.forest-motes,.hero-ears){animation:none}
+body[data-effects="off"] #typingGame :is(.beast-root,.hero-ears,.forest-motes,.art-sparkles){animation:none}
+@media(prefers-reduced-motion:reduce){#typingGame :is(.beast-root,.hero-ears,.forest-motes,.art-sparkles){animation:none!important}}
+@keyframes forest-breathe{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-2px) scale(1.025,.98)}}
+@keyframes forest-ears{0%,78%,100%{transform:rotate(0)}84%{transform:rotate(-6deg)}91%{transform:rotate(4deg)}}
+@keyframes forest-motes{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-7px);opacity:1}}
+@media(max-width:640px){#typingGame .typing-gate .forest-portal{height:110px}#typingGame .typing-impact{font-size:13px}}
+
+#typingGame .typing-gate>span{position:absolute;bottom:24px;left:0;width:100%}
+@media(max-width:640px){#typingGame .forest-landscape{width:700px;max-width:none;position:absolute;left:50%;transform:translateX(-50%)}#typingGame .typing-gate>span{width:52px;left:-5px;bottom:30px}}

@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v21-explicit-typing-surfaces';
+const CACHE_VERSION = 'v23-game-layout-polish';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -14,11 +14,13 @@ const CORE_ASSETS = [
   './styles/games.css',
   './styles/theme-playful.css',
   './styles/typing-world.css',
+  './styles/game-polish.css',
   './scripts/platform/storage.js',
   './scripts/engine/runtime.js',
   './scripts/app/background.js',
   './scripts/engine/audio.js',
   './scripts/engine/art.js',
+  './scripts/engine/forest-scene.js',
   './scripts/games/adventure/config.js',
   './scripts/games/adventure/session.js',
   './scripts/games/adventure/questions.js',
