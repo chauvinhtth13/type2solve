@@ -43,6 +43,7 @@ function startAdventure(){
      perks,
      coins:Number.isFinite(Number(stored.coins))?cleanCount(stored.coins,999999):70, inv,
      heroHp:0,correct:0,wrong:0,timeout:0,goldHit:0,streak:0,bestStreak:0,crit:false,locked:false};
+  G.questionTier=GameStorage.load().story.questionTier;
   G.heroHp=Number.isFinite(Number(stored.heroHp))&&Number(stored.heroHp)>0
     ?Math.min(heroMaxHp(),cleanCount(stored.heroHp,9999)):heroMaxHp();
   saveAdventureProgress();
@@ -66,7 +67,7 @@ function showIntro(){
   $('introDesc').innerHTML=`<p class="intro-objective">Trả lời đúng ${b.minQ} câu trở lên để vượt thử thách.</p>
     <p>${b.mechTxt}</p><details class="intro-details"><summary>Tìm hiểu về boss</summary>
     <p>${b.desc||''}</p><p>Máu: ${b.hp} · Sức đánh: ${b.atk} · Mỗi câu: ${b.time+(G.perks?.time||0)*3}s</p>
-    <p>Cấp độ: ${RANKS[b.tier]}</p></details>`;
+    <p>Cấp độ: ${RANKS[G.questionTier||b.tier]}</p></details>`;
   $('introCoins').textContent=G.coins||0;
   const bag=['potion','hint','freeze','shield','bomb'].reduce((s,k)=>s+(G.inv?.[k]||0),0);
   if(bag>0)$('introDesc').innerHTML+=`<br><span style="color:var(--green-ink)">🎒 Em đang mang <b>${bag} vật phẩm</b> — bấm nút vật phẩm ngay trên câu hỏi để dùng!</span>`;
@@ -80,7 +81,7 @@ function beginBattle(){
   paintBoss(b);
   $('bossName').textContent=b.name.split(' ').slice(0,2).join(' ');
   $('bossMech').textContent=
-    b.mech==='armor'?'🛡️ Giáp':b.mech==='heal'?'💚 Hồi máu':b.mech==='rage'?'😡 Cuồng nộ':b.mech==='drain'?'🩸 Hút máu':'⭐ Thường';
+    b.mech==='armor'?'🛡️ Giáp':b.mech==='heal'?'💚 Hồi máu':b.mech==='rage'?'😡 Cuồng nộ':b.mech==='drain'?'✨ Hồi năng lượng':'⭐ Thường';
   $('levelBadge').textContent='Boss '+(G.bossIndex+1)+'/'+BOSSES.length+' • '+'⭐'.repeat(b.tier);
   updateBars();updateAura();
   startAmbient(b.arena);setDioramaTheme(b.arena);
@@ -166,6 +167,7 @@ function prepArenaForMode(name,theme){
   updateBars();updateHUD();renderEnergy();
 }
 function renderModeBar(){
+  window.StoryWorld?.updateTrial();
   if(G.mode==='blitz'){
     const f=$('timerFill'),n=$('timerNum');
     const pct=G.timeLeftTotal/60*100;
@@ -303,6 +305,7 @@ function showScreen(id){
   const previous=document.querySelector('.screen.active');
   if(previous?.id!==id)clearCombatEffects();
   const screen=swapScreen(id);
+  window.StoryWorld?.enter(id);
   requestAnimationFrame(()=>{if(screen.classList.contains('active'))focusScreen(screen);});
 }
 

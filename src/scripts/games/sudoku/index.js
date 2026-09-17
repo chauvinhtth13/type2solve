@@ -390,6 +390,7 @@
 
   function updateHud() {
     if (!state) return;
+    global.StoryWorld?.constellation(state.values);
     const config = LEVELS[state.level];
     if (byId('sudokuLevel')) byId('sudokuLevel').textContent = `${config.icon} ${config.name}`;
     if (byId('sudokuClues')) byId('sudokuClues').textContent = state.clues;
@@ -548,6 +549,7 @@
     state.status = 'won';
     const elapsed = Math.max(1, elapsedSeconds());
     const isRecord = saveWin(elapsed);
+    global.StoryWorld?.constellation(state.values);
     const config = LEVELS[state.level];
     byId('sudokuResultIcon').textContent = state.level === 'ultimate' ? '👑' : '🏆';
     byId('sudokuResultTitle').textContent = state.level === 'ultimate' ? 'CHINH PHỤC TỐI THƯỢNG!' : 'HOÀN THÀNH SUDOKU!';

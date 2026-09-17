@@ -48,7 +48,7 @@ async function createHarness() {
 {
   const { api, events, storage } = await createHarness();
   const initial = api.load();
-  assert.equal(initial.version, 2);
+  assert.equal(initial.version, 3);
   assert.equal(initial.profile.stars, 0);
   assert.ok(storage.getItem(api.KEY));
 
@@ -65,7 +65,7 @@ async function createHarness() {
 
   storage.setItem(api.KEY, '{damaged json');
   assert.doesNotThrow(() => api.load());
-  assert.equal(api.load().version, 2);
+  assert.equal(api.load().version, 3);
 }
 
 {
@@ -83,7 +83,7 @@ console.log('✓ GameStorage: schema, migration, corruption fallback, cloning an
   const { api, storage } = await createHarness();
   storage.setItem(api.KEY, JSON.stringify({ version: 1, profile: { stars: 42 }, adventure: { cleared: 4, coins: 99, inv: { hint: 2 } }, settings: { sound: false }, records: { hanoi: { wins: 3 } } }));
   const state = api.load();
-  assert.equal(state.version, 2);
+  assert.equal(state.version, 3);
   assert.equal(state.profile.stars, 42);
   assert.equal(state.adventure.coins, 99);
   assert.equal(state.adventure.inv.hint, 2);
@@ -97,4 +97,24 @@ console.log('✓ GameStorage: schema, migration, corruption fallback, cloning an
   assert.equal(normalized.learning.skills.geo, undefined);
   assert.equal(normalized.learning.skills.bad_key, undefined);
   assert.equal(normalized.settings.effects, 'auto');
+}
+
+{
+ const {api,storage}=await createHarness();
+ storage.setItem(api.KEY,JSON.stringify({version:2,profile:{stars:19},adventure:{cleared:5},records:{typing:{bestScore:321}}}));
+ assert.equal(api.load().story.fragments,6);
+ assert.equal(api.load().profile.stars,19);
+ assert.equal(api.load().records.typing.bestScore,321);
+ api.save({story:{costume:'moon'}});
+ api.setAdventure({cleared:-1,bossIndex:0});
+ assert.equal(api.load().story.fragments,6,'campaign restart preserves memories');
+ assert.equal(api.load().story.costume,'moon');
+ api.setAdventure({cleared:6});api.setAdventure({cleared:6});
+ assert.equal(api.load().story.fragments,7,'replay cannot duplicate fragments');
+ assert.equal(api.load().profile.stars,19,'story never duplicates currency');
+ api.save({story:{fragments:'bad',costume:'sun',questionTier:999}});
+ assert.equal(api.load().story.costume,'cloud');
+ assert.equal(api.load().story.questionTier,5);
+ api.save({story:null});
+ assert.equal(api.load().story.fragments,7,'malformed story recovers');
 }

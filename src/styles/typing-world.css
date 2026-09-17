@@ -241,3 +241,10 @@ body[data-effects="off"] #typingGame :is(.beast-root,.hero-ears,.forest-motes,.a
 
 #typingGame .typing-gate>span{position:absolute;bottom:24px;left:0;width:100%}
 @media(max-width:640px){#typingGame .forest-landscape{width:700px;max-width:none;position:absolute;left:50%;transform:translateX(-50%)}#typingGame .typing-gate>span{width:52px;left:-5px;bottom:30px}}
+
+/* Leave room for Vietnamese accent controls and a wrapped dictionary status on laptops. */
+@media(min-width:901px) and (max-height:820px){
+ #typingGame .spell-settings{padding:16px}
+ #typingGame .spell-settings h2{margin-bottom:12px}
+ #typingGame .spell-help{margin:10px 0}
+}

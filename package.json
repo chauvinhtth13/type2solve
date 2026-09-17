@@ -14,7 +14,8 @@
     "test:dist": "node tests/dist.mjs",
     "verify": "npm test && npm run build && npm run test:dist && npm run test:experience",
     "test:experience": "node tests/experience-browser.mjs",
-    "test:typing": "node tests/typing-forest-browser.mjs"
+    "test:typing": "node tests/typing-forest-browser.mjs",
+    "test:story": "node tests/story-world-browser.mjs"
   },
   "keywords": [
     "education",

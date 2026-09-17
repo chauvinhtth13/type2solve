@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="styles/theme-playful.css">
   <link rel="stylesheet" href="styles/typing-world.css">
   <link rel="stylesheet" href="styles/game-polish.css">
+  <link rel="stylesheet" href="styles/story-world.css">
 
   <!-- Classic scripts are intentionally ordered as the browser dependency graph. -->
   <script defer src="scripts/platform/storage.js"></script>
@@ -37,6 +38,7 @@
   <script defer src="scripts/games/hanoi/rules.js"></script>
   <script defer src="scripts/games/hanoi/index.js"></script>
   <script defer src="scripts/engine/experience.js"></script>
+  <script defer src="scripts/engine/story-world.js"></script>
   <script defer src="scripts/app/bootstrap.js"></script>
 </head>
 <body>
@@ -45,6 +47,9 @@
 <!-- @include views/shared/art.html -->
 <main class="wrap">
   <!-- @include views/screens/home.html -->
+  <div class="screen learning-screen" id="story"><div class="card game-card story-card"><div class="game-topbar"><button type="button" class="icon-btn home-btn" onclick="goHome()" aria-label="Về trang chủ">🏠 Trang chủ</button><h1>Cuốn sách của Mây</h1></div>
+  <!-- @include views/shared/story-home.html -->
+  </div></div>
   <!-- @include views/screens/adventure.html -->
   <!-- @include views/screens/typing.html -->
   <!-- @include views/screens/sudoku.html -->

@@ -177,7 +177,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'nim-stone';
-        btn.textContent = '🪨';
+        btn.innerHTML = '<svg viewBox="0 0 32 36" aria-hidden="true"><path d="m16 2 11 10-3 18-8 4-8-4-3-18Z" fill="#c5addd" stroke="#694889" stroke-width="2"/><path d="m16 2-4 12 4 20 5-20Zm-11 10 7 2m9 0 6-2" fill="#efe3fc" stroke="#8d6bab" stroke-width="1.5"/></svg>';
         const willTake = count - i;
         // Đánh dấu trước những viên SẼ bị lấy nếu xác nhận — thấy hậu quả
         // trước khi quyết, không phải bấm rồi mới biết.

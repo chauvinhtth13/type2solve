@@ -117,3 +117,13 @@ không quyết định màn nào đang hoạt động.
 Schema lưu phiên bản 2 bổ sung `learning.skills` và `settings.effects`, giữ nguyên
 khóa lưu và tiến độ cũ. `LearningReview` chỉ giữ tối đa 100 câu gần đây trong bộ nhớ;
 ôn lại tối đa 5 câu khó không cộng sao hay sửa kỷ lục.
+
+
+## Thế giới Cây Sao
+Bản đồ và nhật ký nằm ở màn story, mở từ ô truyện trên trang chủ.
+engine/story-world.js sở hữu nội dung mười chương và phong cảnh SVG;
+game vẫn sở hữu luật và kết quả. showScreen gọi presentation đồng bộ.
+Schema 3 giữ khóa lưu cũ, lấy số mảnh sao từ tiến độ Phiêu lưu đã hoàn thành,
+giữ kỷ niệm khi bắt đầu lại hành trình và kiểm tra điều kiện mở áo choàng.
+Cấp câu hỏi tùy chọn được chụp lúc bắt đầu lượt Phiêu lưu.
+Không thêm vòng RAF hoặc tài nguyên mạng. Xem [story-world.md](story-world.md).

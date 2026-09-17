@@ -134,7 +134,7 @@ try {
   assert(home.modes === 5, 'Khu học tập có Gõ Chữ, Sudoku, Đấu Đối Kháng, Nim và Tháp Hà Nội');
   assert(home.rules, 'Tầng LUẬT thuần của cả ba game được phơi ra và đã đóng băng');
   assert(home.api, 'API các game đã được nạp');
-  assert(home.schema === 2, 'Hồ sơ localStorage có schema hợp lệ');
+  assert(home.schema === 3, 'Hồ sơ localStorage có schema hợp lệ');
   const normalizers = await evaluate(`({
     decimal: isCorrectAnswer('0,5','0.5'),
     words: TYPING_CONTENT.en.length>=45&&TYPING_CONTENT.vi.length>=45
@@ -966,12 +966,18 @@ try {
     confirmDuelAlloc();
   })()`);
   await sleep(300);
+  // Charge through real controls: random attack damage can end a match before rage fills.
+  // Poll the next quiz phase instead of assuming a fixed animation duration.
   let noDay = false;
-  for (let i = 0; i < 30 && !noDay; i++) {
-    const daDung = await evaluate(traLoiDung);
-    await sleep(240);
-    if (daDung) { await evaluate(bamHanhDong('attack')); await sleep(1700); }
-    else await sleep(900);
+  for (let i = 0; i < 12 && !noDay; i++) {
+    assert(await evaluate(traLoiDung), 'Ultimate setup finds the correct answer');
+    assert(await evaluate(bamHanhDong('charge')), 'Ultimate setup charges through the action button');
+    const deadline = Date.now() + 6000;
+    while (Date.now() < deadline) {
+      const ready = await evaluate(`(()=>{const s=DuelGame.snapshot();return s.status==='running' && s.phase==='quiz';})()`);
+      if (ready) break;
+      await sleep(100);
+    }
     noDay = await evaluate(`(()=>{const s=DuelGame.snapshot();
       return s.status==='running' && s.phase==='quiz' && s.players[s.turn].rage>=DuelRules.RAGE_MAX;})()`);
   }

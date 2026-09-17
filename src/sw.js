@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v23-game-layout-polish';
+const CACHE_VERSION = 'v24-star-tree';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -15,6 +15,8 @@ const CORE_ASSETS = [
   './styles/theme-playful.css',
   './styles/typing-world.css',
   './styles/game-polish.css',
+  './styles/story-world.css',
+  './scripts/engine/story-world.js',
   './scripts/platform/storage.js',
   './scripts/engine/runtime.js',
   './scripts/app/background.js',

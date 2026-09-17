@@ -22,7 +22,7 @@
   const gate = field.querySelector('.typing-gate');
   gate.insertAdjacentHTML('afterbegin', '<svg class="forest-portal" viewBox="0 0 100 160" aria-hidden="true"><ellipse cx="50" cy="143" rx="43" ry="10" fill="#567b73" opacity=".3"/><path d="M12 140V62C12 0 88 0 88 62V140" fill="#cff5dc" stroke="#598b83" stroke-width="12"/><path d="M21 133V62C21 13 79 13 79 62V133" fill="none" stroke="#fff3ad" stroke-width="4"/><g fill="#fffbe0"><path d="M50 27l4 9 9 4-9 4-4 9-4-9-9-4 9-4Z"/><circle cx="27" cy="92" r="3"/><circle cx="74" cy="111" r="3"/></g></svg>');
   const biomes = ['garden', 'sunset', 'moon', 'frost', 'pearl'];
-  function setStage(index) { screen.dataset.biome = biomes[Math.min(4, Math.max(0, Math.floor((index || 0) / 2)))]; }
+  function setStage(index) { root.StoryWorld?.typingStage(index); screen.dataset.biome = biomes[Math.min(4, Math.max(0, Math.floor((index || 0) / 2)))]; }
   function setRunning(value) {
     screen.dataset.forestMotion = value && !document.hidden ? 'running' : 'paused';
     if (!value) gate.querySelector('.hero-wand')?.getAnimations().forEach(a => a.cancel());

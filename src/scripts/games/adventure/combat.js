@@ -104,7 +104,7 @@ function newQuestion(){
   G.locked=false;
   const b=BOSSES[G.bossIndex];
   const tier=G.mode==='blitz'?(G.correct<5?1:G.correct<11?2:G.correct<18?3:4)
-            :G.mode==='surv'?G.tier:b.tier;
+            :G.mode==='surv'?G.tier:(G.questionTier||b.tier);
   currentQ=makeFreshQuestion(tier);
   isGolden=Math.random()<Math.min(.45,0.15*(1+(G.perks?.gold||0)));
   const tb=$('typeBadge');
@@ -589,9 +589,20 @@ const ELEMENTAL_SPELLS={
   mystic:{className:'spell-mystic',glow:'#2ed573',html:'<div class="vfx-orb vfx-orb-mystic"><div class="vfx-rune-glyph"></div></div>'}
 };
 
+const GUARDIAN_GLYPHS={
+clock:'<circle cx="20" cy="20" r="14"/><path d="M20 10v11l8 5"/>',
+page:'<path d="M7 9q7-4 13 0 6-4 13 0v24q-7-4-13 0-6-4-13 0Z"/><path d="M20 9v23"/>',
+heart:'<path d="M20 33 6 19C-2 3 16 1 20 12 24 1 42 3 34 19Z"/>',
+moon:'<path d="M25 5A16 16 0 1 0 35 28 16 16 0 0 1 25 5Z"/>',
+sun:'<circle cx="20" cy="20" r="9"/><path d="M20 1v6m0 26v6M1 20h6m26 0h6M6 6l4 4m20 20 4 4M6 34l4-4m20-20 4-4"/>',
+leaf:'<path d="M7 33Q0 5 34 5q3 31-27 28Z"/><path d="M7 33 29 11"/>',
+pearl:'<circle cx="20" cy="20" r="14"/><circle cx="15" cy="14" r="4" fill="white" stroke="none"/>'
+};
+Object.entries(GUARDIAN_GLYPHS).forEach(([kind,path])=>{
+ELEMENTAL_SPELLS[kind]={className:'spell-guardian spell-'+kind,html:'<svg viewBox="0 0 40 40" class="guardian-spell" aria-hidden="true">'+path+'</svg>'};
+});
 function getBossSpellType(bossIndex){
-  const map=['arcane','lightning','mystic','fire','fire','shadow','ice','fire','shadow','ice'];
-  return map[bossIndex]||'arcane';
+  return ['clock','lightning','page','fire','heart','moon','ice','sun','leaf','pearl'][bossIndex]||'arcane';
 }
 
 function arenaRect(){return $('arena').getBoundingClientRect();}

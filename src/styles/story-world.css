@@ -1,0 +1,91 @@
+/* SVG scenery never owns gameplay or obscures reading surfaces. */
+.story-home{grid-column:1/-1;color:#274a45;border:1px solid #bfcec0;background:#f6f8ef;border-radius:24px;overflow:hidden;text-align:left;margin:8px 0 22px}
+.story-heading{padding:24px 28px 12px;max-width:760px}
+.story-heading h2{font-family:Georgia,'Times New Roman',serif;font-size:clamp(26px,3.4vw,42px);line-height:1.15;margin:8px 0 12px;color:#274a45;letter-spacing:-.03em}
+.story-heading p,.story-invitation p{font-size:15px;line-height:1.6;color:#526c64;margin:8px 0}
+.story-overview{display:grid;grid-template-columns:1.4fr 1fr;align-items:center;background:#e3eee7}
+.star-tree svg{display:block;width:100%;max-height:245px}
+.story-invitation{padding:16px 24px 20px}.story-invitation>svg{width:74px;height:74px;display:block}.story-invitation strong{display:block;font-size:18px}.story-invitation .btn{margin-top:6px}
+.story-book{padding:0 24px;border-top:1px solid #cad8c9}.story-book>summary{padding:17px 0;font-weight:800;cursor:pointer;line-height:1.5}.story-book>summary>span{font-size:12px;font-weight:500;color:#526c64;margin-left:10px}
+.story-chapters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 0 20px}
+.story-chapter{border:1px solid #c7d4c9;border-radius:14px;overflow:hidden;background:#fffdf7;align-self:start}.story-chapter[data-restored=true]{border-color:#7eaa89}
+.story-chapter summary{display:flex;gap:10px;align-items:center;padding:10px;cursor:pointer;font-weight:700;list-style:none}.story-chapter summary:after{content:'+';margin-left:auto}.story-chapter[open] summary:after{content:'−'}
+.story-chapter summary svg{width:48px;height:48px;flex:0 0 48px}.story-chapter small{display:block;font-weight:400;font-size:12px;color:#526c64;margin-top:4px}
+.story-chapter p,.story-book>p{font-size:14px;line-height:1.6;padding:0 14px}.story-chapter .world-landscape{height:130px}
+.world-landscape{display:block;width:100%;height:100%}
+.story-costumes{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}.story-costume{background:#fffdf7;border:1px solid #a8b9ab;border-radius:12px;color:#274a45;padding:10px 14px;min-height:44px;font:inherit;cursor:pointer}.story-costume[aria-pressed=true]{background:#286349;color:white;border-color:#286349}.story-costume:disabled{color:#637367;background:#e8ede5;cursor:default}
+.story-level{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:16px 0;font-weight:700}.story-level select{max-width:100%;padding:10px;color:#274a45;background:#fffdf7;border:1px solid #a8b9ab;border-radius:10px}
+[data-side-quests]{padding:0 0 16px}[data-side-quests] p{font-size:14px;line-height:1.6}.story-home :focus-visible{outline:3px solid #386eae;outline-offset:3px}
+.world-banner{display:flex;align-items:center;gap:16px;margin:8px 0 16px;background:#eef3ed;border:1px solid #c8d5c9;border-radius:16px;overflow:hidden;text-align:left;min-width:0}.world-banner>.world-landscape{width:150px;height:82px;flex:0 0 150px}.world-banner>div{padding:10px 14px 10px 0;min-width:0}.world-banner b{display:block;font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#274a45;line-height:1.2}.world-banner span{display:block;font-size:13px;color:#455e55;line-height:1.5;margin-top:5px}
+.has-world-scene{isolation:isolate;position:relative}.world-scene{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;border-radius:inherit}
+#arena>.world-scene{z-index:0;opacity:.9}#arena>.ground{opacity:.4}#arena .hprow,#arena .fighter{z-index:2}#arena .hprow{position:relative}
+.guardian-dialogue{background:#eaf1e6;border-left:3px solid #759779;padding:10px 14px;color:#2d4d41;font-style:italic;font-size:15px;line-height:1.6;text-align:left}
+.story-restoration{font-size:15px;line-height:1.5;color:#28563f;background:#edf4e8;border-radius:12px;padding:10px 14px;max-width:620px;margin:10px auto}
+.chapter-landmark{position:absolute;width:26%;height:40%;right:18%;top:22%;opacity:.8;pointer-events:none}.chapter-landmark svg{width:100%;height:100%}
+body[data-story-costume=leaf] .fantasy-character .hero-cape{fill:#6eaa87;stroke:#39624e}body[data-story-costume=moon] .fantasy-character .hero-cape{fill:#849bcc;stroke:#495e8e}body[data-story-costume=sun] .fantasy-character .hero-cape{fill:#e1b964;stroke:#8c6f35}
+body[data-story-costume=leaf] .fantasy-character .hero-star{fill:#b9e69e}body[data-story-costume=moon] .fantasy-character .hero-star{fill:#e4eaff}body[data-story-costume=sun] .fantasy-character .hero-star{fill:#fff0a3}
+#sudokuGame .sudoku-board-wrap{border:5px solid #c4d4dc;border-radius:12px;background:#edf3f8}
+#nimGame .nim-board{background:#f3edf6;border:1px solid #d1bfdc;border-radius:18px}
+#hanoiGame .hanoi-board{background:linear-gradient(#e7f0ef,#f7f4e8);border:1px solid #bccfc8;border-radius:18px}
+#duelGame #duelArena{background:linear-gradient(#f5ecd6,#fff9e9)}
+@media(max-width:600px){.story-heading{padding:20px 18px 12px}.story-overview{grid-template-columns:1fr}.star-tree svg{max-height:180px}.story-invitation{padding:12px 18px 20px}.story-invitation>svg{float:right;width:60px;height:60px}.story-book{padding:0 16px}.story-book>summary>span{display:block;margin-left:0}.story-chapters{grid-template-columns:1fr}.world-banner{gap:10px}.world-banner>.world-landscape{width:90px;flex-basis:90px;height:85px}.world-banner b{font-size:17px}.world-banner span{font-size:12px}.chapter-landmark{opacity:.55}}
+@media(max-height:700px){.world-banner{margin:5px 0 10px}.world-banner>.world-landscape{height:55px}.world-banner span{display:none}}
+@media(prefers-reduced-motion:reduce){.story-home *,.world-banner *{animation:none!important;transition:none!important}}
+
+/* Short gestures reuse combat classes and pause together with existing effects. */
+.guardian-spell{width:40px;height:40px;fill:#ffe5a0;stroke:#6e6179;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.spell-heart .guardian-spell{fill:#f4b7cd;stroke:#a2547b}.spell-leaf .guardian-spell{fill:#b1dda3;stroke:#4e8353}.spell-moon .guardian-spell{fill:#dee3ff;stroke:#747bad}.spell-pearl .guardian-spell{fill:#e2fff7;stroke:#4f9698}
+.cast-hero .hero-wand{transform-box:fill-box;transform-origin:bottom;animation:story-wand .35s ease-out}
+.cast-boss[data-fantasy-kind=clock-snail] .fantasy-face{transform-box:fill-box;transform-origin:center;animation:story-tuck .35s ease-out}
+.cast-boss[data-fantasy-kind=moon-bat] .art-back,.cast-boss[data-fantasy-kind=pearl-octopus] .art-accessory{transform-box:fill-box;transform-origin:center;animation:story-wand .35s ease-out}
+.hurt .fantasy-face,.hurt-hero .fantasy-face{transform:translateY(2px)}
+.fantasy-character .fantasy-brows{transition:opacity .15s}
+.story-chapter summary:hover .art-accessory{transform:translateY(-2px)}
+.trial-lanterns{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:1}
+.trial-lanterns span{display:grid;place-items:center;width:27px;height:35px;background:#a7b8bb;border:2px solid #60787c;border-radius:7px;color:#e8eeee;font-size:19px}
+.trial-lanterns .lit{background:#ffedb4;border-color:#9c8045;color:#a37019}
+.world-banner .constellation-progress{letter-spacing:4px;color:#45627e;font-size:17px}
+#nimGame .nim-stone{border-radius:8px 15px 8px 15px;background:#ded0ed;border-color:#9b7caf;color:#402c57}
+#nimGame .nim-stone.marked{transform:translateY(-4px);background:#8763aa;color:white}
+#hanoiGame .hanoi-rod{background:#9aa9a1}
+#hanoiGame .hanoi-disk{border:1px solid #697b75;box-shadow:0 3px 0 #59736926}
+#duelGame .turn-active{outline:2px solid #bc944a;outline-offset:3px;border-radius:18px}
+@keyframes story-wand{0%,100%{transform:rotate(0)}40%{transform:rotate(-18deg)}}
+@keyframes story-tuck{0%,100%{transform:scale(1)}40%{transform:scale(.85) translateY(4px)}}
+body[data-battle-phase=paused] .cast-hero .hero-wand,body[data-battle-phase=paused] .cast-boss *{animation-play-state:paused!important}
+body[data-effects=off] .cast-hero .hero-wand,body[data-effects=off] .cast-boss *{animation:none!important}
+@media(prefers-reduced-motion:reduce){.cast-hero .hero-wand,.cast-boss *{animation:none!important}.story-chapter summary:hover .art-accessory{transform:none}}
+
+/* The full journal owns a scrolling screen; the home tile remains compact. */
+#home .story-entry{grid-column:1/-1;display:flex;align-items:center;gap:20px;min-height:90px;padding:12px 24px;border:1px solid #adc7b5;border-radius:22px;background:#e8f1e7;color:#274a45;text-align:left;cursor:pointer;font:inherit;overflow:hidden}
+.story-entry>span:nth-child(2){flex:1;min-width:0}.story-entry small{display:block;font-size:10px;letter-spacing:.14em;font-weight:800}
+.story-entry b{display:block;font-family:Georgia,'Times New Roman',serif;font-size:clamp(20px,2.3vw,32px);line-height:1.15;margin:4px 0}
+.story-entry>span>span{font-size:12px}.story-entry-art{font-size:42px;color:#a38232;background:#fff5cb;border-radius:50%;width:60px;height:60px;display:grid;place-items:center;flex-shrink:0}
+#story .story-card{display:block;overflow-y:auto;max-height:calc(100dvh - 40px);padding:22px;max-width:1100px}
+#story .story-home{height:auto;min-height:0;overflow:visible;margin-bottom:0}
+#story .story-heading p{display:block}
+#story .story-overview{min-height:240px}
+:is(#sudokuGame,#nimGame,#hanoiGame,#duelGame)>.card{position:relative}
+:is(#sudokuGame,#nimGame,#hanoiGame,#duelGame) .world-banner{position:absolute;right:100px;top:10px;width:150px;height:74px;margin:0;border:0;opacity:.28;pointer-events:none;background:none}
+.world-banner>div{display:none}
+.world-banner>.world-landscape{width:100%;height:100%;flex-basis:100%}
+:is(#sudokuGame,#nimGame,#hanoiGame,#duelGame) .game-topbar{position:relative;z-index:1}
+#nimGame .nim-stone svg{width:22px;height:25px;display:block}
+#sudokuGame .sudoku-board-wrap{border-width:2px}
+@media(max-width:600px){
+ #home .story-entry{padding:14px;gap:12px}.story-entry-art{width:44px;height:44px;font-size:30px}.story-entry b{font-size:21px}
+ #story .story-card{padding:12px;max-height:calc(100dvh - 20px)}
+ #story .story-overview{min-height:0}
+ :is(#sudokuGame,#nimGame,#hanoiGame,#duelGame) .world-banner{right:65px;width:100px;opacity:.16}
+}
+
+.story-quest{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #d5dfd1;padding:8px 0}
+.story-quest p{margin:0;flex:1}.story-quest .story-costume{font-size:13px;flex-shrink:0}
+#sudokuGame .constellation-progress{color:#45627e;letter-spacing:2px;font-size:12px;white-space:nowrap}
+#hanoiGame .hanoi-board,#nimGame .nim-board,#duelGame #duelArena{background-image:linear-gradient(#ffffffd9,#ffffffd9),var(--world-background);background-size:cover;background-position:center}
+@media(max-width:400px){.story-quest{align-items:flex-start}.story-quest .story-costume{padding:8px;font-size:12px}}
+body.story-document-hidden .cast-hero .hero-wand,body.story-document-hidden .cast-boss *{animation-play-state:paused!important}
+
+#story .game-topbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#story .home-btn{width:auto;min-width:112px;flex:0 0 auto;white-space:nowrap;min-height:44px;padding:8px 12px;font-size:14px}
+#story .game-topbar h1{font-size:clamp(19px,3vw,28px);margin:0;flex:1;min-width:130px}

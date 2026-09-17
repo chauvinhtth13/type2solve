@@ -2,7 +2,7 @@
 (function createGameStorage(root) {
   'use strict';
 
-  const VERSION = 2;
+  const VERSION = 3;
   const STORAGE_KEY = 'dau-truong-tu-duy:save';
   const LEGACY_KEYS = ['dau-truong-tu-duy:v1', 'dttd-progress-v1'];
   const BLOCKED_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -63,6 +63,7 @@
         },
       },
       learning: { skills: {} },
+      story: { fragments: 0, costume: 'cloud', questionTier: 0 },
       settings: {
         effects: 'auto',
         sound: true,
@@ -198,6 +199,15 @@
         assisted: Math.min(attempts, wholeNumber(value.assisted, 0)),
       };
     });
+    const story = isPlainObject(state.story) ? state.story : {};
+    const fragments = Math.min(10, Math.max(wholeNumber(story.fragments, 0), Math.min(10, state.adventure.cleared + 1)));
+    state.story = {
+      fragments,
+      costume: ['cloud', 'leaf', 'moon', 'sun'].includes(story.costume) ? story.costume : 'cloud',
+      questionTier: Math.min(5, wholeNumber(story.questionTier, 0)),
+    };
+    const costumeAt = { cloud: 0, leaf: 3, moon: 6, sun: 10 };
+    if (fragments < costumeAt[state.story.costume]) state.story.costume = 'cloud';
     state.settings.effects = ['auto', 'low', 'off'].includes(state.settings.effects) ? state.settings.effects : 'auto';
     state.settings.sound = state.settings.sound !== false;
     state.settings.answerMode = ['mixed', 'choice', 'input'].includes(state.settings.answerMode)
