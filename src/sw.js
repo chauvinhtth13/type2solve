@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v25-campaign-atlas';
+const CACHE_VERSION = 'v26-vietnamese-type';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -10,6 +10,15 @@ const CORE_ASSETS = [
   './index.html',
   './manifest.webmanifest',
   './assets/icons/icon.svg',
+  './styles/fonts.css',
+  './assets/fonts/noto-sans-vietnamese.woff2',
+  './assets/fonts/noto-sans-latin-ext.woff2',
+  './assets/fonts/noto-sans-latin.woff2',
+  './assets/fonts/noto-serif-vietnamese.woff2',
+  './assets/fonts/noto-serif-latin-ext.woff2',
+  './assets/fonts/noto-serif-latin.woff2',
+  './assets/fonts/notosans-OFL.txt',
+  './assets/fonts/notoserif-OFL.txt',
   './styles/app.css',
   './styles/games.css',
   './styles/theme-playful.css',

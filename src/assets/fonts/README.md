@@ -1,0 +1,1 @@
+Noto Sans (400–900) and Noto Serif (600–800), variable WOFF2 subsets for Latin, Latin Extended and Vietnamese. Downloaded from the Google Fonts CSS API on 2026-09-17. Distributed under the accompanying SIL Open Font Licenses. Fonts are served locally and included in the offline cache; no runtime Google Fonts request is made.

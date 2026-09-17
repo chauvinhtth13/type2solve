@@ -121,6 +121,7 @@ try {
     await sleep(100);
   }
   await sleep(350);
+  await evaluate("document.fonts.ready");
 
 
   await send('Emulation.setDeviceMetricsOverride',{width:1366,height:768,deviceScaleFactor:1,mobile:false});
@@ -129,7 +130,7 @@ try {
   const pseudo=process.env.CONTRAST_PSEUDO;
   if(process.env.CONTRAST_MOBILE)await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   for(const [name,action] of [
-    ['home','goHome()'],['typing','openTypingGame();document.querySelector("#typingSetup details").open=true'],
+    ['home','goHome()'],['story',"showScreen('story');document.querySelector('.atlas-kit').open=true"],['typing','openTypingGame();document.querySelector("#typingSetup details").open=true'],
     ['typing-play','openTypingGame();startTypingRun()'],['typing-pause','openTypingGame();await startTypingRun();toggleTypingPause()'],
     ['sudoku','openSudokuGame()'],['sudoku-play','openSudokuGame();startSudoku()'],
     ['duel','openDuelGame()'],['duel-alloc','openDuelGame();startDuel()'],

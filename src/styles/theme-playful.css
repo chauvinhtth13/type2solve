@@ -20,8 +20,8 @@
   --lamp-warm:255 204 77;
   --tint:36 50 74;
 
-  --font-display:ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
-  --font-body:ui-rounded,"Trebuchet MS",system-ui,sans-serif;
+  --font-display:'Noto Sans','Segoe UI',Arial,sans-serif;
+  --font-body:'Noto Sans','Segoe UI',Arial,sans-serif;
   --bd-1:1px;
   --bd-2:2px;
   --bd-3:3px;

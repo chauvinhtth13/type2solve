@@ -9,7 +9,7 @@ import * as esbuild from 'esbuild';
 import { renderHtml } from './lib/html.mjs';
 import { cleanReferencePath, extractHtmlReferences, isLocalReference } from './lib/references.mjs';
 import {
-  deferredAssets, distDir, fromDist, fromSource, htmlEntry,
+  deferredAssets, fontAssets, distDir, fromDist, fromSource, htmlEntry,
   projectRoot, serviceWorkerEntry, sourceDir,
 } from './project.mjs';
 
@@ -94,7 +94,7 @@ async function build() {
 
   const generated = new Set(['assets/app.js', 'assets/app.css']);
   const htmlRefs = extractHtmlReferences(builtHtml).map(cleanReferencePath).filter(Boolean);
-  const copyRefs = [...new Set([...htmlRefs, ...deferredAssets])].filter((ref) => !generated.has(ref));
+  const copyRefs = [...new Set([...htmlRefs, ...deferredAssets, ...fontAssets])].filter((ref) => !generated.has(ref));
   for (const ref of copyRefs) {
     try {
       await stat(fromSource(ref));
@@ -106,7 +106,7 @@ async function build() {
   }
 
   const deferredSet = new Set(deferredAssets);
-  const coreRefs = htmlRefs.filter((ref) => !deferredSet.has(ref));
+  const coreRefs = [...htmlRefs.filter((ref) => !deferredSet.has(ref)), ...fontAssets];
   const coreAssets = ['./', './index.html', ...coreRefs.map((ref) => `./${ref}`)];
 
   const hash = createHash('sha256');

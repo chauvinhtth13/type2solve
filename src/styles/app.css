@@ -2,7 +2,7 @@
     --sky:#1b2a52; --sky2:#2d3f73;
     --panel:#fffdf5; --ink:#2b2350;
 
-    --font-display:'Baloo 2','Baloo 2 Fallback','Nunito','Nunito Fallback','Segoe UI',Tahoma,Arial,sans-serif;
+    --font-display:'Noto Sans','Segoe UI',Arial,sans-serif;
 
     --bd-1:2px; --bd-2:3px; --bd-3:4px;
     --r-1:12px; --r-2:16px; --r-3:22px; --r-pill:999px;
@@ -39,7 +39,7 @@
     --dur-2:.22s;
     --dur-3:.38s;
     --dur-4:.6s;
-    --font-body:'Nunito','Nunito Fallback','Segoe UI',Tahoma,Arial,sans-serif;
+    --font-body:'Noto Sans','Segoe UI',Arial,sans-serif;
     --gold:#ffc93c; --hero:#41c9e2; --boss:#ff5d73;
     --green:#4dd685; --purple:#8d6bff; --orange:#ff9e3d;
 
@@ -69,8 +69,6 @@ body{
     display:flex;align-items:center;justify-content:center;overflow-x:hidden;
   }
 body.fx-quiet .playful-canvas{opacity:.5}
-@font-face{font-family:'Baloo 2 Fallback';src:local('Arial');size-adjust:92.9%}
-@font-face{font-family:'Nunito Fallback';src:local('Arial');size-adjust:99.5%}
 :root{
     --wrapW:1080px;
     --arenaH:210px;
