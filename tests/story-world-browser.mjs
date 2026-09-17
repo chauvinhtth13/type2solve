@@ -130,11 +130,14 @@ try {
   }
 
   assert(await evaluate("StoryWorld.chapters.length===10 && GameStorage.load().version===3"),'Story boots with ten chapters and migrated schema');
+  assert(await evaluate("(()=>{const entries=[...document.querySelectorAll('#home [data-game]')];return entries.length===8&&new Set(entries.map(b=>b.dataset.game)).size===8})()"),'Each distinct game has exactly one home entry');
   await snapshot('home-desktop');
   await evaluate("document.querySelector('#home .story-entry').click()");
-  assert(await evaluate("document.querySelector('#story.active')!==null"),'Home story tile opens the journal');
-  assert(await evaluate("(()=>{const r=document.querySelector('.story-overview').getBoundingClientRect();return r.height>150 && r.width>200})()"),'Story illustration is visible, not clipped');
-  await evaluate("document.querySelector('.story-book').open=true; document.querySelector('.story-chapter').open=true");
+  assert(await evaluate("document.querySelector('#story.active')!==null"),'Campaign entry opens its atlas');
+  assert(await evaluate("(()=>{const r=document.querySelector('.atlas-map').getBoundingClientRect();return r.height>150 && r.width>200})()"),'Story illustration is visible, not clipped');
+  await evaluate("document.querySelectorAll('.atlas-stop')[4].click()");
+  assert(await evaluate("document.querySelectorAll('.atlas-stop').length===10 && document.getElementById('atlasPlace').textContent==='Vườn kẹo' && GameStorage.load().adventure.cleared===-1"),'Map previews ten chapters without changing progress');
+  assert(await evaluate("document.querySelectorAll('.atlas-stop[aria-pressed=true]').length===1"),'Selected guardian is accessible');
   await snapshot('journal-desktop');
   await evaluate("GameStorage.setAdventure({cleared:2});GameStorage.save({story:{costume:'leaf',questionTier:1}});startAdventure();beginBattle();stopTimer()");
   assert(await evaluate("G.questionTier===1 && document.body.dataset.storyCostume==='leaf'"),'Selected learning level and unlocked costume apply');
@@ -160,8 +163,17 @@ try {
   }
   for(const width of [320,390,768]){
     await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<700});
-    await evaluate("goHome();showScreen('story');document.querySelectorAll('.story-book').forEach(el=>el.open=true)");
+    await evaluate("goHome()");
+    await snapshot('home-'+width);
+    assert(await evaluate("document.querySelector('.lobby-footer').getBoundingClientRect().top>=document.querySelector('.lobby-layout').getBoundingClientRect().bottom-1"),'Home footer follows the game library at '+width);
+    await evaluate("document.querySelector('#home .nim-mode').scrollIntoView({block:'center'})");
+    assert(await evaluate("(()=>{const b=document.querySelector('#home .nim-mode'),r=b.getBoundingClientRect();return b.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))})()"),'Last game remains reachable at '+width);
+    await snapshot('home-bottom-'+width);
+    assert(await evaluate("document.documentElement.scrollWidth<=innerWidth+1"),'Home has no overflow at '+width);
+    await evaluate("goHome();showScreen('story');document.querySelector('.atlas-kit').open=true");
     await snapshot('journal-'+width);
+    assert(await evaluate("(()=>{const a=document.querySelector('#story .game-topbar>div').getBoundingClientRect(),b=document.querySelector('.atlas-count').getBoundingClientRect();return a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1})()"),'Atlas title and progress do not overlap at '+width);
+
     assert(await evaluate("(()=>{const b=document.querySelector('#story .home-btn');return b.scrollWidth<=b.clientWidth+1&&b.scrollHeight<=b.clientHeight+1})()"),'Journal navigation text fits at '+width);
     assert(await evaluate("document.documentElement.scrollWidth<=innerWidth+1"),'Expanded story has no overflow at '+width);
     for(const open of ['openSudokuGame()','openNimGame()','openHanoiGame()','openDuelGame()']){
@@ -176,10 +188,11 @@ try {
   assert(await evaluate("document.querySelector('[data-story-progress]').textContent.includes('10/10')"),'Final story restoration is visible');
   await evaluate("showScreen('story')");
   await snapshot('restored-tree');
-  await evaluate("document.querySelectorAll('.story-book')[1].open=true;document.querySelectorAll('[data-costumes] button')[3].click()");
+  await evaluate("document.querySelector('.atlas-kit').open=true;document.querySelectorAll('[data-costumes] button')[3].click()");
   assert(await evaluate("GameStorage.load().story.costume==='sun'"),'Final cape can be equipped from the journal');
-  await evaluate("document.querySelector('[data-side-quests] button').click()");
-  assert(await evaluate("G.mode==='blitz' && document.querySelector('#battle.active')!==null"),'Journal quests launch their game');
+  assert(await evaluate("document.querySelector('[data-side-quests]')===null"),'Atlas does not repeat the game library');
+  await evaluate("document.getElementById('atlasStart').click()");
+  assert(await evaluate("G.bossIndex===9 && document.querySelector('#intro.active')!==null"),'Atlas resumes the actual saved chapter');
   await evaluate("goHome()");
 
   assert(runtimeErrors.length===0,runtimeErrors.join(' | ')||'No story runtime errors');

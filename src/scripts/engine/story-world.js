@@ -25,51 +25,75 @@ sun:'<circle cx="300" cy="80" r="37"/><path d="M300 22v12m0 93v12m-58-59h12m93 0
 mushroom:'<path d="M268 162V97h64v65Z" fill="#fff1d5"/><path d="M235 104q65-129 130 0Z"/><circle cx="281" cy="77" r="10" fill="#fff1d5"/><circle cx="317" cy="67" r="8" fill="#fff1d5"/><path d="M290 162v-31q10-20 20 0v31Z"/>',
 pearl:'<path d="M235 104q65 111 130 0l-27 9-8-32-30 26-30-26-8 32Z"/><circle cx="300" cy="103" r="25" fill="#fff7df"/><circle cx="291" cy="93" r="7" fill="white"/>'
 };
+
+function pine(x,y,size,color){
+ return '<g transform="translate('+x+' '+y+') scale('+size+')"><path d="M-4 0h8v-74h-8Z" fill="#4b645a"/><path d="M0-144-38-73h22l-35 48h34L-49 0h98L17-25h34L16-73h22Z" fill="'+color+'"/><path d="M0-132v117" fill="none" stroke="#eaf3cd" stroke-width="1.5" opacity=".22"/></g>';
+}
 function landscape(index,restored=false){
-const c=chapters[Math.max(0,Math.min(9,Number(index)||0))];
-return '<svg class="world-landscape" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="--scene-sky:'+c.sky+';--scene-ink:'+c.ink+'"><path fill="var(--scene-sky)" d="M0 0h600v200H0Z"/><circle cx="485" cy="45" r="25" fill="#fff8df"/><path d="M0 140Q90 42 204 136T420 116T600 110V200H0" fill="var(--scene-ink)" opacity=".18"/><path d="M0 170Q140 120 280 163T600 143v57H0" fill="var(--scene-ink)" opacity=".28"/><g fill="var(--scene-ink)" color="var(--scene-ink)">'+motifs[c.landmark]+'</g><path d="M268 200q55-20 31-37h23q36 23 17 37" fill="#fff7e3"/><g fill="var(--scene-ink)" opacity=".55"><path d="m22 190 12-55 12 55Zm24 0 9-38 9 38Zm505 0 12-55 12 55Zm24 0 9-38 9 38Z"/></g>'+(restored?'<g fill="#fff8cf"><path d="m210 51 4 9 9 4-9 4-4 9-4-9-9-4 9-4Zm173 20 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><circle cx="155" cy="116" r="4"/><circle cx="420" cy="138" r="4"/></g>':'')+'</svg>';
+ const c=chapters[Math.max(0,Math.min(9,Number(index)||0))];
+ const moon=index===5||index===6;
+ return '<svg xmlns="http://www.w3.org/2000/svg" class="world-landscape" viewBox="0 0 900 540" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+
+ '<path fill="'+c.sky+'" d="M0 0h900v540H0Z"/><circle cx="690" cy="106" r="57" fill="#fff4c9"/><circle cx="690" cy="106" r="74" fill="none" stroke="#fff8dc" stroke-width="12" opacity=".3"/>'+
+ '<g fill="none" stroke="#fff9e6" stroke-width="5" opacity=".6"><path d="M68 108h160m-112 15h78m442 72h124M330 72h116"/></g>'+
+ '<path d="m0 295 144-143 67 77 136-132 128 143 118-90 189 104 118-42v328H0Z" fill="'+c.ink+'" opacity=".19"/>'+
+ '<path d="M0 329Q174 206 352 316T900 259v281H0Z" fill="'+c.ink+'" opacity=".38"/>'+
+ '<path d="M0 385Q160 326 296 358T600 337T900 351v189H0Z" fill="'+(moon?'#98b4b3':'#95b9a0')+'"/>'+
+ '<path d="M310 540q275-73 121-114t110-88h35q-210 50-79 75t-27 127Z" fill="#ecddaf"/>'+
+ '<g transform="translate(360 186) scale(.65)"><path d="M190 164q100-37 213 0l-29 29H220Z" fill="#496c5d" opacity=".35"/><g fill="'+c.ink+'" color="'+c.ink+'">'+motifs[c.landmark]+'</g></g>'+
+ pine(150,389,.8,'#668e79')+pine(773,377,.9,'#668e79')+pine(51,483,1.8,'#315e51')+pine(865,477,1.7,'#315e51')+
+ '<path d="M0 486q151-59 290 17l-50 37H0Zm642 54q121-97 258-56v56Z" fill="#285347"/>'+
+ '<g fill="#afc7a1"><ellipse cx="100" cy="484" rx="34" ry="10"/><ellipse cx="796" cy="499" rx="45" ry="12"/></g>'+
+ '<g fill="#f6dc98"><path d="m120 448 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Zm612-173 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/><circle cx="289" cy="360" r="3"/><circle cx="681" cy="432" r="3"/></g>'+
+ (restored?'<g fill="#fff4c4"><circle cx="551" cy="217" r="3"/><circle cx="603" cy="253" r="2"/><circle cx="575" cy="193" r="3"/></g>':'')+'</svg>';
 }
-function tree(count){
-return '<svg viewBox="0 0 600 230" aria-hidden="true"><path fill="#e3eee7" d="M0 0h600v230H0Z"/><circle cx="454" cy="55" r="30" fill="#fff6ce"/><path d="M0 188Q150 127 300 180T600 170V230H0" fill="#c2d9c7"/><path d="M263 224q28-54 16-100l-51-42 10-14 47 30 9-66h15l5 77 47-44 12 13-54 62q-5 53 25 84Z" fill="#827969"/><g fill="'+(count===10?'#76ad8e':'#a9c6b5')+'"><circle cx="241" cy="81" r="49"/><circle cx="306" cy="53" r="47"/><circle cx="365" cy="85" r="49"/><circle cx="296" cy="111" r="51"/></g>'+chapters.map((c,i)=>{const x=[217,259,302,344,388,235,278,322,365,300][i],y=[74,43,26,48,78,113,90,69,118,135][i];return '<path transform="translate('+x+' '+y+')" d="m0-10 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z" fill="'+(i<count?'#fff0a3':'#719180')+'"/>';}).join('')+'<path d="M255 230q46-18 44-36 37 18 46 36" fill="#fff4d8"/></svg>';
+const stops=[[16,76],[32,67],[19,48],[35,33],[49,46],[61,65],[76,53],[65,32],[79,21],[49,17]];
+function mapArt(){
+ return '<svg viewBox="0 0 900 600" preserveAspectRatio="none" aria-hidden="true"><path fill="#c9dfd5" d="M0 0h900v600H0Z"/><path d="M-30 358Q180 102 418 129T968 279v350H-30Z" fill="#abc9b2"/><path d="M58 435Q69 163 293 93t351 9 179 303Q708 558 511 496T58 435Z" fill="#dae5c4" stroke="#9fbfa7" stroke-width="12"/><path d="M405 0q-54 168 87 237t-74 363h93q174-280 35-356T504 0Z" fill="#94c4c4"/><path d="M403 0q-45 160 90 232t-68 368" fill="none" stroke="#e4f1df" stroke-width="7" opacity=".7"/>'+
+ '<g opacity=".75">'+pine(102,320,.7,'#7ba88c')+pine(718,418,1.1,'#7ba88c')+pine(251,186,.7,'#7ba88c')+pine(641,104,.7,'#7ba88c')+pine(821,329,.8,'#7ba88c')+'</g>'+
+ '<path d="M144 456 288 402 171 288 315 198 441 276 549 390 684 318 585 192 711 126 441 102" fill="none" stroke="#fff4d5" stroke-width="15" stroke-linejoin="round"/><path d="M144 456 288 402 171 288 315 198 441 276 549 390 684 318 585 192 711 126 441 102" fill="none" stroke="#bfa66b" stroke-width="2" stroke-dasharray="3 9"/>'+
+ '<g transform="translate(60 80)" stroke="#406c62" fill="none"><circle r="29" stroke-width="1"/><path d="M0-38V38m-38-38h76M0-29l7 29-7 29-7-29Z" fill="#fff5d8"/><text y="-46" text-anchor="middle" fill="#406c62" stroke="none" font-size="12">BẮC</text></g>'+
+ '<path d="M44 533q79-17 163 4m-124 10h72m567-50q63-16 118-1m-98 12h65" stroke="#6daba8" fill="none" stroke-width="3"/></svg>';
 }
-let lastHomeState = null;
+let selectedChapter=0;
+let lastState='';
+function selectChapter(index){
+ selectedChapter=index;
+ const c=chapters[index],state=GameStorage.load(),complete=index<state.story.fragments;
+ document.querySelectorAll('.atlas-stop').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));
+ document.querySelector('.atlas-preview').innerHTML=landscape(index,complete);
+ const portrait=document.querySelector('.atlas-portrait');portrait.replaceChildren(buildBeastArt(index));
+ document.getElementById('atlasChapter').textContent='Chặng '+(index+1)+' · '+c.name;
+ document.getElementById('atlasPlace').textContent=c.place;
+ document.getElementById('atlasDialogue').textContent='“'+c.intro+'”';
+ document.getElementById('atlasMemory').textContent=complete?c.memory:'Kỷ niệm của '+c.name+' sẽ mở khi em vượt qua chặng này.';
+ document.getElementById('atlasMemory').dataset.unlocked=String(complete);
+ const next=Math.min(9,Math.max(state.adventure.cleared+1,state.adventure.bossIndex||0));
+ document.getElementById('atlasStart').textContent='Tiếp tục · '+chapters[next].name+' →';
+ document.querySelector('[data-story-next]').textContent=index!==next?'Em đang xem '+c.place+'. Hành trình tiếp tục ở '+chapters[next].place+'.':'Trả lời từng câu để mang ánh sáng trở về.';
+}
 function renderHome(){
-const host=document.getElementById('storyHome');if(!host)return;
-const state=GameStorage.load(),n=state.story.fragments;
-const signature=JSON.stringify([state.story,state.records]);
-if(signature===lastHomeState)return;
-lastHomeState=signature;
-const focused=document.activeElement;
-const focusedCostume=focused?.dataset.costume;
-const openChapters=[...host.querySelectorAll('.story-chapter[open]')].map(el=>el.dataset.chapter);
-document.body.dataset.storyCostume=state.story.costume;
-host.querySelector('.star-tree').innerHTML=tree(n);
-host.querySelector('[data-story-progress]').textContent=n===10?'Cây Sao đã thức dậy · 10/10 mảnh sao':n+'/10 mảnh sao đã trở về';
-host.querySelector('[data-story-next]').textContent=n===10?'Ghé lại những người bạn và khám phá các thử thách còn lại.':'Điểm đến tiếp theo: '+chapters[n].place;
-const list=host.querySelector('.story-chapters');list.replaceChildren();
-chapters.forEach((c,i)=>{
-const detail=document.createElement('details');detail.className='story-chapter';detail.dataset.chapter=String(i);detail.open=openChapters.includes(String(i));detail.dataset.restored=String(i<n);
-const summary=document.createElement('summary'),art=buildBeastArt(i);if(art){art.setAttribute('aria-hidden','true');summary.append(art);}
-const label=document.createElement('span');label.textContent=(i<n?'✦ ':i===n?'→ ':'')+(i+1)+'. '+c.place;
-const tag=document.createElement('small');tag.textContent=i<n?'Đã hồi sinh':i===n?'Điểm đến tiếp theo':'Chưa khám phá';label.append(tag);summary.append(label);detail.append(summary);
-const scene=document.createElement('div');scene.innerHTML=landscape(i,i<n);detail.append(scene);
-const text=document.createElement('p');text.textContent=i<n?c.memory:c.intro;detail.append(text);list.append(detail);
-});
-const costumes=host.querySelector('[data-costumes]');costumes.replaceChildren();
-[['cloud','Mây tím',0],['leaf','Lá non',3],['moon','Ánh trăng',6],['sun','Nắng vàng',10]].forEach(([id,label,at])=>{
-const b=document.createElement('button');b.type='button';b.dataset.costume=id;b.className='story-costume';b.textContent=label+(n<at?' · '+at+' mảnh':'');b.disabled=n<at;b.setAttribute('aria-pressed',String(state.story.costume===id));b.onclick=()=>GameStorage.save({story:{costume:id}});costumes.append(b);
-});
-const r=state.records,quests=[['Hải đăng của Sparky',r.blitz>0,'Hoàn thành một lượt 60 Giây có điểm.'],['Ba ngọn đèn',r.survival>0,'Ghi điểm trong thử thách 3 Trái Tim.'],['Cánh cổng phép chữ',r.typing.campaignCleared>=0,'Vượt một chặng Gõ Chữ Vui.'],['Bầu trời thư viện',r.sudoku.wins>0,'Giải một bàn Sudoku.'],['Cầu trên mây',r.hanoi.wins>0,'Hoàn thành một tháp Hà Nội.'],['Tinh thể khéo léo',r.nim.wins>0,'Thắng một ván Nim với máy.'],['Lễ hội bạn bè',r.duel.series>0,'Hoàn thành một trận Đối Kháng cùng bạn.']];
-const journal=host.querySelector('[data-side-quests]');journal.replaceChildren();
-const launch=[startBlitz,startSurvival,openTypingGame,openSudokuGame,openHanoiGame,openNimGame,openDuelGame];
-quests.forEach(([title,done,hint],i)=>{
-const row=document.createElement('div');row.className='story-quest';
-const p=document.createElement('p');p.textContent=(done?'✓ ':'○ ')+title+' — '+(done?'Đã hoàn thành':hint);
-const button=document.createElement('button');button.type='button';button.className='story-costume';button.textContent=done?'Chơi lại':'Khám phá';button.setAttribute('aria-label',(done?'Chơi lại ':'Khám phá ')+title);button.onclick=()=>{goHome();launch[i]();};
-row.append(p,button);journal.append(row);
-});
-host.querySelector('[data-story-tier]').value=String(state.story.questionTier);
-if(focusedCostume)host.querySelector('[data-costume="'+focusedCostume+'"]')?.focus({preventScroll:true});
+ const state=GameStorage.load(),n=state.story.fragments;
+ document.body.dataset.storyCostume=state.story.costume;
+ const signature=JSON.stringify([state.story,state.adventure.cleared,state.adventure.bossIndex]);
+ if(signature===lastState)return;
+ lastState=signature;
+ document.querySelector('[data-story-progress]').textContent=n+'/10 mảnh sao';
+ document.querySelector('[data-campaign-cover]').innerHTML=landscape(Math.min(n,9),n===10);
+ const map=document.querySelector('.atlas-art');if(!map.childElementCount)map.innerHTML=mapArt();
+ const list=document.querySelector('.atlas-stops');
+ if(!list.childElementCount)chapters.forEach((c,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='atlas-stop';b.style.left=stops[i][0]+'%';b.style.top=stops[i][1]+'%';b.setAttribute('aria-label','Chặng '+(i+1)+': '+c.name+' · '+c.place);
+  const art=buildBeastArt(i);art.setAttribute('aria-hidden','true');b.append(art);
+  const label=document.createElement('span');label.textContent=c.name;b.append(label);b.onclick=()=>selectChapter(i);list.append(b);
+ });
+ [...list.children].forEach((b,i)=>{b.dataset.complete=String(i<n);b.dataset.current=String(i===Math.min(9,Math.max(state.adventure.cleared+1,state.adventure.bossIndex||0)));b.title=(i<n?'Đã hoàn thành · ':'')+chapters[i].place;});
+ const focused=document.activeElement?.dataset.costume, costumes=document.querySelector('[data-costumes]');costumes.replaceChildren();
+ [['cloud','Mây tím',0],['leaf','Lá non',3],['moon','Ánh trăng',6],['sun','Nắng vàng',10]].forEach(([id,label,at])=>{
+  const b=document.createElement('button');b.type='button';b.dataset.costume=id;b.className='story-costume';b.textContent=label+(n<at?' · '+at+' mảnh':'');b.disabled=n<at;b.setAttribute('aria-pressed',String(state.story.costume===id));b.onclick=()=>GameStorage.save({story:{costume:id}});costumes.append(b);
+ });
+ document.querySelector('[data-story-tier]').value=String(state.story.questionTier);
+ selectChapter(selectedChapter);
+ if(focused)document.querySelector('[data-costume="'+focused+'"]')?.focus({preventScroll:true});
 }
 function scene(host,index){
 if(!host)return;
@@ -78,22 +102,18 @@ if(!layer){layer=document.createElement('div');layer.className='world-scene';lay
 if(layer.dataset.chapter!==String(index)){layer.dataset.chapter=String(index);layer.innerHTML=landscape(index,true);}
 host.classList.add('has-world-scene');
 }
-const worlds={sudokuGame:[2,'Thư viện chòm sao','Điền từng con số để nối lại bầu trời.'],duelGame:[7,'Lễ hội vệ binh','Cùng bạn thử tài trong đấu trường mặt trời.'],nimGame:[4,'Hang tinh thể của Vex','Chọn khéo từng viên. Người lấy viên cuối cùng sẽ thua.'],hanoiGame:[8,'Những tòa tháp trên mây','Chuyển từng đĩa để nối lại chiếc cầu của Lumiel.']};
+const worlds={sudokuGame:2,duelGame:7,nimGame:4,hanoiGame:8};
 function enter(id){
-if(id==='home'||id==='story'){renderHome();return;}
-const world=worlds[id];
-if(world){
-const card=document.querySelector('#'+id+' > .card');
-if(card&&!card.querySelector('.world-banner')){
-const banner=document.createElement('div');banner.className='world-banner';banner.innerHTML=landscape(world[0],true)+'<div><b>'+world[1]+'</b><span>'+world[2]+'</span></div>';card.querySelector('.game-topbar').after(banner);
-const label=card.querySelector('.game-topbar .eyebrow');if(label)label.textContent=world[1];
-const board=card.querySelector('.hanoi-board,.nim-board,#duelArena');
-if(board){
-const art=landscape(world[0],true).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
-board.style.setProperty('--world-background','url("data:image/svg+xml,'+encodeURIComponent(art)+'")');
-}
-
-}}
+ if(id==='home'){renderHome();return;}
+ if(id==='story'){
+  renderHome();const saved=GameStorage.load();
+  selectChapter(Math.min(9,Math.max(saved.adventure.cleared+1,saved.adventure.bossIndex||0)));
+  return;
+ }
+ if(Object.hasOwn(worlds,id)){
+  const board=document.querySelector('#'+id+' .hanoi-board,#'+id+' .nim-board,#'+id+' #duelArena');
+  if(board&&!board.style.getPropertyValue('--world-background'))board.style.setProperty('--world-background','url("data:image/svg+xml,'+encodeURIComponent(landscape(worlds[id],true))+'")');
+ }
 if(id==='intro'){
 const c=chapters[G.bossIndex],desc=document.getElementById('introDesc');
 let p=desc.querySelector('.guardian-dialogue');if(!p){p=document.createElement('p');p.className='guardian-dialogue';desc.prepend(p);}

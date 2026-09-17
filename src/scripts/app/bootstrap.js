@@ -25,14 +25,6 @@
     if($('profileBadge'))$('profileBadge').textContent=stars>=60?'Vương miện tư duy · 60 sao':stars>=30?'Nhà khám phá · 30 sao':stars>=10?'Ngôi sao chăm học · 10 sao':'Mỗi câu đúng là một bước tiến';
     const skills=Object.entries(data.learning?.skills||{}).filter(([,v])=>v.attempts>0).sort((a,b)=>b[1].attempts-a[1].attempts);
     if($('profileLearning'))$('profileLearning').textContent=skills.length?`${TYPE_LABEL[skills[0][0]]||'Toán'}: tự làm đúng ${skills[0][1].correct}/${skills[0][1].attempts} câu`:'Bắt đầu một lượt để khám phá điều mới.';
-    // Ô hero trang chủ giống hệt nhau dù là lượt chơi đầu hay lượt 50 — cho
-    // icon đổi theo tổng sao (đã tính sẵn cho #profileStars) để người chơi
-    // quay lại thấy ngay hành trình của mình, không cần đọc số.
-    if($('homeBigEmoji')){
-      const rank=stars>=60?['👑','Bậc Thầy Tư Duy']:stars>=30?['🔥','Cao Thủ']:stars>=10?['⚡','Chiến Binh']:['🧠','Tân Binh'];
-      $('homeBigEmoji').textContent=rank[0];
-      $('homeBigEmoji').title=`${rank[1]} · ${stars} ⭐`;
-    }
     if($('profileTyping'))$('profileTyping').textContent=typingBest;
     if($('profileSudoku'))$('profileSudoku').textContent=Number(records.sudoku?.wins)||0;
     // Ô "Phiêu lưu" chiếm hai hàng trong lưới bento nên phải có nội dung xứng chỗ:
@@ -44,7 +36,7 @@
       progress.innerHTML=`<span>Đã vượt <b>${cleared}/${total}</b> boss</span><i></i>`;
       progress.style.setProperty('--done',(cleared/total*100)+'%');
       const next=Math.min(total,Math.max(cleared+1,(Number(data.adventure?.bossIndex)||0)+1));
-      if($('adventureAction'))$('adventureAction').textContent=cleared===total?'Chơi lại boss cuối →':data.adventure?.active?`Tiếp tục · Boss ${next}/${total} →`:'Bắt đầu hành trình →';
+      if($('adventureAction'))$('adventureAction').textContent=cleared===total?'Ghé lại đảo ngọc →':data.adventure?.active?`Tiếp tục · Chặng ${next}/${total} →`:'Khám phá hành trình →';
       const track=$('journeyTrack');
       if(track){
         track.replaceChildren();

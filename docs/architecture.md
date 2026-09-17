@@ -120,10 +120,12 @@ khóa lưu và tiến độ cũ. `LearningReview` chỉ giữ tối đa 100 câu
 
 
 ## Thế giới Cây Sao
-Bản đồ và nhật ký nằm ở màn story, mở từ ô truyện trên trang chủ.
+Bản đồ mười vệ binh nằm ở màn story, mở từ lối vào Phiêu lưu duy nhất trên trang chủ.
 engine/story-world.js sở hữu nội dung mười chương và phong cảnh SVG;
 game vẫn sở hữu luật và kết quả. showScreen gọi presentation đồng bộ.
 Schema 3 giữ khóa lưu cũ, lấy số mảnh sao từ tiến độ Phiêu lưu đã hoàn thành,
 giữ kỷ niệm khi bắt đầu lại hành trình và kiểm tra điều kiện mở áo choàng.
 Cấp câu hỏi tùy chọn được chụp lúc bắt đầu lượt Phiêu lưu.
 Không thêm vòng RAF hoặc tài nguyên mạng. Xem [story-world.md](story-world.md).
+
+See [cleanup-redesign.md](cleanup-redesign.md) for removed duplicate entry points and obsolete source.

@@ -1,105 +1,13 @@
-  <!-- TRANG CHỦ — một cột dọc chia làm ba phân khu có tiêu đề NHÌN THẤY ĐƯỢC.
-       Trước đây ba tiêu đề này là .sr-only nên mắt thường chỉ thấy 8 ô rời rạc,
-       không biết ô nào thuộc nhóm nào; còn .home-bento thì không có luật bố cục
-       nào cả (xem chú thích trong app.css) nên các ô dán sát vào nhau. -->
-  <div class="screen active" id="home">
-    <div class="card home-card">
-      <div class="home-bento">
-
-        <header class="tile tile-hero">
-          <button class="tile-sound" id="sndBtnHome" onclick="toggleSound()" aria-pressed="true" aria-label="Bật hoặc tắt âm thanh">🔊</button>
-          <div class="hero-doodle" aria-hidden="true">
-            <span>2 + 3</span><b>= 5</b><i>★</i>
-          </div>
-          <p class="hero-kicker">HỌC MỖI NGÀY · VUI MỖI LƯỢT</p>
-          <h1 id="homeTitle">Đấu trường <span class="hl">tư duy</span></h1>
-          <p class="sub">Chọn một trò chơi, học điều mới và gom thật nhiều sao.</p>
-        </header>
-
-        <div class="tile tile-stats" id="profileSummary" aria-live="polite">
-          <span class="eyebrow">TIẾN ĐỘ CỦA EM</span><span class="profile-badge" id="profileBadge"></span>
-          <div class="profile-strip">
-            <span><b id="profileStars">0</b><small>⭐ sao</small></span>
-            <span><b id="profileTyping">0</b><small>⌨️ kỷ lục</small></span>
-            <span><b id="profileSudoku">0</b><small>🧩 Sudoku</small></span>
-          </div>
-        </div>
-
-        <p class="profile-learning" id="profileLearning"></p>
-
-        <button type="button" class="story-entry" onclick="SFX.click();showScreen('story')"><span class="story-entry-art" aria-hidden="true">✦</span><span><small>CHUYỆN CỦA MÂY</small><b>Mây và Mười Mảnh Sao</b><span>Bản đồ · Ký ức vệ binh · Áo choàng</span></span><span aria-hidden="true">→</span></button>
-        <section class="home-zone zone-play">
-          <h2 class="zone-heading">Khởi động với Toán</h2>
-          <div class="modes">
-            <button class="mode adv tile tile-flagship" onclick="SFX.click();startAdventure()">
-              <span class="mi" aria-hidden="true">⚔️</span>
-              <b>PHIÊU LƯU</b>
-              <span class="tile-desc">Vượt 10 bạn quái vui nhộn bằng những câu Toán vừa sức.</span>
-              <span class="tile-cta" id="adventureAction">Bắt đầu hành trình →</span>
-              <span class="tile-progress" id="advProgress"></span><span class="journey-track" id="journeyTrack" aria-label="Tiến độ 10 boss"></span>
-            </button>
-            <div class="quick-modes">
-              <button class="mode blitz tile" onclick="SFX.click();startBlitz()">
-                <span class="mi" aria-hidden="true">⚡</span><b>60 GIÂY</b>
-                <span class="tile-desc">Khởi động nhanh và phá kỷ lục của em.</span>
-              </button>
-              <button class="mode surv tile" onclick="SFX.click();startSurvival()">
-                <span class="mi" aria-hidden="true">💛</span><b>3 TRÁI TIM</b>
-                <span class="tile-desc">Câu hỏi khó dần, bình tĩnh đi thật xa.</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section class="home-zone zone-solo">
-          <h2 class="zone-heading">Tự luyện kỹ năng</h2>
-          <div class="learning-modes">
-            <button class="learning-mode typing-mode tile" onclick="SFX.click();openTypingGame()">
-              <span class="world-icon" aria-hidden="true">⌨️</span>
-              <span><b>GÕ CHỮ VUI</b><small>Luyện gõ Anh–Việt · 10 chặng · hơn 80.000 từ</small></span>
-              <span class="world-tag">Anh · Việt</span>
-            </button>
-            <button class="learning-mode sudoku-mode tile" onclick="SFX.click();openSudokuGame()">
-              <span class="world-icon" aria-hidden="true">🧩</span>
-              <span><b>SUDOKU</b><small>6 cấp độ · có ghi chú, gợi ý và lưu kỷ lục</small></span>
-              <span class="world-tag">Dễ → 17 ô</span>
-            </button>
-            <button class="learning-mode hanoi-mode tile" onclick="SFX.click();openHanoiGame()">
-              <span class="world-icon" aria-hidden="true">🗼</span>
-              <span><b>THÁP HÀ NỘI</b><small>Chuyển tháp · luyện suy luận từng bước</small></span>
-              <span class="world-tag">1 người</span>
-            </button>
-          </div>
-        </section>
-
-        <section class="home-zone zone-versus">
-          <h2 class="zone-heading">Chơi cùng bạn</h2>
-          <div class="tile-more">
-            <button class="learning-mode duel-mode tile" onclick="SFX.click();openDuelGame()">
-              <span class="world-icon" aria-hidden="true">⚔️</span>
-              <span><b>ĐẤU ĐỐI KHÁNG</b><small>Hai bạn cùng máy · chọn sức mạnh và thi đấu</small></span>
-              <span class="world-tag">2 người</span>
-            </button>
-            <button class="learning-mode nim-mode tile" onclick="SFX.click();openNimGame()">
-              <span class="world-icon" aria-hidden="true">🪨</span>
-              <span><b>NIM MISÈRE</b><small>Bốc sỏi · thử chiến thuật với bạn hoặc máy</small></span>
-              <span class="world-tag">2 người · máy</span>
-            </button>
-
-          </div>
-        </section>
-
-        <footer class="tile tile-credit">
-          <label class="effects-setting">Hiệu ứng <select data-effects-setting aria-label="Mức hiệu ứng"><option value="auto">Tự động</option><option value="low">Nhẹ</option><option value="off">Tắt chuyển động</option></select></label>
-          <p class="credit-line">
-            <span class="credit-work">Đấu Trường Tư Duy</span>
-            <span class="credit-sep" aria-hidden="true">·</span>
-            <span class="credit-role">Thiết kế &amp; phát triển</span>
-            <strong class="credit-name">Châu Vinh</strong>
-          </p>
-          <button class="credit-info-btn" onclick="SFX.click();openInfoModal()">💛 Ủng hộ &amp; Góp ý</button>
-        </footer>
-
-      </div>
-    </div>
-  </div>
+<div class="screen active" id="home">
+ <div class="card home-card">
+  <header class="lobby-header"><div><p class="lobby-kicker">✦ TYPE2SOLVE · HỌC QUA TRÒ CHƠI</p><h1 id="homeTitle">Một thế giới để khám phá.</h1></div><button class="icon-btn" id="sndBtnHome" onclick="toggleSound()" aria-pressed="true" aria-label="Bật hoặc tắt âm thanh">🔊</button></header>
+  <div class="lobby-layout">
+   <button type="button" class="mode adv story-entry campaign-entry" data-game="adventure" onclick="SFX.click();showScreen('story')">
+    <span class="campaign-cover" data-campaign-cover aria-hidden="true"></span>
+    <span class="campaign-hero" aria-hidden="true"><svg viewBox="0 0 120 120" data-art="tplHero"></svg></span>
+    <span class="campaign-copy"><small>PHIÊU LƯU · 10 MIỀN ĐẤT</small><b>Mây và<br>Mười Mảnh Sao</b><span class="campaign-description">Gặp những vệ binh kỳ lạ.<br>Mang ánh sáng trở về khu rừng.</span><span class="campaign-link" id="adventureAction">Khám phá hành trình →</span></span>
+    <span class="campaign-progress"><span id="advProgress"></span><span class="journey-track" id="journeyTrack" aria-label="Tiến độ 10 chặng"></span></span>
+   </button>
+   <div class="lobby-library"><section class="home-zone zone-play"><h2 class="zone-heading">01 / Thử thách Toán</h2><div class="quick-modes"><button type="button" class="mode blitz game-entry" data-game="blitz" onclick="SFX.click();startBlitz()"><span class="world-icon" aria-hidden="true">⚡</span><span><b>60 giây</b><small>Toán nhanh · Thử sức mỗi ngày</small></span><i aria-hidden="true">↗</i></button><button type="button" class="mode surv game-entry" data-game="survival" onclick="SFX.click();startSurvival()"><span class="world-icon" aria-hidden="true">♡</span><span><b>3 trái tim</b><small>Toán khó dần · Đi xa hơn</small></span><i aria-hidden="true">↗</i></button></div></section><section class="home-zone zone-solo"><h2 class="zone-heading">02 / Tự luyện kỹ năng</h2><div class="learning-modes"><button type="button" class="learning-mode typing-mode game-entry" data-game="typing" onclick="SFX.click();openTypingGame()"><span class="world-icon" aria-hidden="true">⌨</span><span><b>Gõ chữ vui</b><small>Anh – Việt · 10 chặng rừng</small></span><i aria-hidden="true">↗</i></button><button type="button" class="learning-mode sudoku-mode game-entry" data-game="sudoku" onclick="SFX.click();openSudokuGame()"><span class="world-icon" aria-hidden="true">▦</span><span><b>Sudoku</b><small>6 cấp độ · Suy luận từng ô</small></span><i aria-hidden="true">↗</i></button><button type="button" class="learning-mode hanoi-mode game-entry" data-game="hanoi" onclick="SFX.click();openHanoiGame()"><span class="world-icon" aria-hidden="true">♜</span><span><b>Tháp Hà Nội</b><small>Chuyển tháp · Tìm đường ngắn</small></span><i aria-hidden="true">↗</i></button></div></section><section class="home-zone zone-versus"><h2 class="zone-heading">03 / Chơi cùng bạn</h2><div class="tile-more"><button type="button" class="learning-mode duel-mode game-entry" data-game="duel" onclick="SFX.click();openDuelGame()"><span class="world-icon" aria-hidden="true">⚔</span><span><b>Đấu đối kháng</b><small>Hai người · Chung một máy</small></span><i aria-hidden="true">↗</i></button><button type="button" class="learning-mode nim-mode game-entry" data-game="nim" onclick="SFX.click();openNimGame()"><span class="world-icon" aria-hidden="true">◆</span><span><b>Nim misère</b><small>Bốc sỏi · Chơi với bạn hoặc máy</small></span><i aria-hidden="true">↗</i></button></div></section></div></div>
+ <footer class="lobby-footer"><div id="profileSummary" class="lobby-profile" aria-live="polite"><span><b id="profileStars">0</b> sao</span><span><b id="profileTyping">0</b> kỷ lục gõ</span><span><b id="profileSudoku">0</b> Sudoku</span><small id="profileBadge"></small></div><p class="sr-only" id="profileLearning"></p><label class="effects-setting">Hiệu ứng <select data-effects-setting aria-label="Mức hiệu ứng"><option value="auto">Tự động</option><option value="low">Nhẹ</option><option value="off">Tắt chuyển động</option></select></label><button class="lobby-info" onclick="SFX.click();openInfoModal()">Châu Vinh · Góp ý</button></footer>
+ </div></div>

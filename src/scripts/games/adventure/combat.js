@@ -640,17 +640,6 @@ function boomAt(x,y,kind='arcane'){
   bm.style.left=(x-28)+'px';bm.style.top=(y-28)+'px';
   arena.appendChild(bm);combatTimers.later(()=>bm.remove(),550);
 }
-/* Đường cong cubic-bezier(.3,0,.7,1) — bám sát chưởng khí không đụng layout thrashing */
-function projEase(t){
-  const cx=.9,bx=.3,ax=-.2,cy=0,by=3,ay=-2;
-  let u=t;
-  for(let i=0;i<4;i++){
-    const dx=((ax*u+bx)*u+cx)*u-t, d=(3*ax*u+2*bx)*u+cx;
-    if(Math.abs(d)<1e-6)break;
-    u-=dx/d;
-  }
-  return ((ay*u+by)*u+cy)*u;
-}
 function shootProjectile(fromId,toId,spellKind,dark,onHit){
   const arena=$('arena'),from=spriteCenter(fromId),to=spriteCenter(toId);
   if(REDUCED_MOTION()){onHit(to);return;}
@@ -662,7 +651,6 @@ function shootProjectile(fromId,toId,spellKind,dark,onHit){
   combatTimers.later(()=>{p.style.transform=`translate(${to.x-from.x}px,${to.y-from.y}px)`;},16);
   combatTimers.later(()=>{p.remove();boomAt(to.x,to.y,kind);onHit(to);},200);
 }
-function shootBeam(onHit){shootProjectile('heroSprite','bossSprite','arcane',false,onHit);}
 function healEffect(){
   const c=spriteCenter('heroSprite'),arena=$('arena');
   showDmg('+10 HP','#2ed573','left',true);
