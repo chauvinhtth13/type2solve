@@ -757,7 +757,7 @@ function genWorld(t){
 ============================================================ */
 function genFamous(t){
   const easy=['lily','handshake','nine9'];
-  const mid=['flyTrains','hatSeller','tableHeight','camels'];
+  const mid=['flyTrains','hatSeller','tableHeight','camels','missingDollar','animalLegs'];
   const hard=['cheryl','hats3','twoDoors','einstein','boxes3'];
   const k=pick(t<=2?easy:t===3?[...easy,...mid]:[...mid,...hard]);
 
@@ -798,6 +798,23 @@ function genFamous(t){
   if(k==='camels'){ // Chia 17 con lạc đà — mượn 1 con
     return qs(`🐫 Người cha để lại 17 con lạc đà cho 3 con trai: con cả được 1/2, con thứ được 1/3, con út được 1/9 — và không được xẻ thịt con nào. Nhà thông thái cho MƯỢN 1 con để thành 18 con rồi mới chia. Hỏi con CẢ nhận được mấy con lạc đà?`,9,3,
       `Có 18 con: con cả 18 : 2 = 9 con, con thứ 18 : 3 = 6 con, con út 18 : 9 = 2 con. Tổng đã chia: 9 + 6 + 2 = 17 con — vừa đúng số lạc đà thật, nên TRẢ LẠI 1 con đã mượn. Mẹo nằm ở chỗ 1/2 + 1/3 + 1/9 = 17/18 chứ không phải trọn 1.`);
+  }
+  if(k==='missingDollar'){ // Vay tiền mua áo — bẫy cộng nhầm số tiền đang giữ
+    const A=pick([40,50,60,70,80]),C=pick([3,5,6]),P=2*A-C,G=1,R=C-2*G;
+    const owedEach=A-G,correctTotal=owedEach*2,flawedTotal=correctTotal+R;
+    return {q:`💰 Bạn vay mẹ ${A} nghìn đồng và vay bố ${A} nghìn đồng để mua một chiếc áo giá ${P} nghìn đồng. Mua áo xong, bạn còn thừa ${C} nghìn đồng. Bạn trả mẹ ${G} nghìn, trả bố ${G} nghìn, và giữ lại ${R} nghìn cho mình. Như vậy bạn còn nợ mẹ ${owedEach} nghìn và nợ bố ${owedEach} nghìn. Hỏi tổng số tiền bạn ĐANG NỢ cả bố lẫn mẹ là bao nhiêu nghìn đồng?`,small:true,
+      ans:correctTotal,choices:shuffle([...new Set([correctTotal,flawedTotal,P,2*A])]),
+      exp:`Đừng CỘNG thêm ${R} nghìn bạn đang giữ vào tổng nợ — đó là phép cộng sai bản chất, vì số tiền bạn giữ phải bị TRỪ đi khỏi số tiền vay ban đầu, không phải cộng thêm vào số nợ! Tổng nợ đúng = ${owedEach} + ${owedEach} = ${correctTotal} nghìn — đúng bằng giá áo (${P} nghìn) cộng với ${R} nghìn bạn đang cầm: ${P} + ${R} = ${correctTotal} nghìn.`};
+  }
+  if(k==='animalLegs'){ // Quy luật ẩn: giá trị = (số chân ÷ 2) × đơn vị
+    const groups={2:['vịt','gà'],4:['mèo','chó','ngựa'],6:['ong','kiến','bướm'],8:['nhện','bọ cạp']};
+    const legsList=[2,4,6,8],unit=pick([3,4,5,6,7,8,9,10]);
+    const askLegs=pick(legsList),givenLegs=shuffle(legsList.filter(l=>l!==askLegs));
+    const names={};legsList.forEach(l=>names[l]=pick(groups[l]));
+    const valueOf=l=>(l/2)*unit,ans=valueOf(askLegs);
+    const givenText=givenLegs.map(l=>`${names[l]} ${valueOf(l)} nghìn đồng`).join(', ');
+    return qs(`🐾 Nếu đưa cho con ${givenText}, hỏi phải đưa cho con ${names[askLegs]} bao nhiêu nghìn đồng thì đúng quy luật?`,ans,Math.max(2,unit),
+      `Quy luật ẩn: giá trị = (số chân ÷ 2) × ${unit} nghìn đồng. ${givenLegs.map(l=>`${names[l]} có ${l} chân → (${l}÷2)×${unit} = ${valueOf(l)} nghìn`).join('; ')}. Con ${names[askLegs]} có ${askLegs} chân → (${askLegs}÷2)×${unit} = ${ans} nghìn đồng.`);
   }
   if(k==='cheryl'){ // Câu đố sinh nhật Cheryl (SASMO)
     return {q:`🎂 Cheryl nói riêng THÁNG sinh cho Albert, nói riêng NGÀY sinh cho Bernard, và đưa 10 khả năng: 15/5, 16/5, 19/5, 17/6, 18/6, 14/7, 16/7, 14/8, 15/8, 17/8.<br>• Albert: "Tôi không biết, nhưng tôi CHẮC CHẮN Bernard cũng không biết."<br>• Bernard: "Ban đầu tôi không biết, nhưng giờ thì tôi biết rồi."<br>• Albert: "Vậy giờ tôi cũng biết."<br>Hỏi Cheryl sinh ngày nào?`,small:true,
@@ -1286,6 +1303,13 @@ const UNIT_TABLE=[
 ];
 function genUnit(t){
   const [big,small,factor]=pick(UNIT_TABLE);
+  const fracDivisors=[2,3,4,5,6,8,10].filter(d=>factor%d===0);
+  if(fracDivisors.length&&Math.random()<.3){
+    const d=pick(fracDivisors),num=ri(1,d-1),g=gcd(num,d),n1=num/g,d1=d/g;
+    const ans=factor*num/d;
+    return qs(`📏 Đổi: ${n1}/${d1} ${big} = ? ${small}`,ans,Math.max(2,Math.round(factor*0.1)),
+      `1 ${big} = ${factor} ${small}, nên ${n1}/${d1} ${big} = ${factor} : ${d1} × ${n1} = ${ans} ${small}. Đừng nhầm ${n1}/${d1} với phần trăm hay đổi sang đơn vị khác!`);
+  }
   const n=ri(2,12);
   if(Math.random()<.6){
     const ans=n*factor;
@@ -1609,7 +1633,15 @@ function genBrainChallenge(t){
 ============================================================ */
 function genHSG(t){
   const k=pick(['avgSpeedTrap','arithSeries','lastDigitPow','lcmMultiple','drainPipe','telescopeProduct',
-                'triRatioArea','midSquare','polyDiag','circleGap','telescopeSum','twoCevianArea']);
+                'triRatioArea','midSquare','polyDiag','circleGap','telescopeSum','twoCevianArea','ageDiffInvariant']);
+
+  if(k==='ageDiffInvariant'){ // Hiệu số tuổi bố-con không đổi theo thời gian
+    const [A,B,N]=pick([[3,2,4],[4,3,4],[3,2,5],[5,3,6],[6,5,2],[5,4,3]]);
+    const D=N*A*B/(A-B), con=D/A;
+    const g=gcd(A-B,A*B),rnum=(A-B)/g,rden=(A*B)/g,diffFrac=`${rnum}/${rden}`;
+    return qs(`🌟👨‍👧 Tuổi của con hiện nay bằng 1/${A} hiệu số tuổi của bố và con. Sau ${N} năm nữa, tuổi con bằng 1/${B} hiệu số tuổi của bố và con. Hỏi hiện nay con bao nhiêu tuổi?`,con,3,
+      `Hiệu số tuổi của bố và con luôn KHÔNG ĐỔI theo thời gian. Phần tuổi con tăng thêm sau ${N} năm chính là: 1/${B} − 1/${A} = ${diffFrac} hiệu số tuổi, mà phần tăng thêm đó đúng bằng ${N} tuổi (ai cũng lớn thêm ${N} tuổi). Suy ra ${diffFrac} hiệu số tuổi = ${N} tuổi, nên hiệu số tuổi của hai bố con là ${N} : ${diffFrac} = ${N} × ${rden}/${rnum} = ${D} tuổi. Tuổi con hiện nay = ${D} × 1/${A} = ${D}/${A} = ${con} tuổi.`);
+  }
 
   if(k==='telescopeSum'){ // tổng phân số dạng 1/(a·(a+d)) triệt tiêu qua từng cặp
     const d=pick([2,3,4,5,6]), n=ri(6,40);
