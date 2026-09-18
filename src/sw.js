@@ -2,7 +2,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'dttd-shell-';
-const CACHE_VERSION = 'v26-vietnamese-type';
+const CACHE_VERSION = 'v27-fantasy';
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 /* Vỏ ứng dụng: nhỏ, cần có NGAY để mở được game. Nạp xong mới coi là cài đặt xong. */
 const CORE_ASSETS = [
@@ -21,6 +21,7 @@ const CORE_ASSETS = [
   './styles/typing-world.css',
   './styles/game-polish.css',
   './styles/story-world.css',
+  './styles/fantasy.css',
   './scripts/engine/story-world.js',
   './scripts/platform/storage.js',
   './scripts/engine/runtime.js',

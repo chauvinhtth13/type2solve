@@ -9,8 +9,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#06081a",
-  "theme_color": "#0a0c1e",
+  "background_color": "#152e29",
+  "theme_color": "#152e29",
   "categories": ["education", "games"],
   "icons": [
     {
