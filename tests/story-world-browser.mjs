@@ -120,6 +120,22 @@ try {
   }
   await sleep(350);
 
+  await send('DOM.enable');
+  await send('CSS.enable');
+  // Check actual rendered glyphs, not just the declared CSS font family.
+  for (const family of ['Noto Sans', 'Noto Serif']) {
+    for (const normalized of ['NFC', 'NFD']) {
+      await evaluate("(()=>{const p=document.createElement('span');p.id='vietnameseFontProbe';p.textContent='Tiếng Việt: Đặng, Nguyễn, Ắ Ằ Ẳ Ẵ Ặ Ế Ề Ể Ễ Ệ Ố Ồ Ổ Ỗ Ộ Ớ Ờ Ở Ỡ Ợ Ứ Ừ Ử Ữ Ự Ỳ Ỷ Ỹ Ỵ'.normalize("+JSON.stringify(normalized)+");p.style.cssText='position:fixed;top:0;left:0;font-size:24px;font-weight:700';p.style.fontFamily="+JSON.stringify(family)+";document.body.append(p)})()");
+      await evaluate("document.fonts.ready");
+      const {root:doc}=await send('DOM.getDocument');
+      const {nodeId}=await send('DOM.querySelector',{nodeId:doc.nodeId,selector:'#vietnameseFontProbe'});
+      const {fonts}=await send('CSS.getPlatformFontsForNode',{nodeId});
+      assert(fonts.length>0&&fonts.every(font=>font.isCustomFont&&font.familyName===family),family+' renders Vietnamese '+normalized+' without system fallback: '+JSON.stringify(fonts));
+      await evaluate("document.getElementById('vietnameseFontProbe').remove()");
+    }
+  }
+
+
   await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
   const folder = join(root, 'artifacts', 'story-world');
   await mkdir(folder, { recursive: true });
@@ -131,6 +147,7 @@ try {
 
   assert(await evaluate("StoryWorld.chapters.length===10 && GameStorage.load().version===3"),'Story boots with ten chapters and migrated schema');
   assert(await evaluate("(()=>{const entries=[...document.querySelectorAll('#home [data-game]')];return entries.length===8&&new Set(entries.map(b=>b.dataset.game)).size===8})()"),'Each distinct game has exactly one home entry');
+  assert(await evaluate("getComputedStyle(document.getElementById('adventureAction')).backgroundColor==='rgb(241, 213, 148)'"),'Campaign action keeps its contrast background after CSS bundling');
   await snapshot('home-desktop');
   await evaluate("document.querySelector('#home .story-entry').click()");
   assert(await evaluate("document.querySelector('#story.active')!==null"),'Campaign entry opens its atlas');

@@ -8,7 +8,7 @@ story-world.js owns chapter data, SVG scenery and atlas presentation. story-worl
 One fragment per completed chapter, without duplicate story currency. Cape colors unlock at 3, 6 and 10 fragments. The seven other game modes stay in the home library; Duel never gates solo progress. Players can keep increasing question difficulty or select a fixed tier for the next Adventure run.
 
 ## Graphics
-Ten SVG landmarks extend Adventure and Typing. Sudoku, Duel, Nim and Hanoi have distinct illustrated settings. Existing rigs and cancellable effects remain. No new frame loop, external font, engine or bitmap dependency.
+Ten SVG landmarks extend Adventure and Typing. Sudoku, Duel, Nim and Hanoi have distinct illustrated settings. Existing rigs and cancellable effects remain. No new frame loop, runtime font service, engine or bitmap dependency. Noto Sans and Noto Serif are bundled locally with Latin and Vietnamese subsets, including offline caching.
 
 ## Validation
 Run npm run verify, npm run test:browser, npm run test:typing and npm run test:story. Physical-device frame rate, battery use and keyboard behavior require separate measurement.
@@ -17,3 +17,5 @@ Run npm run verify, npm run test:browser, npm run test:typing and npm run test:s
 The single campaign entrance opens a connected ten-guardian atlas. Selecting a guardian previews its landscape, dialogue and unlocked memory in one detail panel without changing progress. One play button resumes the actual saved campaign, even when another guardian is selected. Costume and question-tier controls live in the expandable equipment panel. The home library has exactly one entry per distinct game. State signatures avoid rebuilding unchanged presentation; costume focus survives updates.
 
 The landscape uses layered vector mountains, a winding path, foreground trees and a chapter-specific landmark. The existing shared character artwork appears on the campaign cover, map and detail panel. All assets stay local and effects-off/reduced-motion behavior remains supported.
+
+Typography uses consistent Vietnamese-capable families with extra heading line height for stacked accents. Muted labels use darker ink, campaign text has a stronger illustrated-background overlay, and progress numbers have opaque backgrounds. The browser story check verifies actual custom-font glyph rendering for both composed and decomposed Vietnamese text.

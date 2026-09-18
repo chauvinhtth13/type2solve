@@ -21,4 +21,4 @@ export function fromDist(relativePath) {
   return resolve(distDir, relativePath);
 }
 
-export const fontAssets = Object.freeze(["assets/fonts/noto-sans-vietnamese.woff2", "assets/fonts/noto-sans-latin-ext.woff2", "assets/fonts/noto-sans-latin.woff2", "assets/fonts/noto-serif-vietnamese.woff2", "assets/fonts/noto-serif-latin-ext.woff2", "assets/fonts/noto-serif-latin.woff2", "assets/fonts/notosans-OFL.txt", "assets/fonts/notoserif-OFL.txt"]);
+export const fontAssets = Object.freeze(["assets/fonts/noto-sans-vietnamese-full.woff2", "assets/fonts/noto-serif-vietnamese-full.woff2", "assets/fonts/notosans-OFL.txt", "assets/fonts/notoserif-OFL.txt"]);

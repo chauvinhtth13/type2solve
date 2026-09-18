@@ -327,8 +327,8 @@ body[data-arena-theme=ice]{background:radial-gradient(circle at 8% 5%,rgba(143,2
 .game-topbar>:last-child{grid-column:1/-1}
 
 }
-@media(min-width:1100px) and (max-height:820px){#shop .shop-banner-wrap{min-height:56px}
-#shop .shop-symbol{font-size:44px}
+@media(min-width:1100px) and (max-height:820px){#shop .shop-banner-wrap{min-height:32px}
+#shop .shop-symbol{font-size:30px}
 #shop .card{padding:12px 18px}
 #shop h1{font-size:28px}
 #shop .sub{margin-top:3px;line-height:1.3}

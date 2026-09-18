@@ -47,17 +47,17 @@ function replaceOrderedAssets(html, assets) {
   return output;
 }
 
-async function concatenate(paths) {
+async function concatenate(paths, separator = '\n;\n') {
   const chunks = [];
   for (const relativePath of paths) chunks.push(await readFile(fromSource(relativePath), 'utf8'));
-  return chunks.join('\n;\n');
+  return chunks.join(separator);
 }
 
 async function emitBundles(assets) {
   const js = await esbuild.transform(await concatenate(assets.scripts.map((asset) => asset.path)), {
     loader: 'js', minify: true, target: 'es2019', legalComments: 'none', sourcefile: 'app.js',
   });
-  const css = await esbuild.transform(await concatenate(assets.styles.map((asset) => asset.path)), {
+  const css = await esbuild.transform(await concatenate(assets.styles.map((asset) => asset.path), '\n'), {
     loader: 'css', minify: true, legalComments: 'none', sourcefile: 'app.css',
   });
   await ensureParentDir(fromDist('assets/app.js'));
